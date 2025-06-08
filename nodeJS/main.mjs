@@ -15,8 +15,8 @@ try {
     'SELECT * FROM `users`'
   );
 
-  console.log(results); // results contains rows returned by server
-  console.log(fields); // fields contains extra meta data about results, if available
+  console.log('RESULTS', results); // results contains rows returned by server
+  console.log('FIELDS', fields); // fields contains extra meta data about results, if available
 } catch (err) {
   console.log(err);
 }
