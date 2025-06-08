@@ -1,53 +1,21 @@
 import http from 'node:http'
+import mysql from 'mysql'
+import { processRequest } from './api.js'
 
-const processRequest = (req, res) => {
-  const { method, url } = req
+const connection = mysql.createConnection({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME
+})
 
-  switch (method) {
-    case 'GET':
-      switch (url) {
-        case '/user':
-
-          res.setHeader('Content-Type', 'application/json; charset=utf-8')
-          return res.end(JSON.stringify({
-            name: 'John Doe',
-            age: 30
-          }))
-        default:
-          res.statusCode = 404
-          res.setHeader('Content-Type', 'text/html; charset=utf-8')
-          return res.end('Not found')
-      }
-
-    case 'POST':
-      switch (url) {
-        case '/login': {
-          let body = ''
-
-          // escuchar el evento data
-          req.on('data', chunk => {
-            body += chunk.toString()
-          })
-
-          req.on('end', () => {
-            const data = JSON.parse(body)
-            // llamar a una base de datos para guardar la info
-            res.writeHead(201, { 'Content-Type': 'application/json; charset=utf-8' })
-
-            data.timestamp = Date.now()
-            res.end(JSON.stringify(data))
-          })
-
-          break
-        }
-
-        default:
-          res.statusCode = 404
-          res.setHeader('Content-Type', 'text/plain; charset=utf-8')
-          return res.end('Not found')
-      }
+connection.connect(err => {
+  if (err) {
+    console.error('Error connecting to MySQL:', err)
+    return
   }
-}
+  console.log('Connected to MySQL database')
+})
 
 const server = http.createServer(processRequest)
 
