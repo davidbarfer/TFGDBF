@@ -10,17 +10,18 @@ COLLATE utf8mb4_unicode_ci;
 -- Use the database
 USE doctus_lite;
 
--- Example table: users
+-- Table: users
 CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
     email VARCHAR(100) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
+    role ENUM('professor', 'student', 'admin') DEFAULT 'student',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- Example table: posts
+-- Table: posts
 CREATE TABLE IF NOT EXISTS posts (
     id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
@@ -32,9 +33,9 @@ CREATE TABLE IF NOT EXISTS posts (
 );
 
 -- Insert sample data
-INSERT INTO users (username, email, password_hash) VALUES
-('admin', 'admin@doctuslite.com', 'hashed_password_here'),
-('user1', 'user1@example.com', 'hashed_password_here')
+INSERT INTO users (username, email, password_hash, role) VALUES
+('admin', 'admin@doctuslite.com', 'hashed_password_here','admin'),
+('user1', 'user1@example.com', 'hashed_password_here','student')
 ON DUPLICATE KEY UPDATE username = username;
 
 INSERT INTO posts (title, content, user_id) VALUES
