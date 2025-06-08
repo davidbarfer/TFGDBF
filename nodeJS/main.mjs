@@ -1,6 +1,6 @@
 import http from 'node:http'
 import mysql from 'mysql2/promise'
-import { processRequest } from './api.js'
+import { processRequest } from './api.mjs'
 
 // Create the connection to database
 const connection = await mysql.createConnection({
