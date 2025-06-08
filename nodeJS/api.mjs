@@ -1,16 +1,20 @@
-export const processRequest = (req, res) => {
+import { query } from './database.mjs'
+export const processRequest = async (req, res) => {
   const { method, url } = req
 
   switch (method) {
     case 'GET':
       switch (url) {
-        case '/user':
-
-          res.setHeader('Content-Type', 'application/json; charset=utf-8')
-          return res.end(JSON.stringify({
-            name: 'John Doe',
-            age: 30
-          }))
+        case '/users':
+          try {
+            const users = await query('SELECT * FROM users')
+            res.setHeader('Content-Type', 'application/json; charset=utf-8')
+            return res.end(JSON.stringify(users.results))
+          } catch (error) {
+            console.error('Database query error:', error)
+            res.statusCode = 500
+            return res.end(JSON.stringify({ error: 'Internal server error' }))
+          }
         default:
           res.statusCode = 404
           res.setHeader('Content-Type', 'text/html; charset=utf-8')
