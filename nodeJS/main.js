@@ -1,21 +1,25 @@
 import http from 'node:http'
-import mysql from 'mysql'
+import mysql from 'mysql2/promise'
 import { processRequest } from './api.js'
 
-const connection = mysql.createConnection({
+// Create the connection to database
+const connection = await mysql.createConnection({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME
 })
 
-connection.connect(err => {
-  if (err) {
-    console.error('Error connecting to MySQL:', err)
-    return
-  }
-  console.log('Connected to MySQL database')
-})
+try {
+  const [results, fields] = await connection.query(
+    'SELECT * FROM `users`'
+  );
+
+  console.log(results); // results contains rows returned by server
+  console.log(fields); // fields contains extra meta data about results, if available
+} catch (err) {
+  console.log(err);
+}
 
 const server = http.createServer(processRequest)
 
