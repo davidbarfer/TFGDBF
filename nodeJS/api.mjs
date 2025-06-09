@@ -92,7 +92,71 @@ export const processRequest = async (req, res) => {
           
           break
         }
+        case '/register': {
+          let body = ''
+          
+          // Collect request data
+          req.on('data', chunk => {
+            body += chunk.toString()
+          })
 
+          req.on('end', async () => {
+            try {
+              // Parse and validate request body
+              const data = JSON.parse(body)
+              
+              // JSON schema validation
+              const registerSchema = {
+                type: 'object',
+                required: ['email', 'password', 'name'],
+                properties: {
+                  email: { type: 'string', format: 'email' },
+                  password: { type: 'string', minLength: 8 },
+                  name: { type: 'string' }
+                },
+                additionalProperties: false
+              }
+              
+              // Simple validation
+              if (!data.email || !data.password || !data.name) {
+                res.statusCode = 400
+                return res.end(JSON.stringify({ error: 'Email, password, and name are required' }))
+              }
+              
+              // Check if user already exists
+              const [existingUsers] = await query('SELECT * FROM users WHERE email = ?', [data.email])
+              
+              if (existingUsers && existingUsers.length > 0) {
+                res.statusCode = 409
+                return res.end(JSON.stringify({ error: 'User already exists' }))
+              }
+              
+              // Hash password
+              const hashedPassword = await hashPassword(data.password)
+              
+              // Insert new user
+              await query('INSERT INTO users (email, password, name) VALUES (?, ?, ?)', [data.email, hashedPassword, data.name])
+              
+              // Registration successful
+              res.statusCode = 201
+              res.setHeader('Content-Type', 'application/json; charset=utf-8')
+              return res.end(JSON.stringify({ 
+                message: 'User registered successfully',
+                user: {
+                  email: data.email,
+                  name: data.name
+                }
+              }))
+              
+            } catch (error) {
+              console.error('Registration error:', error)
+              res.statusCode = 500
+              return res.end(JSON.stringify({ error: 'Internal server error' }))
+            }
+          })
+          
+          break
+        }
         default:
           res.statusCode = 404
           res.setHeader('Content-Type', 'text/plain; charset=utf-8')
