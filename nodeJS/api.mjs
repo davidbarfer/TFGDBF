@@ -1,4 +1,4 @@
-import { query } from './database.mjs'
+import { query, hashPassword, verifyPassword } from './database.mjs'
 export const processRequest = async (req, res) => {
   const { method, url } = req
 
@@ -25,21 +25,71 @@ export const processRequest = async (req, res) => {
       switch (url) {
         case '/login': {
           let body = ''
-
-          // escuchar el evento data
+          
+          // Collect request data
           req.on('data', chunk => {
             body += chunk.toString()
           })
 
-          req.on('end', () => {
-            const data = JSON.parse(body)
-            // llamar a una base de datos para guardar la info
-            res.writeHead(201, { 'Content-Type': 'application/json; charset=utf-8' })
-
-            data.timestamp = Date.now()
-            res.end(JSON.stringify(data))
+          req.on('end', async () => {
+            try {
+              // Parse and validate request body
+              const data = JSON.parse(body)
+              
+              // JSON schema validation
+              const loginSchema = {
+                type: 'object',
+                required: ['email', 'password'],
+                properties: {
+                  email: { type: 'string', format: 'email' },
+                  password: { type: 'string', minLength: 8 }
+                },
+                additionalProperties: false
+              }
+              
+              // Simple validation
+              if (!data.email || !data.password) {
+                res.statusCode = 400
+                return res.end(JSON.stringify({ error: 'Email and password are required' }))
+              }
+              
+              // Find user by email
+              const [users] = await query('SELECT * FROM users WHERE email = ?', [data.email])
+              
+              if (!users || users.length === 0) {
+                res.statusCode = 401
+                return res.end(JSON.stringify({ error: 'Invalid credentials' }))
+              }
+              
+              const user = users[0]
+              
+              // Verify password
+              const isPasswordValid = await verifyPassword(data.password, user.password)
+              
+              if (!isPasswordValid) {
+                res.statusCode = 401
+                return res.end(JSON.stringify({ error: 'Invalid credentials' }))
+              }
+              
+              // Login successful
+              res.statusCode = 200
+              res.setHeader('Content-Type', 'application/json; charset=utf-8')
+              return res.end(JSON.stringify({ 
+                message: 'Login successful',
+                user: {
+                  id: user.id,
+                  email: user.email,
+                  name: user.name
+                }
+              }))
+              
+            } catch (error) {
+              console.error('Login error:', error)
+              res.statusCode = 500
+              return res.end(JSON.stringify({ error: 'Internal server error' }))
+            }
           })
-
+          
           break
         }
 
