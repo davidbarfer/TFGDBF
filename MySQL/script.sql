@@ -11,8 +11,8 @@ COLLATE utf8mb4_unicode_ci;
 USE doctus_lite;
 
 -- Drop tables if they exist (for fresh start)
-DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS posts;
+DROP TABLE IF EXISTS users;
 
 -- Table: users
 CREATE TABLE IF NOT EXISTS users (
