@@ -61,22 +61,22 @@ export const processRequest = async (req, res) => {
               // JSON schema validation
               const loginSchema = {
                 type: 'object',
-                required: ['email', 'password'],
+                required: ['username', 'password'],
                 properties: {
-                  email: { type: 'string', format: 'email' },
+                  username: { type: 'string' },
                   password: { type: 'string', minLength: 8 }
                 },
                 additionalProperties: false
               }
               
               // Simple validation
-              if (!data.email || !data.password) {
+              if (!data.username || !data.password) {
                 res.statusCode = 400
-                return res.end(JSON.stringify({ error: 'Email and password are required' }))
+                return res.end(JSON.stringify({ error: 'Username and password are required' }))
               }
               
-              // Find user by email
-              const [users] = await query('SELECT * FROM users WHERE email = ?', [data.email])
+              // Find user by username
+              const [users] = await query('SELECT * FROM users WHERE username = ?', [data.username])
               
               if (!users || users.length === 0) {
                 res.statusCode = 401
@@ -100,8 +100,7 @@ export const processRequest = async (req, res) => {
                 message: 'Login successful',
                 user: {
                   id: user.id,
-                  email: user.email,
-                  name: user.name
+                  username: user.username,
                 }
               }))
               
