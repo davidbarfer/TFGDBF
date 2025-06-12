@@ -74,16 +74,15 @@ export const processRequest = async (req, res) => {
                 res.statusCode = 400
                 return res.end(JSON.stringify({ error: 'Username and password are required' }))
               }
-              
+
               // Find user by username
-              const [users] = await query('SELECT * FROM users WHERE username = ?', [data.username])
+              const users = await query('SELECT * FROM users WHERE username = ?', [data.username])
+              const user = users.results[0]
               
-              if (!users || users.length === 0) {
+              if (!user) {
                 res.statusCode = 401
                 return res.end(JSON.stringify({ error: 'Invalid credentials' }))
               }
-              
-              const user = users[0]
               
               // Verify password
               const isPasswordValid = await verifyPassword(data.password, user.password)
