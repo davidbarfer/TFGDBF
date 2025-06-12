@@ -1,6 +1,28 @@
 import { query, hashPassword, verifyPassword } from './database.mjs'
+// CORS headers configuration
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*', // In production, replace '*' with your frontend domain
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  'Access-Control-Max-Age': 86400 // 24 hours
+}
+
 export const processRequest = async (req, res) => {
   const { method, url } = req
+  
+  // Handle preflight requests
+  if (method === 'OPTIONS') {
+    res.writeHead(204, {
+      ...corsHeaders,
+      'Content-Length': 0
+    })
+    return res.end()
+  }
+  
+  // Set CORS headers for all responses
+  Object.entries(corsHeaders).forEach(([key, value]) => {
+    res.setHeader(key, value)
+  })
 
   switch (method) {
     case 'GET':
@@ -17,7 +39,7 @@ export const processRequest = async (req, res) => {
           }
         default:
           res.statusCode = 404
-          res.setHeader('Content-Type', 'text/html; charset=utf-8')
+          res.setHeader('Content-Type', 'application/json; charset=utf-8')
           return res.end('Not found')
       }
 
