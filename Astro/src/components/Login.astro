@@ -16,13 +16,14 @@
       const data = Object.fromEntries(formData.entries());
       const response = await fetch("http://localhost:1234/login", {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(data),
       });
       if (response.ok) {
-				console.log('Login successful')
+				console.log('Login successful', response)
       } else {
         console.error("Login failed");
       }

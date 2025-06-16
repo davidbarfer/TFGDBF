@@ -1,10 +1,14 @@
+import { URL } from 'node:url'
+import jwt from 'jsonwebtoken'
 import { query, hashPassword, verifyPassword } from './database.mjs'
+import { authProviders } from './database.mjs'
 // CORS headers configuration
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*', // In production, replace '*' with your frontend domain
+  'Access-Control-Allow-Origin': 'http://localhost:4321', // Your frontend URL
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-  'Access-Control-Max-Age': 86400 // 24 hours
+  'Access-Control-Allow-Credentials': 'true', // Crucial for cookies
+  'Access-Control-Max-Age': 86400
 }
 
 export const processRequest = async (req, res) => {
@@ -91,10 +95,27 @@ export const processRequest = async (req, res) => {
                 res.statusCode = 401
                 return res.end(JSON.stringify({ error: 'Invalid credentials' }))
               }
+
+              // Generate token
+              const token = jwt.sign(
+                {
+                  userId: user.id,
+                  authMehod: authProviders.jwt
+                },
+                process.env.JWT_SECRET,
+                {
+                  expiresIn: '1h',
+                  issuer: 'http://localhost:1234'
+                }
+              );
               
+              // Set as HttpOnly Secure cookie
+              res.writeHead(200, {
+                ...corsHeaders,
+                'Content-Type': 'application/json',
+                'Set-Cookie' : `token=${token}; HttpOnly; Secure; SameSite=None; Max-Age=3600; Path=/`
+              });
               // Login successful
-              res.statusCode = 200
-              res.setHeader('Content-Type', 'application/json; charset=utf-8')
               return res.end(JSON.stringify({ 
                 message: 'Login successful',
                 user: {
