@@ -1,5 +1,13 @@
+---
+const { user } = Astro.props;
+---
 <header>
 	<h1>DoctusLite</h1>
+	{user ? (
+		<p>User logged in</p>
+	) : (
+		<p>Not logged in</p>
+	)}
 </header>
 
 <style>

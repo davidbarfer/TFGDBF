@@ -1,6 +1,20 @@
 ---
 import Header from '@/components/Header.astro';
 import Footer from '@/components/Footer.astro';
+import jwt from 'jsonwebtoken'
+import { parse } from 'cookie';
+
+const cookies = parse(Astro.request.headers.get('cookie') || '');
+const token = cookies.token;
+const secret = import.meta.env.JWT_SECRET;
+let user = null;
+if (token) {
+  try {
+    user = jwt.verify(token, secret); // same secret as backend
+  } catch (err) {
+    console.warn("Invalid or expired token", err);
+  }
+}
 ---
 
 <!doctype html>
@@ -13,7 +27,7 @@ import Footer from '@/components/Footer.astro';
 		<title>DoctusLite</title>
 	</head>
 	<body>
-		<Header />
+		<Header user={user}/>
 		<slot />
 		<Footer />
 	</body>
