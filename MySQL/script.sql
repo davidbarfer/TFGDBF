@@ -58,9 +58,27 @@ CREATE TABLE IF NOT EXISTS practice (
 CREATE TABLE IF NOT EXISTS groups (
   id INT AUTO_INCREMENT PRIMARY KEY,
   practice_id INT NOT NULL,
+  name NUMERIC NOT NULL,
   FOREIGN KEY (practice_id) REFERENCES practice(id)
 );
 
+-- Tabla Relaciones: Usuarios-Asignaturas
+CREATE TABLE IF NOT EXISTS users_subjects (
+  user_id INT NOT NULL,
+  subject_id INT NOT NULL,
+  PRIMARY KEY (user_id, subject_id),
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  FOREIGN KEY (subject_id) REFERENCES subject(id)
+);
+
+-- Tabla Relaciones: Grupos-Usuarios
+CREATE TABLE IF NOT EXISTS groups_users (
+  group_id INT NOT NULL,
+  user_id INT NOT NULL,
+  PRIMARY KEY (group_id, user_id),
+  FOREIGN KEY (group_id) REFERENCES groups(id),
+  FOREIGN KEY (user_id) REFERENCES users(id)
+);
 
 -- Insert sample data
 INSERT INTO users (username, password, password_salt, role) VALUES
