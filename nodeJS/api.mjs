@@ -100,7 +100,8 @@ export const processRequest = async (req, res) => {
               const token = jwt.sign(
                 {
                   userId: user.id,
-                  authMehod: authProviders.jwt
+                  authMehod: authProviders.jwt,
+                  role: user.role,
                 },
                 process.env.JWT_SECRET,
                 {
