@@ -37,6 +37,31 @@ CREATE TABLE saml_sessions (
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
+-- Tabla: asignaturas
+CREATE TABLE IF NOT EXISTS subject (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  course VARCHAR(50),
+  degree VARCHAR(50)
+);
+
+-- Tabla: Practicas
+CREATE TABLE IF NOT EXISTS practice (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  subject_id INT NOT NULL,
+  deadline DATE,
+  file_url VARCHAR(255),
+  FOREIGN KEY (subject_id) REFERENCES subject(id)
+);
+
+-- Tabla: Grupos
+CREATE TABLE IF NOT EXISTS groups (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  practice_id INT NOT NULL,
+  FOREIGN KEY (practice_id) REFERENCES practice(id)
+);
+
+
 -- Insert sample data
 INSERT INTO users (username, password, password_salt, role) VALUES
 ('admin', '$2b$12$W16liLOZR6U4Zp3iptOPEOPNCl8ob/ieZqmEkdOWrrD5yo3qYK5xW',12,'admin'),
