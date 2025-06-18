@@ -66,6 +66,20 @@ CREATE TABLE IF NOT EXISTS practice_groups (
   FOREIGN KEY (practice_id) REFERENCES practice(id)
 );
 
+-- Tabla Entregas:
+CREATE TABLE IF NOT EXISTS submissions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    practice_group_id INT NOT NULL,
+    file_url VARCHAR(255) NOT NULL,
+    delivery_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    grade DECIMAL(5,2),
+    feedback TEXT,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (practice_group_id) REFERENCES practice_groups(id)
+);
+
+
 -- Tabla Relaciones: Usuarios-Asignaturas
 CREATE TABLE IF NOT EXISTS users_subjects (
   user_id INT NOT NULL,
@@ -110,6 +124,7 @@ SELECT * FROM users;
 SELECT * FROM subject;
 SELECT * FROM practice;
 SELECT * FROM practice_groups;
+SELECT * FROM submissions;
 SELECT * FROM users_subjects;
 SELECT * FROM practice_groups_users;
 
