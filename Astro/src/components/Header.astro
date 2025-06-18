@@ -10,10 +10,10 @@ const { user } = Astro.props;
 <header>
 	<a href="/">Inicio</a>
 	{user ? (
-		<button id="logout">Logout</button>
+		<button id="logout">Cerrar Sesión</button>
 	) : (
-		<a href="/login">Login</a>
-		<a href="/signup">Sign Up</a>
+		<a href="/login">Iniciar Sesión</a>
+		<a href="/signup">Registrarse</a>
 	)}
 </header>
 
