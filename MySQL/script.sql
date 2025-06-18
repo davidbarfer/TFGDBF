@@ -11,7 +11,11 @@ COLLATE utf8mb4_unicode_ci;
 USE doctus_lite;
 
 -- Drop tables if they exist (for fresh start)
-DROP TABLE IF EXISTS posts;
+DROP TABLE IF EXISTS users_subjects;
+DROP TABLE IF EXISTS practice_groups_users;
+DROP TABLE IF EXISTS practice_groups;
+DROP TABLE IF EXISTS practice;
+DROP TABLE IF EXISTS subject;
 DROP TABLE IF EXISTS saml_sessions;
 DROP TABLE IF EXISTS users;
 
@@ -55,7 +59,7 @@ CREATE TABLE IF NOT EXISTS practice (
 );
 
 -- Tabla: Grupos
-CREATE TABLE IF NOT EXISTS groups (
+CREATE TABLE IF NOT EXISTS practice_groups (
   id INT AUTO_INCREMENT PRIMARY KEY,
   practice_id INT NOT NULL,
   name NUMERIC NOT NULL,
@@ -72,11 +76,11 @@ CREATE TABLE IF NOT EXISTS users_subjects (
 );
 
 -- Tabla Relaciones: Grupos-Usuarios
-CREATE TABLE IF NOT EXISTS groups_users (
+CREATE TABLE IF NOT EXISTS practice_groups_users (
   group_id INT NOT NULL,
   user_id INT NOT NULL,
   PRIMARY KEY (group_id, user_id),
-  FOREIGN KEY (group_id) REFERENCES groups(id),
+  FOREIGN KEY (group_id) REFERENCES practice_groups(id),
   FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
