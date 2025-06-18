@@ -11,7 +11,11 @@ COLLATE utf8mb4_unicode_ci;
 USE doctus_lite;
 
 -- Drop tables if they exist (for fresh start)
-DROP TABLE IF EXISTS posts;
+DROP TABLE IF EXISTS users_subjects;
+DROP TABLE IF EXISTS practice_groups_users;
+DROP TABLE IF EXISTS practice_groups;
+DROP TABLE IF EXISTS practice;
+DROP TABLE IF EXISTS subject;
 DROP TABLE IF EXISTS saml_sessions;
 DROP TABLE IF EXISTS users;
 
@@ -37,15 +41,61 @@ CREATE TABLE saml_sessions (
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
--- Table: posts
-CREATE TABLE IF NOT EXISTS posts (
+-- Tabla: asignaturas
+CREATE TABLE IF NOT EXISTS subject (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  course NUMERIC NOT NULL,
+  degree ENUM('Grado en Ingeniería de Tecnologías Industriales', 'Grado en Ingeniería de las Tecnologías de Telecomunicación') NOT NULL
+);
+
+-- Tabla: Practicas
+CREATE TABLE IF NOT EXISTS practice (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  subject_id INT NOT NULL,
+  deadline DATE,
+  file_url VARCHAR(255),
+  FOREIGN KEY (subject_id) REFERENCES subject(id)
+);
+
+-- Tabla: Grupos
+CREATE TABLE IF NOT EXISTS practice_groups (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  practice_id INT NOT NULL,
+  name NUMERIC NOT NULL,
+  FOREIGN KEY (practice_id) REFERENCES practice(id)
+);
+
+-- Tabla Entregas:
+CREATE TABLE IF NOT EXISTS submissions (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
-    content TEXT,
-    user_id INT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    user_id INT NOT NULL,
+    practice_group_id INT NOT NULL,
+    file_url VARCHAR(255) NOT NULL,
+    delivery_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    grade DECIMAL(5,2),
+    feedback TEXT,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (practice_group_id) REFERENCES practice_groups(id)
+);
+
+
+-- Tabla Relaciones: Usuarios-Asignaturas
+CREATE TABLE IF NOT EXISTS users_subjects (
+  user_id INT NOT NULL,
+  subject_id INT NOT NULL,
+  PRIMARY KEY (user_id, subject_id),
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  FOREIGN KEY (subject_id) REFERENCES subject(id)
+);
+
+-- Tabla Relaciones: Grupos-Usuarios
+CREATE TABLE IF NOT EXISTS practice_groups_users (
+  group_id INT NOT NULL,
+  user_id INT NOT NULL,
+  PRIMARY KEY (group_id, user_id),
+  FOREIGN KEY (group_id) REFERENCES practice_groups(id),
+  FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
 -- Insert sample data
@@ -54,15 +104,28 @@ INSERT INTO users (username, password, password_salt, role) VALUES
 ('user1', '$2b$12$W16liLOZR6U4Zp3iptOPEOPNCl8ob/ieZqmEkdOWrrD5yo3qYK5xW',12,'student')
 ON DUPLICATE KEY UPDATE username = username;
 
-INSERT INTO posts (title, content, user_id) VALUES
-('Welcome to DoctusLite', 'This is the first post in our system.', 1),
-('Getting Started', 'Here are some tips to get started with the platform.', 1)
-ON DUPLICATE KEY UPDATE title = title;
+INSERT INTO subject (name, course, degree) VALUES
+('Fundametos de Control Automático', 2, 'Grado en Ingeniería de Tecnologías Industriales'),
+('Complentos de Control', 4, 'Grado en Ingeniería de Tecnologías Industriales');
+
+INSERT INTO practice (subject_id, deadline, file_url) VALUES
+(1, '2025-09-18', 'https://example.com/practice1.pdf'),
+(2, '2025-08-18', 'https://example.com/practice2.pdf');
+
+INSERT INTO practice_groups (practice_id, name) VALUES
+(1, 1),
+(2, 2);
 
 -- Show tables
 SHOW TABLES;
 
 -- Display sample data
 SELECT * FROM users;
-SELECT * FROM posts;
+SELECT * FROM subject;
+SELECT * FROM practice;
+SELECT * FROM practice_groups;
+SELECT * FROM submissions;
+SELECT * FROM users_subjects;
+SELECT * FROM practice_groups_users;
+
 
