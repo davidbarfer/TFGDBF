@@ -28,17 +28,23 @@ const { user } = Astro.props;
 		padding: 1rem;
 		text-align: center;
 	}
+	button {
+		all: unset;
+		outline: revert;
+	}
 	a, button {
 		text-decoration: none;
 		color: var(--color-tertiary);
 		text-transform: uppercase;
 		font-weight: bold;
 		padding: 0.5rem;
-		border-radius: 4px;
+		cursor: pointer;
+
 	}
 	a:hover, button:hover {
 		background-color: var(--color-tertiary);
 		color: var(--color-primary);
+		border-radius: 4px;
 		transition: background-color 0.3s ease;
 	}
 </style>
