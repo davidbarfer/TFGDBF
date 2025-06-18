@@ -155,7 +155,7 @@ export const processRequest = async (req, res) => {
             try {
               // Parse and validate request body
               const data = JSON.parse(body)
-              
+
               // JSON schema validation
               const signupSchema = {
                 type: 'object',
@@ -180,9 +180,8 @@ export const processRequest = async (req, res) => {
               }
               
               // Check if user already exists
-              const [existingUsers] = await query('SELECT * FROM users WHERE username = ?', [data.username])
-              
-              if (existingUsers && existingUsers.length > 0) {
+              const existingUsers = await query('SELECT * FROM users WHERE username = ?', [data.username])
+              if (existingUsers.results && existingUsers.results.length > 0) {
                 res.statusCode = 409
                 return res.end(JSON.stringify({ error: 'User already exists' }))
               }
