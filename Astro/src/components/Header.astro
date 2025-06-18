@@ -1,14 +1,38 @@
+---
+const { user } = Astro.props;
+---
 <header>
-	<h1>DoctusLite</h1>
+	<a href="/">Inicio</a>
+	{user ? (
+		<a href="/logout">Logout</a>
+	) : (
+		<a href="/login">Login</a>
+	)}
 </header>
 
 <style>
 	header {
+		display: flex;
+		justify-content: center;
+		gap: 1rem;
 		width: 100%;
     height: fit-content;
 		background-color: var(--color-primary);
 		color: var(--color-tertiary);
 		padding: 1rem;
 		text-align: center;
+	}
+	a {
+		text-decoration: none;
+		color: var(--color-tertiary);
+		text-transform: uppercase;
+		font-weight: bold;
+		padding: 0.5rem;
+		border-radius: 4px;
+	}
+	a:hover {
+		background-color: var(--color-tertiary);
+		color: var(--color-primary);
+		transition: background-color 0.3s ease;
 	}
 </style>

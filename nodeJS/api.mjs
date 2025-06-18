@@ -1,6 +1,32 @@
+import { URL } from 'node:url'
+import jwt from 'jsonwebtoken'
 import { query, hashPassword, verifyPassword } from './database.mjs'
+import { authProviders } from './database.mjs'
+// CORS headers configuration
+const corsHeaders = {
+  'Access-Control-Allow-Origin': 'http://localhost:4321', // Your frontend URL
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  'Access-Control-Allow-Credentials': 'true', // Crucial for cookies
+  'Access-Control-Max-Age': 86400
+}
+
 export const processRequest = async (req, res) => {
   const { method, url } = req
+  
+  // Handle preflight requests
+  if (method === 'OPTIONS') {
+    res.writeHead(204, {
+      ...corsHeaders,
+      'Content-Length': 0
+    })
+    return res.end()
+  }
+  
+  // Set CORS headers for all responses
+  Object.entries(corsHeaders).forEach(([key, value]) => {
+    res.setHeader(key, value)
+  })
 
   switch (method) {
     case 'GET':
@@ -17,7 +43,7 @@ export const processRequest = async (req, res) => {
           }
         default:
           res.statusCode = 404
-          res.setHeader('Content-Type', 'text/html; charset=utf-8')
+          res.setHeader('Content-Type', 'application/json; charset=utf-8')
           return res.end('Not found')
       }
 
@@ -39,29 +65,28 @@ export const processRequest = async (req, res) => {
               // JSON schema validation
               const loginSchema = {
                 type: 'object',
-                required: ['email', 'password'],
+                required: ['username', 'password'],
                 properties: {
-                  email: { type: 'string', format: 'email' },
+                  username: { type: 'string' },
                   password: { type: 'string', minLength: 8 }
                 },
                 additionalProperties: false
               }
               
               // Simple validation
-              if (!data.email || !data.password) {
+              if (!data.username || !data.password) {
                 res.statusCode = 400
-                return res.end(JSON.stringify({ error: 'Email and password are required' }))
+                return res.end(JSON.stringify({ error: 'Username and password are required' }))
               }
+
+              // Find user by username
+              const users = await query('SELECT * FROM users WHERE username = ?', [data.username])
+              const user = users.results[0]
               
-              // Find user by email
-              const [users] = await query('SELECT * FROM users WHERE email = ?', [data.email])
-              
-              if (!users || users.length === 0) {
+              if (!user) {
                 res.statusCode = 401
                 return res.end(JSON.stringify({ error: 'Invalid credentials' }))
               }
-              
-              const user = users[0]
               
               // Verify password
               const isPasswordValid = await verifyPassword(data.password, user.password)
@@ -70,16 +95,32 @@ export const processRequest = async (req, res) => {
                 res.statusCode = 401
                 return res.end(JSON.stringify({ error: 'Invalid credentials' }))
               }
+
+              // Generate token
+              const token = jwt.sign(
+                {
+                  userId: user.id,
+                  authMehod: authProviders.jwt
+                },
+                process.env.JWT_SECRET,
+                {
+                  expiresIn: '1h',
+                  issuer: 'http://localhost:1234'
+                }
+              );
               
+              // Set as HttpOnly Secure cookie
+              res.writeHead(200, {
+                ...corsHeaders,
+                'Content-Type': 'application/json',
+                'Set-Cookie' : `token=${token}; HttpOnly; Secure; SameSite=None; Max-Age=3600; Path=/`
+              });
               // Login successful
-              res.statusCode = 200
-              res.setHeader('Content-Type', 'application/json; charset=utf-8')
               return res.end(JSON.stringify({ 
                 message: 'Login successful',
                 user: {
                   id: user.id,
-                  email: user.email,
-                  name: user.name
+                  username: user.username,
                 }
               }))
               

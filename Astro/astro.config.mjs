@@ -10,5 +10,10 @@ export default defineConfig({
         '@': path.resolve('./src')
       }
     }
+  },
+  output: 'server',
+  server: {
+    port: 4321,
+    host: 'localhost'
   }
 });

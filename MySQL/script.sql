@@ -10,15 +10,31 @@ COLLATE utf8mb4_unicode_ci;
 -- Use the database
 USE doctus_lite;
 
+-- Drop tables if they exist (for fresh start)
+DROP TABLE IF EXISTS posts;
+DROP TABLE IF EXISTS saml_sessions;
+DROP TABLE IF EXISTS users;
+
 -- Table: users
 CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
-    email VARCHAR(100) NOT NULL UNIQUE,
-    password_hash VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    password_salt NUMERIC NOT NULL,
+    auth_provider ENUM('jwt', 'google', 'saml') DEFAULT 'jwt',
+    provider_id VARCHAR(255),
     role ENUM('professor', 'student', 'admin') DEFAULT 'student',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE saml_sessions (
+    session_id VARCHAR(255) PRIMARY KEY,
+    user_id INT NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
 -- Table: posts
@@ -33,9 +49,9 @@ CREATE TABLE IF NOT EXISTS posts (
 );
 
 -- Insert sample data
-INSERT INTO users (username, email, password_hash, role) VALUES
-('admin', 'admin@doctuslite.com', 'hashed_password_here','admin'),
-('user1', 'user1@example.com', 'hashed_password_here','student')
+INSERT INTO users (username, password, password_salt, role) VALUES
+('admin', '$2b$12$W16liLOZR6U4Zp3iptOPEOPNCl8ob/ieZqmEkdOWrrD5yo3qYK5xW',12,'admin'),
+('user1', '$2b$12$W16liLOZR6U4Zp3iptOPEOPNCl8ob/ieZqmEkdOWrrD5yo3qYK5xW',12,'student')
 ON DUPLICATE KEY UPDATE username = username;
 
 INSERT INTO posts (title, content, user_id) VALUES
