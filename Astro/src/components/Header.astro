@@ -1,10 +1,16 @@
 ---
 const { user } = Astro.props;
 ---
+
+<script>
+	import { logout } from '@/utils/auth.ts';
+	document.getElementById('logout')?.addEventListener('click', logout);
+</script>
+
 <header>
 	<a href="/">Inicio</a>
 	{user ? (
-		<a href="/logout">Logout</a>
+		<button id="logout">Logout</button>
 	) : (
 		<a href="/login">Login</a>
 	)}
@@ -22,7 +28,7 @@ const { user } = Astro.props;
 		padding: 1rem;
 		text-align: center;
 	}
-	a {
+	a, button {
 		text-decoration: none;
 		color: var(--color-tertiary);
 		text-transform: uppercase;
@@ -30,7 +36,7 @@ const { user } = Astro.props;
 		padding: 0.5rem;
 		border-radius: 4px;
 	}
-	a:hover {
+	a:hover, button:hover {
 		background-color: var(--color-tertiary);
 		color: var(--color-primary);
 		transition: background-color 0.3s ease;

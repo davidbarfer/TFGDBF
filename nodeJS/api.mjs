@@ -133,6 +133,15 @@ export const processRequest = async (req, res) => {
           
           break
         }
+        case '/logout': {
+          // Clean HttpOnly cookie
+          res.writeHead(200, {
+            ...corsHeaders,
+            'Content-Type': 'application/json',
+            'Set-Cookie' : `token=; HttpOnly; Secure; SameSite=None; Max-Age=0; Path=/`
+          });
+          return res.end(JSON.stringify({ message: 'Logout successful' }))
+        }
         case '/register': {
           let body = ''
           
