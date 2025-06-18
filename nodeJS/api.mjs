@@ -143,7 +143,7 @@ export const processRequest = async (req, res) => {
           });
           return res.end(JSON.stringify({ message: 'Logout successful' }))
         }
-        case '/register': {
+        case '/signup': {
           let body = ''
           
           // Collect request data
@@ -155,29 +155,33 @@ export const processRequest = async (req, res) => {
             try {
               // Parse and validate request body
               const data = JSON.parse(body)
-              
+
               // JSON schema validation
-              const registerSchema = {
+              const signupSchema = {
                 type: 'object',
-                required: ['email', 'password', 'name'],
+                required: ['username', 'password','role'],
                 properties: {
-                  email: { type: 'string', format: 'email' },
+                  username: { type: 'string', format: 'email' },
                   password: { type: 'string', minLength: 8 },
-                  name: { type: 'string' }
+                  role: { type: 'string' }
                 },
                 additionalProperties: false
               }
               
               // Simple validation
-              if (!data.email || !data.password || !data.name) {
+              if (!data.username || !data.password || !data.role) {
                 res.statusCode = 400
-                return res.end(JSON.stringify({ error: 'Email, password, and name are required' }))
+                return res.end(JSON.stringify({ error: 'Username, password, and role are required' }))
+              }
+              // Admin Creation not allow
+              if (data.role === 'admin') {
+                res.statusCode = 400
+                return res.end(JSON.stringify({ error: 'Admin creation not allowed' }))
               }
               
               // Check if user already exists
-              const [existingUsers] = await query('SELECT * FROM users WHERE email = ?', [data.email])
-              
-              if (existingUsers && existingUsers.length > 0) {
+              const existingUsers = await query('SELECT * FROM users WHERE username = ?', [data.username])
+              if (existingUsers.results && existingUsers.results.length > 0) {
                 res.statusCode = 409
                 return res.end(JSON.stringify({ error: 'User already exists' }))
               }
@@ -186,7 +190,7 @@ export const processRequest = async (req, res) => {
               const hashedPassword = await hashPassword(data.password)
               
               // Insert new user
-              await query('INSERT INTO users (email, password, name) VALUES (?, ?, ?)', [data.email, hashedPassword, data.name])
+              await query('INSERT INTO users (username, password, password_salt, role) VALUES (?, ?, ?, ?)', [data.username, hashedPassword, 12, data.role])
               
               // Registration successful
               res.statusCode = 201
@@ -194,8 +198,8 @@ export const processRequest = async (req, res) => {
               return res.end(JSON.stringify({ 
                 message: 'User registered successfully',
                 user: {
-                  email: data.email,
-                  name: data.name
+                  username: data.username,
+                  role: data.role
                 }
               }))
               
