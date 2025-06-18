@@ -8,25 +8,14 @@
 
 
 <script>
+  import { login } from "@/utils/auth.ts";
   const loginForm = document.getElementById("loginForm");
   if (loginForm) {
     loginForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       const formData = new FormData(e.target);
       const data = Object.fromEntries(formData.entries());
-      const response = await fetch("http://localhost:1234/login", {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-      if (response.ok) {
-				console.log('Login successful', response)
-      } else {
-        console.error("Login failed");
-      }
+      login(data);
     });
   }
 </script>
