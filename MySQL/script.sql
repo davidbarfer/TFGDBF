@@ -45,8 +45,8 @@ CREATE TABLE saml_sessions (
 CREATE TABLE IF NOT EXISTS subject (
   id INT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(100) NOT NULL,
-  course VARCHAR(50),
-  degree VARCHAR(50)
+  course NUMERIC NOT NULL,
+  degree ENUM('Grado en Ingeniería de Tecnologías Industriales', 'Grado en Ingeniería de las Tecnologías de Telecomunicación') NOT NULL
 );
 
 -- Tabla: Practicas
@@ -90,9 +90,27 @@ INSERT INTO users (username, password, password_salt, role) VALUES
 ('user1', '$2b$12$W16liLOZR6U4Zp3iptOPEOPNCl8ob/ieZqmEkdOWrrD5yo3qYK5xW',12,'student')
 ON DUPLICATE KEY UPDATE username = username;
 
+INSERT INTO subject (name, course, degree) VALUES
+('Fundametos de Control Automático', 2, 'Grado en Ingeniería de Tecnologías Industriales'),
+('Complentos de Control', 4, 'Grado en Ingeniería de Tecnologías Industriales');
+
+INSERT INTO practice (subject_id, deadline, file_url) VALUES
+(1, '2025-09-18', 'https://example.com/practice1.pdf'),
+(2, '2025-08-18', 'https://example.com/practice2.pdf');
+
+INSERT INTO practice_groups (practice_id, name) VALUES
+(1, 1),
+(2, 2);
+
 -- Show tables
 SHOW TABLES;
 
 -- Display sample data
 SELECT * FROM users;
+SELECT * FROM subject;
+SELECT * FROM practice;
+SELECT * FROM practice_groups;
+SELECT * FROM users_subjects;
+SELECT * FROM practice_groups_users;
+
 
