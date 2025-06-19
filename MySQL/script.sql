@@ -103,7 +103,8 @@ CREATE TABLE IF NOT EXISTS practice_groups_users (
 -- Insert sample data
 INSERT INTO users (username, password, password_salt, role) VALUES
 ('admin', '$2b$12$W16liLOZR6U4Zp3iptOPEOPNCl8ob/ieZqmEkdOWrrD5yo3qYK5xW',12,'admin'),
-('user1', '$2b$12$W16liLOZR6U4Zp3iptOPEOPNCl8ob/ieZqmEkdOWrrD5yo3qYK5xW',12,'student')
+('student', '$2b$12$W16liLOZR6U4Zp3iptOPEOPNCl8ob/ieZqmEkdOWrrD5yo3qYK5xW',12,'student'),
+('professor', '$2b$12$W16liLOZR6U4Zp3iptOPEOPNCl8ob/ieZqmEkdOWrrD5yo3qYK5xW',12,'professor')
 ON DUPLICATE KEY UPDATE username = username;
 
 INSERT INTO subject (name, course, degree) VALUES
@@ -118,6 +119,10 @@ INSERT INTO practice (subject_id, deadline, file_url) VALUES
 INSERT INTO practice_groups (practice_id, name, max_participants) VALUES
 (1, 1, 10),
 (2, 2, 10);
+
+INSERT INTO users_subjects (user_id, subject_id) VALUES
+(3, 1),
+(3, 2);
 
 -- Show tables
 SHOW TABLES;
