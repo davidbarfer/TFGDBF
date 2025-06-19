@@ -63,6 +63,7 @@ CREATE TABLE IF NOT EXISTS practice_groups (
   id INT AUTO_INCREMENT PRIMARY KEY,
   practice_id INT NOT NULL,
   name NUMERIC NOT NULL,
+  max_participants NUMERIC NOT NULL,
   FOREIGN KEY (practice_id) REFERENCES practice(id)
 );
 
@@ -70,13 +71,13 @@ CREATE TABLE IF NOT EXISTS practice_groups (
 CREATE TABLE IF NOT EXISTS submissions (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
-    practice_group_id INT NOT NULL,
+    practice_id INT NOT NULL,
     file_url VARCHAR(255) NOT NULL,
     delivery_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     grade DECIMAL(5,2),
     feedback TEXT,
     FOREIGN KEY (user_id) REFERENCES users(id),
-    FOREIGN KEY (practice_group_id) REFERENCES practice_groups(id)
+    FOREIGN KEY (practice_id) REFERENCES practice(id)
 );
 
 
@@ -112,9 +113,9 @@ INSERT INTO practice (subject_id, deadline, file_url) VALUES
 (1, '2025-09-18', 'https://example.com/practice1.pdf'),
 (2, '2025-08-18', 'https://example.com/practice2.pdf');
 
-INSERT INTO practice_groups (practice_id, name) VALUES
-(1, 1),
-(2, 2);
+INSERT INTO practice_groups (practice_id, name, max_participants) VALUES
+(1, 1, 10),
+(2, 2, 10);
 
 -- Show tables
 SHOW TABLES;
