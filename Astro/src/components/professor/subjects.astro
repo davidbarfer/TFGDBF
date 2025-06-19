@@ -1,0 +1,45 @@
+---
+import { getSubjects } from "@/utils/professor.ts";
+const { token } = Astro.props;
+const subjects = await getSubjects(token);
+---
+<section>
+  <table>
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Curso</th>
+        <th>Grado</th>
+      </tr>
+    </thead>
+    <tbody>
+      {subjects.map(subject => (
+        <tr>
+          <td>{subject.name}</td>
+          <td>{subject.course}</td>
+          <td>{subject.degree}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</section>
+
+<style>
+  section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    gap: 1rem;
+  }
+  table {
+    width: fit-content;
+    border-collapse: collapse;
+    margin: 0 auto;
+  }
+  th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+</style>

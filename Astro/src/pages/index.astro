@@ -1,9 +1,30 @@
 ---
 import Layout from "@/layouts/Layout.astro";
+import jwt from 'jsonwebtoken'
+import { parse } from 'cookie';
+import { roles } from "@/consts/users";
+
+const cookies = parse(Astro.request.headers.get('cookie') || '');
+const token = cookies.token;
+const secret = import.meta.env.JWT_SECRET;
+let user = null;
+if (token) {
+  try {
+    user = jwt.verify(token, secret); // same secret as backend
+  } catch (err) {
+    console.warn("Invalid or expired token", err);
+  }
+}
 ---
 
 <Layout>
-  <h1>
-    Doctus Lite
-  </h1>
+  {user?.role === roles.admin ? (
+    <p>Has iniciado sesión como {user?.role}</p>
+  ) : user?.role === roles.professor ? (
+    <p>Has iniciado sesión como {user?.role}</p>
+  ) : user?.role === roles.student ? (
+    <p>Has iniciado sesión como {user?.role}</p>
+  ) : (
+    <p>Doctus Lite</p>
+  )}
 </Layout>

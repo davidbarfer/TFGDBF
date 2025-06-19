@@ -31,6 +31,27 @@ export const processRequest = async (req, res) => {
   switch (method) {
     case 'GET':
       switch (url) {
+        case '/professor/subjects':
+          try {
+            if (!req.headers.authorization) {
+              res.statusCode = 401
+              return res.end(JSON.stringify({ error: 'Unauthorized', message: 'No authorization header' }))
+            }
+            const token = req.headers.authorization
+            const decoded = jwt.verify(token, process.env.JWT_SECRET)
+            if (decoded.role !== 'professor' && decoded.role !== 'admin') {
+              res.statusCode = 401
+              return res.end(JSON.stringify({ error: 'Unauthorized'}))
+            }
+            const subjects_id = await query('SELECT subject_id FROM users_subjects WHERE user_id = ?', [decoded.userId])
+            const subjects = await query('SELECT * FROM subject WHERE id IN (?)', [subjects_id.results.map(subject => subject.subject_id).flat()])
+            res.setHeader('Content-Type', 'application/json; charset=utf-8')
+            return res.end(JSON.stringify(subjects.results))
+          } catch (error) {
+            console.error('Database query error:', error)
+            res.statusCode = 500
+            return res.end(JSON.stringify({ error: 'Internal server error' }))
+          }
         case '/users':
           try {
             const users = await query('SELECT * FROM users')
