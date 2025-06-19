@@ -14,6 +14,7 @@ USE doctus_lite;
 DROP TABLE IF EXISTS users_subjects;
 DROP TABLE IF EXISTS practice_groups_users;
 DROP TABLE IF EXISTS practice_groups;
+DROP TABLE IF EXISTS submissions;
 DROP TABLE IF EXISTS practice;
 DROP TABLE IF EXISTS subject;
 DROP TABLE IF EXISTS saml_sessions;
@@ -107,7 +108,8 @@ ON DUPLICATE KEY UPDATE username = username;
 
 INSERT INTO subject (name, course, degree) VALUES
 ('Fundametos de Control Automático', 2, 'Grado en Ingeniería de Tecnologías Industriales'),
-('Complentos de Control', 4, 'Grado en Ingeniería de Tecnologías Industriales');
+('Complentos de Control', 4, 'Grado en Ingeniería de Tecnologías Industriales')
+ON DUPLICATE KEY UPDATE name = name, course = course, degree = degree; 
 
 INSERT INTO practice (subject_id, deadline, file_url) VALUES
 (1, '2025-09-18', 'https://example.com/practice1.pdf'),
