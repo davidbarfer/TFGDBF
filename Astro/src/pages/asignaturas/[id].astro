@@ -8,9 +8,106 @@ if (subject === null) {
 }
 ---
 <Layout>
-  <section>
-    <h1>{subject?.name}</h1>
-    <p>{subject?.course}</p>
-    <p>{subject?.degree}</p>
-  </section>
+  <div>
+    <section class="subject-info">
+      <h1>{subject?.name}</h1>
+      <div>
+        <p>Curso: {subject?.course}</p>
+        <p>Titulación: {subject?.degree}</p>
+      </div>
+    </section>
+    <section class="actions">
+      <button>Crear prácticas</button>
+      <button>Crear grupos</button>
+    </section>
+    <section class="practice">
+      <h1>Prácticas</h1>
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Fecha de entrega</th>
+            <th>Grupos</th>
+            <th>Entregas</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Practica 1 Control</td>
+            <td>2025-06-20</td>
+            <td>Ver Grupos (10)</td>
+            <td>Ver Entregas (20/100)</td>
+          </tr>
+          <tr>
+            <td>Practica 1 Control</td>
+            <td>2025-06-20</td>
+            <td>Ver Grupos (10)</td>
+            <td>Ver Entregas (20/100)</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+    <section class="students">
+      <h1>Alumnos</h1>
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Apellido</th>
+            <th>Grupo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Nombre</td>
+            <td>Apellido</td>
+            <td>Grupo</td>
+          </tr>
+          <tr>
+            <td>Nombre</td>
+            <td>Apellido</td>
+            <td>Grupo</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </div>
 </Layout>
+
+<style>
+div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    gap: 1rem;
+}
+.subject-info {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  align-items: center;
+}
+.subject-info div {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  place-content: center;
+  gap: 1rem;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+table {
+    width: fit-content;
+    border-collapse: collapse;
+    margin: 0 auto;
+  }
+  th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+</style>
