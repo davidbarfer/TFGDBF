@@ -1,7 +1,7 @@
-import { URL } from 'node:url'
 import jwt from 'jsonwebtoken'
 import { query, hashPassword, verifyPassword } from './database.mjs'
 import { authProviders } from './database.mjs'
+import { checkGetSubject } from './regExp.mjs'
 // CORS headers configuration
 const corsHeaders = {
   'Access-Control-Allow-Origin': 'http://localhost:4321', // Your frontend URL
@@ -29,22 +29,23 @@ export const processRequest = async (req, res) => {
   })
   switch (method) {
     case 'GET':
-      switch (url) {
-        case '/subject/1':
-          try {
-            const id = req.url.split('/').pop()
-            const subject = await query('SELECT * FROM subject WHERE id = ?', [id])
-            if (subject.results.length === 0) {
-              res.statusCode = 404
-              return res.end(JSON.stringify({ error: 'Subject not found' }))
-            }
-            res.setHeader('Content-Type', 'application/json; charset=utf-8')
-            return res.end(JSON.stringify(subject.results[0]))
-          } catch (error) {
-            console.error('Database query error:', error)
-            res.statusCode = 500
-            return res.end(JSON.stringify({ error: 'Internal server error' }))
+      const subject_id = checkGetSubject(url)
+      if (subject_id) {
+        try {
+          const subject = await query('SELECT * FROM subject WHERE id = ?', [subject_id])
+          if (subject.results.length === 0) {
+            res.statusCode = 404
+            return res.end(JSON.stringify({ error: 'Subject not found' }))
           }
+          res.setHeader('Content-Type', 'application/json; charset=utf-8')
+          return res.end(JSON.stringify(subject.results[0]))
+        } catch (error) {
+          console.error('Database query error:', error)
+          res.statusCode = 500
+          return res.end(JSON.stringify({ error: 'Internal server error' }))
+        }
+      } else {
+        switch (url) {
         case '/professor/subjects':
           try {
             if (!req.headers.authorization) {
@@ -76,12 +77,12 @@ export const processRequest = async (req, res) => {
             res.statusCode = 500
             return res.end(JSON.stringify({ error: 'Internal server error' }))
           }
-        default:
+          default:
           res.statusCode = 404
           res.setHeader('Content-Type', 'application/json; charset=utf-8')
           return res.end(JSON.stringify({ error: 'Not found' }))
       }
-
+    }
     case 'POST':
       switch (url) {
         case '/login': {

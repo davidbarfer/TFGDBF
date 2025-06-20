@@ -1,12 +1,16 @@
 ---
+import Layout from "@/layouts/Layout.astro";
 import { getSubject } from "@/utils/public";
 const { id } = Astro.params;
 const subject = await getSubject(id);
-console.log(subject)
+if (subject === null) {
+  return Astro.redirect('/404');
+}
 ---
-
-<section>
-  <h1>Subject 1</h1>
-  <p></p>
-  <p></p>
-</section>
+<Layout>
+  <section>
+    <h1>{subject?.name}</h1>
+    <p>{subject?.course}</p>
+    <p>{subject?.degree}</p>
+  </section>
+</Layout>
