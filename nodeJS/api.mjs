@@ -29,7 +29,14 @@ export const processRequest = async (req, res) => {
   })
   switch (method) {
     case 'GET':
-      const subject_id = checkGetSubject(url)
+      let subject_id = false
+      try {
+        subject_id = await checkGetSubject(url)
+      }
+      catch (error) {
+        console.error('Error checking subject ID:', error)
+        subject_id = false
+      }
       if (subject_id) {
         try {
           const subject = await query('SELECT * FROM subject WHERE id = ?', [subject_id])
@@ -81,8 +88,8 @@ export const processRequest = async (req, res) => {
           res.statusCode = 404
           res.setHeader('Content-Type', 'application/json; charset=utf-8')
           return res.end(JSON.stringify({ error: 'Not found' }))
+        }
       }
-    }
     case 'POST':
       switch (url) {
         case '/login': {
