@@ -27,10 +27,24 @@ export const processRequest = async (req, res) => {
   Object.entries(corsHeaders).forEach(([key, value]) => {
     res.setHeader(key, value)
   })
-
   switch (method) {
     case 'GET':
       switch (url) {
+        case '/subject/1':
+          try {
+            const id = req.url.split('/').pop()
+            const subject = await query('SELECT * FROM subject WHERE id = ?', [id])
+            if (subject.results.length === 0) {
+              res.statusCode = 404
+              return res.end(JSON.stringify({ error: 'Subject not found' }))
+            }
+            res.setHeader('Content-Type', 'application/json; charset=utf-8')
+            return res.end(JSON.stringify(subject.results[0]))
+          } catch (error) {
+            console.error('Database query error:', error)
+            res.statusCode = 500
+            return res.end(JSON.stringify({ error: 'Internal server error' }))
+          }
         case '/professor/subjects':
           try {
             if (!req.headers.authorization) {
@@ -65,7 +79,7 @@ export const processRequest = async (req, res) => {
         default:
           res.statusCode = 404
           res.setHeader('Content-Type', 'application/json; charset=utf-8')
-          return res.end('Not found')
+          return res.end(JSON.stringify({ error: 'Not found' }))
       }
 
     case 'POST':

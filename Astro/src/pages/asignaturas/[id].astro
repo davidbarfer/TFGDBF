@@ -1,0 +1,12 @@
+---
+import { getSubject } from "@/utils/public";
+const { id } = Astro.params;
+const subject = await getSubject(id);
+console.log(subject)
+---
+
+<section>
+  <h1>Subject 1</h1>
+  <p></p>
+  <p></p>
+</section>

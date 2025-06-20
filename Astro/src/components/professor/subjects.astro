@@ -15,7 +15,7 @@ const subjects = await getSubjects(token);
     <tbody>
       {subjects.map(subject => (
         <tr>
-          <td>{subject.name}</td>
+          <td><a href={`/asignaturas/${subject.id}`}>{subject.name}</a></td>
           <td>{subject.course}</td>
           <td>{subject.degree}</td>
         </tr>
