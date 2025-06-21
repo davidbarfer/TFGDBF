@@ -32,3 +32,16 @@ export async function createPractice(token:string, subject_id:string, practice_d
     );
     return response.json();
 }
+export async function createGroups(token:string, subject_id:string, group_data: { name: string, max_participants: number, practice_group_date: string, start_time: string, end_time: string}) {
+    const response = await fetch('http://localhost:1234/subject/' + subject_id + '/groups/create',
+        {
+            method: 'POST',
+            headers: {
+                'Authorization': token,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(group_data),
+        }
+    );
+    return response.json();
+}

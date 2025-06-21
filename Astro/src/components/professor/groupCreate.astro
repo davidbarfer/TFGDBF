@@ -1,0 +1,55 @@
+---
+import { getPractices } from "@/utils/professor";
+const { id, token, subject } = Astro.props;
+const practices = await getPractices(token, id);
+---
+<section>
+  <h1>Crear grupo</h1>
+  <h2>Asignatura: {subject?.name}</h2>
+  <form id="groupForm" data-id={id} data-token={token}>
+    <label for="practice">Selecciona la práctica</label>
+    <select name="practice" id="practice">
+      <option value="">Selecciona una práctica</option>
+      {practices.map((practice: any) => (
+        <option value={practice.id}>{practice.name}</option>
+      ))}
+    </select>
+    <label for="groupsNumber">Numero de grupos</label>
+    <input type="number" id="groupsNumber" name="groupsNumber" required>
+    <div>
+      <label for="max_participants">Maximo de participantes</label>
+      <input type="number" id="max_participants" name="max_participants" required>
+      <label for="group_date">Fecha de grupo</label>
+      <input type="date" id="group_date" name="group_date" required>
+      <label for="start_time">Hora de inicio</label>
+      <input type="time" id="start_time" name="start_time" required>
+      <label for="end_time">Hora de fin</label>
+      <input type="time" id="end_time" name="end_time" required>
+    </div>
+    <button type="submit">Crear</button>
+  </form>
+</section>
+
+<script>
+import { createGroups } from "@/utils/professor";
+const form = document.getElementById('groupForm');
+const groupsNumber = document.getElementById('groupsNumber');
+if (form && groupsNumber) {
+  const subject_id = form.dataset.id;
+  const token = form.dataset.token;
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+    createGroups(token, subject_id, data);
+  });
+}
+</script>
+
+<style>
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+</style>
