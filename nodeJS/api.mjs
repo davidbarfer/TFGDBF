@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken'
 import { query, hashPassword, verifyPassword } from './database.mjs'
 import { authProviders } from './database.mjs'
-import { checkGetSubject, checkPostPracticeCreate } from './regExp.mjs'
+import { checkGetSubject, checkPostPracticeCreate, checkGetSubjectPractices } from './regExp.mjs'
 // CORS headers configuration
 const corsHeaders = {
   'Access-Control-Allow-Origin': 'http://localhost:4321', // Your frontend URL
@@ -28,10 +28,12 @@ export const processRequest = async (req, res) => {
     res.setHeader(key, value)
   })
   let subject_id = false
+  let practices_url = false
   switch (method) {
     case 'GET':
       try {
         subject_id = await checkGetSubject(url)
+        practices_url = await checkGetSubjectPractices(url)
       }
       catch (error) {
         console.error('Error checking subject ID:', error)
@@ -46,6 +48,30 @@ export const processRequest = async (req, res) => {
           }
           res.setHeader('Content-Type', 'application/json; charset=utf-8')
           return res.end(JSON.stringify(subject.results[0]))
+        } catch (error) {
+          console.error('Database query error:', error)
+          res.statusCode = 500
+          return res.end(JSON.stringify({ error: 'Internal server error' }))
+        }
+      } else if (practices_url) {
+        try {
+          if(!req.headers.authorization) {
+            res.statusCode = 401
+            return res.end(JSON.stringify({ error: 'Unauthorized', message: 'No authorization header' }))
+          }
+          const token = req.headers.authorization
+          const decoded = jwt.verify(token, process.env.JWT_SECRET)
+          if (decoded.role !== 'professor' && decoded.role !== 'admin') {
+            res.statusCode = 401
+            return res.end(JSON.stringify({ error: 'Unauthorized'}))
+          }
+          const practices = await query('SELECT * FROM practice WHERE subject_id = ?', [practices_url])
+          if (practices.results.length === 0) {
+            res.statusCode = 404
+            return res.end(JSON.stringify({ error: 'Practices not found' }))
+          }
+          res.setHeader('Content-Type', 'application/json; charset=utf-8')
+          return res.end(JSON.stringify(practices.results))
         } catch (error) {
           console.error('Database query error:', error)
           res.statusCode = 500

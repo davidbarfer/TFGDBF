@@ -1,10 +1,28 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import { getSubject } from "@/utils/public";
+import { getPractices } from "@/utils/professor";
+import jwt from 'jsonwebtoken'
+import { parse } from 'cookie';
+const cookies = parse(Astro.request.headers.get('cookie') || '');
+const token = cookies.token;
+const secret = import.meta.env.JWT_SECRET;
+let user = null;
+if (token) {
+  try {
+    user = jwt.verify(token, secret); // same secret as backend
+  } catch (err) {
+    console.warn("Invalid or expired token", err);
+  }
+}
 const { id } = Astro.params;
 const subject = await getSubject(id);
 if (subject === null) {
   return Astro.redirect('/404');
+}
+let practices = await getPractices(token, id);
+if (practices === null) {
+  practices = [];
 }
 ---
 <Layout>
@@ -26,24 +44,22 @@ if (subject === null) {
         <thead>
           <tr>
             <th>Nombre</th>
+            <th>Descripción</th>
             <th>Fecha de entrega</th>
             <th>Grupos</th>
             <th>Entregas</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>Practica 1 Control</td>
-            <td>2025-06-20</td>
-            <td>Ver Grupos (10)</td>
-            <td>Ver Entregas (20/100)</td>
-          </tr>
-          <tr>
-            <td>Practica 1 Control</td>
-            <td>2025-06-20</td>
-            <td>Ver Grupos (10)</td>
-            <td>Ver Entregas (20/100)</td>
-          </tr>
+          {practices.map(practice => (
+            <tr>
+              <td>{practice.name}</td>
+              <td>{practice.description}</td>
+              <td>{practice.deadline}</td>
+              <td>Ver Grupos (TODO)</td>
+              <td>Ver Entregas (TODO)</td>
+            </tr>
+          ))}
         </tbody>
       </table>
     </section>
