@@ -1,7 +1,7 @@
-import { URL } from 'node:url'
 import jwt from 'jsonwebtoken'
 import { query, hashPassword, verifyPassword } from './database.mjs'
 import { authProviders } from './database.mjs'
+import { checkGetSubject, checkPostPracticeCreate, checkGetSubjectPractices } from './regExp.mjs'
 // CORS headers configuration
 const corsHeaders = {
   'Access-Control-Allow-Origin': 'http://localhost:4321', // Your frontend URL
@@ -27,10 +27,79 @@ export const processRequest = async (req, res) => {
   Object.entries(corsHeaders).forEach(([key, value]) => {
     res.setHeader(key, value)
   })
-
+  let subject_id = false
+  let practices_url = false
   switch (method) {
     case 'GET':
-      switch (url) {
+      try {
+        subject_id = await checkGetSubject(url)
+        practices_url = await checkGetSubjectPractices(url)
+      }
+      catch (error) {
+        console.error('Error checking subject ID:', error)
+        subject_id = false
+      }
+      if (subject_id) {
+        try {
+          const subject = await query('SELECT * FROM subject WHERE id = ?', [subject_id])
+          if (subject.results.length === 0) {
+            res.statusCode = 404
+            return res.end(JSON.stringify({ error: 'Subject not found' }))
+          }
+          res.setHeader('Content-Type', 'application/json; charset=utf-8')
+          return res.end(JSON.stringify(subject.results[0]))
+        } catch (error) {
+          console.error('Database query error:', error)
+          res.statusCode = 500
+          return res.end(JSON.stringify({ error: 'Internal server error' }))
+        }
+      } else if (practices_url) {
+        try {
+          if(!req.headers.authorization) {
+            res.statusCode = 401
+            return res.end(JSON.stringify({ error: 'Unauthorized', message: 'No authorization header' }))
+          }
+          const token = req.headers.authorization
+          const decoded = jwt.verify(token, process.env.JWT_SECRET)
+          if (decoded.role !== 'professor' && decoded.role !== 'admin') {
+            res.statusCode = 401
+            return res.end(JSON.stringify({ error: 'Unauthorized'}))
+          }
+          const practices = await query('SELECT * FROM practice WHERE subject_id = ?', [practices_url])
+          if (practices.results.length === 0) {
+            res.statusCode = 404
+            return res.end(JSON.stringify({ error: 'Practices not found' }))
+          }
+          res.setHeader('Content-Type', 'application/json; charset=utf-8')
+          return res.end(JSON.stringify(practices.results))
+        } catch (error) {
+          console.error('Database query error:', error)
+          res.statusCode = 500
+          return res.end(JSON.stringify({ error: 'Internal server error' }))
+        }
+      } else {
+        switch (url) {
+        case '/professor/subjects':
+          try {
+            if (!req.headers.authorization) {
+              res.statusCode = 401
+              return res.end(JSON.stringify({ error: 'Unauthorized', message: 'No authorization header' }))
+            }
+            const token = req.headers.authorization
+            const decoded = jwt.verify(token, process.env.JWT_SECRET)
+            if (decoded.role !== 'professor' && decoded.role !== 'admin') {
+              res.statusCode = 401
+              return res.end(JSON.stringify({ error: 'Unauthorized'}))
+            }
+            const subjects_id = await query('SELECT subject_id FROM users_subjects WHERE user_id = ?', [decoded.userId])
+            const subjects = await query('SELECT * FROM subject WHERE id IN (?)', [subjects_id.results.map(subject => subject.subject_id).flat()])
+            res.setHeader('Content-Type', 'application/json; charset=utf-8')
+            return res.end(JSON.stringify(subjects.results))
+          } catch (error) {
+            console.error('Database query error:', error)
+            res.statusCode = 500
+            return res.end(JSON.stringify({ error: 'Internal server error' }))
+          }
         case '/users':
           try {
             const users = await query('SELECT * FROM users')
@@ -41,13 +110,74 @@ export const processRequest = async (req, res) => {
             res.statusCode = 500
             return res.end(JSON.stringify({ error: 'Internal server error' }))
           }
-        default:
+          default:
           res.statusCode = 404
           res.setHeader('Content-Type', 'application/json; charset=utf-8')
-          return res.end('Not found')
+          return res.end(JSON.stringify({ error: 'Not found' }))
+        }
       }
-
     case 'POST':
+      try {
+        subject_id = await checkPostPracticeCreate(url)
+      }
+      catch (error) {
+        console.error('Error checking subject ID:', error)
+        subject_id = false
+      }
+      if (subject_id) {
+        try {
+          if(req.headers.authorization){
+            const token = req.headers.authorization
+            const decoded = jwt.verify(token, process.env.JWT_SECRET)
+            if (decoded.role !== 'professor' && decoded.role !== 'admin') {
+              res.statusCode = 401
+              return res.end(JSON.stringify({ error: 'Unauthorized'}))
+            }
+          }
+          let body = ''
+          
+          // Collect request data
+          req.on('data', chunk => {
+            body += chunk.toString()
+          })
+
+          req.on('end', async () => {
+            try {
+              // Parse and validate request body
+              const data = JSON.parse(body)
+              
+              // JSON schema validation
+              const practiceSchema = {
+                type: 'object',
+                required: ['name', 'description'],
+                properties: {
+                  name: { type: 'string' },
+                  description: { type: 'string' }
+                },
+                additionalProperties: false
+              }
+              
+              // Simple validation
+              if (!data.name || !data.description) {
+                res.statusCode = 400
+                return res.end(JSON.stringify({ error: 'Name and description are required' }))
+              }
+
+              const practice = await query('INSERT INTO practice (subject_id, name, description, deadline) VALUES (?, ?, ?, ?)', [subject_id, data.name, data.description, data.deadline])
+              res.setHeader('Content-Type', 'application/json; charset=utf-8')
+              return res.end(JSON.stringify(practice.results[0]))
+            } catch (error) {
+              console.error('Database query error:', error)
+              res.statusCode = 500
+              return res.end(JSON.stringify({ error: 'Internal server error' }))
+            }
+          })
+        } catch (error) {
+          console.error('Error checking subject ID:', error)
+          res.statusCode = 500
+          return res.end(JSON.stringify({ error: 'Internal server error' }))
+        }
+      } else {
       switch (url) {
         case '/login': {
           let body = ''
@@ -217,5 +347,6 @@ export const processRequest = async (req, res) => {
           res.setHeader('Content-Type', 'text/plain; charset=utf-8')
           return res.end('Not found')
       }
+    }
   }
 }

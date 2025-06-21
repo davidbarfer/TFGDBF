@@ -1,0 +1,29 @@
+---
+import Layout from "@/layouts/Layout.astro"
+---
+<Layout>
+  <section>
+    <h1>404</h1>
+    <p>Parece que la página que buscas no existe</p>
+    <a href="/">Volver al inicio</a>
+  </section>
+</Layout>
+
+<style>
+  section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    gap: 1rem;
+  }
+  a {
+    text-decoration: none;
+    color: var(--color-tertiary);
+    text-transform: uppercase;
+    font-weight: bold;
+    padding: 0.5rem;
+    cursor: pointer;
+  }
+</style>

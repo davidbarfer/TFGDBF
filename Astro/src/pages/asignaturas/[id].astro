@@ -1,0 +1,133 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { getSubject } from "@/utils/public";
+import { getPractices } from "@/utils/professor";
+import jwt from 'jsonwebtoken'
+import { parse } from 'cookie';
+const cookies = parse(Astro.request.headers.get('cookie') || '');
+const token = cookies.token;
+const secret = import.meta.env.JWT_SECRET;
+let user = null;
+if (token) {
+  try {
+    user = jwt.verify(token, secret); // same secret as backend
+  } catch (err) {
+    console.warn("Invalid or expired token", err);
+  }
+}
+const { id } = Astro.params;
+const subject = await getSubject(id);
+if (subject === null) {
+  return Astro.redirect('/404');
+}
+let practices = await getPractices(token, id);
+if (practices === null) {
+  practices = [];
+}
+---
+<Layout>
+  <div>
+    <section class="subject-info">
+      <h1>{subject?.name}</h1>
+      <div>
+        <p>Curso: {subject?.course}</p>
+        <p>Titulación: {subject?.degree}</p>
+      </div>
+    </section>
+    <section class="actions">
+      <button><a href={`/asignaturas/${id}/create`}>Crear prácticas</a></button>
+      <button>Crear grupos</button>
+    </section>
+    <section class="practice">
+      <h1>Prácticas</h1>
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Descripción</th>
+            <th>Fecha de entrega</th>
+            <th>Grupos</th>
+            <th>Entregas</th>
+          </tr>
+        </thead>
+        <tbody>
+          {practices.map(practice => (
+            <tr>
+              <td>{practice.name}</td>
+              <td>{practice.description}</td>
+              <td>{practice.deadline}</td>
+              <td>Ver Grupos (TODO)</td>
+              <td>Ver Entregas (TODO)</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+    <section class="students">
+      <h1>Alumnos</h1>
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Apellido</th>
+            <th>Grupo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Nombre</td>
+            <td>Apellido</td>
+            <td>Grupo</td>
+          </tr>
+          <tr>
+            <td>Nombre</td>
+            <td>Apellido</td>
+            <td>Grupo</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </div>
+</Layout>
+
+<style>
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
+div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    gap: 1rem;
+}
+.subject-info {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  align-items: center;
+}
+.subject-info div {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  place-content: center;
+  gap: 1rem;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+table {
+    width: fit-content;
+    border-collapse: collapse;
+    margin: 0 auto;
+  }
+  th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+</style>

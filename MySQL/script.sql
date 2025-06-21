@@ -54,6 +54,8 @@ CREATE TABLE IF NOT EXISTS subject (
 CREATE TABLE IF NOT EXISTS practice (
   id INT AUTO_INCREMENT PRIMARY KEY,
   subject_id INT NOT NULL,
+  name VARCHAR(100) NOT NULL,
+  description TEXT,
   deadline DATE,
   file_url VARCHAR(255),
   FOREIGN KEY (subject_id) REFERENCES subject(id)
@@ -103,7 +105,8 @@ CREATE TABLE IF NOT EXISTS practice_groups_users (
 -- Insert sample data
 INSERT INTO users (username, password, password_salt, role) VALUES
 ('admin', '$2b$12$W16liLOZR6U4Zp3iptOPEOPNCl8ob/ieZqmEkdOWrrD5yo3qYK5xW',12,'admin'),
-('user1', '$2b$12$W16liLOZR6U4Zp3iptOPEOPNCl8ob/ieZqmEkdOWrrD5yo3qYK5xW',12,'student')
+('student', '$2b$12$W16liLOZR6U4Zp3iptOPEOPNCl8ob/ieZqmEkdOWrrD5yo3qYK5xW',12,'student'),
+('professor', '$2b$12$W16liLOZR6U4Zp3iptOPEOPNCl8ob/ieZqmEkdOWrrD5yo3qYK5xW',12,'professor')
 ON DUPLICATE KEY UPDATE username = username;
 
 INSERT INTO subject (name, course, degree) VALUES
@@ -111,13 +114,17 @@ INSERT INTO subject (name, course, degree) VALUES
 ('Complentos de Control', 4, 'Grado en Ingeniería de Tecnologías Industriales')
 ON DUPLICATE KEY UPDATE name = name, course = course, degree = degree; 
 
-INSERT INTO practice (subject_id, deadline, file_url) VALUES
-(1, '2025-09-18', 'https://example.com/practice1.pdf'),
-(2, '2025-08-18', 'https://example.com/practice2.pdf');
+INSERT INTO practice (subject_id, name, description, deadline, file_url) VALUES
+(1, 'Control PI', 'Diseñe un control PI', '2025-09-18', 'https://example.com/practice1.pdf'),
+(2, 'Control GPC', 'Diseñe un control GPC', '2025-08-18', 'https://example.com/practice2.pdf');
 
 INSERT INTO practice_groups (practice_id, name, max_participants) VALUES
 (1, 1, 10),
 (2, 2, 10);
+
+INSERT INTO users_subjects (user_id, subject_id) VALUES
+(3, 1),
+(3, 2);
 
 -- Show tables
 SHOW TABLES;

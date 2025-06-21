@@ -1,5 +1,6 @@
 ---
 const { user } = Astro.props;
+import { roles } from '@/consts/users';
 ---
 
 <script>
@@ -15,6 +16,11 @@ const { user } = Astro.props;
 		<a href="/login">Iniciar Sesión</a>
 		<a href="/signup">Registrarse</a>
 	)}
+	{user?.role === roles.professor || user?.role === roles.admin ? (
+		<a href="/asignaturas">Asignaturas</a>
+	) : (
+		<a href="/practicas">Prácticas</a>
+		) }
 </header>
 
 <style>
