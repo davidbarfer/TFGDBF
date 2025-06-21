@@ -9,3 +9,16 @@ export async function getSubjects(token: string) {
     );
     return response.json();
 }
+export async function createPractice(token:string, subject_id:string, practice_data: { name: string, description: string, deadline: string}) {
+    const response = await fetch('http://localhost:1234/subject/' + subject_id + '/create',
+        {
+            method: 'POST',
+            headers: {
+                'Authorization': token,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(practice_data),
+        }
+    );
+    return response.json();
+}

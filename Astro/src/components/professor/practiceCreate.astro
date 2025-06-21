@@ -1,0 +1,41 @@
+---
+const { id, token } = Astro.props;
+---
+<section>
+  <h1>Crear práctica</h1>
+  <form id="practiceForm" data-id={id} data-token={token}>
+    <label for="name">Nombre</label>
+    <input type="text" id="name" name="name" required>
+    <label for="description">Descripción</label>
+    <textarea id="description" name="description" required rows="8" cols="50"></textarea>
+    <label for="deadline">Fecha de vencimiento</label>
+    <input type="date" id="deadline" name="deadline" required>
+    <button type="submit">Crear</button>
+  </form>
+</section>
+
+<script>
+import { createPractice } from "@/utils/professor";
+const form = document.getElementById('practiceForm');
+if (form) {
+  const subject_id = form?.dataset.id;
+  const token = form?.dataset.token;
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+    createPractice(token, subject_id, data);
+  });
+}
+</script>
+
+<style>
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  textarea {
+    resize: none;
+  }
+</style>

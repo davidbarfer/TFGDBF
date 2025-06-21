@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken'
 import { query, hashPassword, verifyPassword } from './database.mjs'
 import { authProviders } from './database.mjs'
-import { checkGetSubject } from './regExp.mjs'
+import { checkGetSubject, checkPostPracticeCreate } from './regExp.mjs'
 // CORS headers configuration
 const corsHeaders = {
   'Access-Control-Allow-Origin': 'http://localhost:4321', // Your frontend URL
@@ -27,9 +27,9 @@ export const processRequest = async (req, res) => {
   Object.entries(corsHeaders).forEach(([key, value]) => {
     res.setHeader(key, value)
   })
+  let subject_id = false
   switch (method) {
     case 'GET':
-      let subject_id = false
       try {
         subject_id = await checkGetSubject(url)
       }
@@ -91,6 +91,67 @@ export const processRequest = async (req, res) => {
         }
       }
     case 'POST':
+      try {
+        subject_id = await checkPostPracticeCreate(url)
+      }
+      catch (error) {
+        console.error('Error checking subject ID:', error)
+        subject_id = false
+      }
+      if (subject_id) {
+        try {
+          if(req.headers.authorization){
+            const token = req.headers.authorization
+            const decoded = jwt.verify(token, process.env.JWT_SECRET)
+            if (decoded.role !== 'professor' && decoded.role !== 'admin') {
+              res.statusCode = 401
+              return res.end(JSON.stringify({ error: 'Unauthorized'}))
+            }
+          }
+          let body = ''
+          
+          // Collect request data
+          req.on('data', chunk => {
+            body += chunk.toString()
+          })
+
+          req.on('end', async () => {
+            try {
+              // Parse and validate request body
+              const data = JSON.parse(body)
+              
+              // JSON schema validation
+              const practiceSchema = {
+                type: 'object',
+                required: ['name', 'description'],
+                properties: {
+                  name: { type: 'string' },
+                  description: { type: 'string' }
+                },
+                additionalProperties: false
+              }
+              
+              // Simple validation
+              if (!data.name || !data.description) {
+                res.statusCode = 400
+                return res.end(JSON.stringify({ error: 'Name and description are required' }))
+              }
+
+              const practice = await query('INSERT INTO practice (subject_id, name, description, deadline) VALUES (?, ?, ?, ?)', [subject_id, data.name, data.description, data.deadline])
+              res.setHeader('Content-Type', 'application/json; charset=utf-8')
+              return res.end(JSON.stringify(practice.results[0]))
+            } catch (error) {
+              console.error('Database query error:', error)
+              res.statusCode = 500
+              return res.end(JSON.stringify({ error: 'Internal server error' }))
+            }
+          })
+        } catch (error) {
+          console.error('Error checking subject ID:', error)
+          res.statusCode = 500
+          return res.end(JSON.stringify({ error: 'Internal server error' }))
+        }
+      } else {
       switch (url) {
         case '/login': {
           let body = ''
@@ -260,5 +321,6 @@ export const processRequest = async (req, res) => {
           res.setHeader('Content-Type', 'text/plain; charset=utf-8')
           return res.end('Not found')
       }
+    }
   }
 }
