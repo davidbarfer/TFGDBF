@@ -17,7 +17,7 @@ if (subject === null) {
       </div>
     </section>
     <section class="actions">
-      <button>Crear prácticas</button>
+      <button><a href={`/asignaturas/${id}/create`}>Crear prácticas</a></button>
       <button>Crear grupos</button>
     </section>
     <section class="practice">
@@ -75,6 +75,10 @@ if (subject === null) {
 </Layout>
 
 <style>
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
 div {
     display: flex;
     flex-direction: column;
