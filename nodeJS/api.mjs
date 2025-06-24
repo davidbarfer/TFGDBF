@@ -167,7 +167,7 @@ export const processRequest = async (req, res) => {
 
               const practice = await query('INSERT INTO practice (subject_id, name, description, deadline) VALUES (?, ?, ?, ?)', [subject_url, data.name, data.description, data.deadline])
               res.setHeader('Content-Type', 'application/json; charset=utf-8')
-              return res.end(JSON.stringify(practice.results[0]))
+              return res.end(JSON.stringify(practice.results))
             } catch (error) {
               console.error('Database query error:', error)
               res.statusCode = 500
@@ -196,13 +196,14 @@ export const processRequest = async (req, res) => {
           req.on('end', async () => {
             try {
               const data = JSON.parse(body)
-              if (!data.group_name || !data.max_participants || !data.practice_group_date || !data.start_time || !data.end_time) {
+              if (!data.group_name || !data.max_participants || !data.group_date || !data.start_time || !data.end_time) {
                 res.statusCode = 400
-                return res.end(JSON.stringify({ error: 'Group name, max participants, practice group date, start time and end time are required' }))
+                return res.end(JSON.stringify({ error: 'Group name, max participants, group date, start time and end time are required' }))
               }
-              const group = await query('INSERT INTO practice_groups (practice_id, name, max_participants, practice_group_date, start_time, end_time) VALUES (?, ?, ?, ?, ?, ?)', [groups_url.practice_id, data.group_name, data.max_participants, data.practice_group_date, data.start_time, data.end_time])
+              const group = await query('INSERT INTO practice_groups (practice_id, name, max_participants, practice_group_date, start_time, end_time) VALUES (?, ?, ?, ?, ?, ?)', [data.practice_id, data.group_name, data.max_participants, data.group_date, data.start_time, data.end_time])
+              res.statusCode = 201
               res.setHeader('Content-Type', 'application/json; charset=utf-8')
-              return res.end(JSON.stringify(group.results[0]))
+              return res.end(JSON.stringify(group.results))
             } catch (error) {
               console.error('Database query error:', error)
               res.statusCode = 500
