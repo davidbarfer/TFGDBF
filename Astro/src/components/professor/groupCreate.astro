@@ -8,7 +8,7 @@ const practices = await getPractices(token, id);
   <h2>Asignatura: {subject?.name}</h2>
   <form id="groupForm" data-id={id} data-token={token}>
     <label for="practice">Selecciona la práctica</label>
-    <select name="practice" id="practice">
+    <select name="practice_id" id="practice">
       <option value="">Selecciona una práctica</option>
       {practices.map((practice: any) => (
         <option value={practice.id}>{practice.name}</option>
