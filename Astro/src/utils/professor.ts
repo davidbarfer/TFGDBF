@@ -29,6 +29,27 @@ export async function getGroups(token: string, subject_id: string, practice_id: 
     );
     return response.json();
 }
+export async function getGroup(token: string, group_id: string) {
+    const response = await fetch('http://localhost:1234/group/' + group_id,
+        {
+            headers: {
+                'Authorization': token,
+            },
+        }
+    );
+    return response.json();
+}
+export async function deleteGroup(token: string, group_id: string) {
+    const response = await fetch('http://localhost:1234/group/' + group_id,
+        {
+            method: 'DELETE',
+            headers: {
+                'Authorization': token,
+            },
+        }
+    );
+    return response.json();
+}
 export async function createPractice(token:string, subject_id:string, practice_data: { name: string, description: string, deadline: string}) {
     const response = await fetch('http://localhost:1234/subject/' + subject_id + '/create',
         {

@@ -1,8 +1,9 @@
 import jwt from 'jsonwebtoken'
 import { query, hashPassword, verifyPassword } from './database.mjs'
 import { authProviders } from './database.mjs'
-import { checkGetSubject, checkGetSubjectPractices, checkGetSubjectPracticesGroups } from './regExpGet.mjs'
+import { checkGetSubject, checkGetSubjectPractices, checkGetSubjectPracticesGroups, checkGetGroup } from './regExpGet.mjs'
 import { checkPostPracticeCreate, checkPostPracticeGroupsCreate } from './regExpPost.mjs'
+import { checkDeleteGroup } from './regExpDelete.mjs'
 // CORS headers configuration
 const corsHeaders = {
   'Access-Control-Allow-Origin': 'http://localhost:4321', // Your frontend URL
@@ -31,12 +32,14 @@ export const processRequest = async (req, res) => {
   let subject_url = false
   let practices_url = false
   let groups_url = false
+  let group_url = false
   switch (method) {
     case 'GET':
       try {
         subject_url = await checkGetSubject(url)
         practices_url = await checkGetSubjectPractices(url)
         groups_url = await checkGetSubjectPracticesGroups(url)
+        group_url = await checkGetGroup(url)
       }
       catch (error) {
         console.error('Error checking subject ID:', error)
@@ -102,6 +105,30 @@ export const processRequest = async (req, res) => {
           }
           res.setHeader('Content-Type', 'application/json; charset=utf-8')
           return res.end(JSON.stringify(groups.results))
+        } catch (error) {
+          console.error('Database query error:', error)
+          res.statusCode = 500
+          return res.end(JSON.stringify({ error: 'Internal server error' }))
+        }
+      } else if (group_url) {
+        try {
+          if(!req.headers.authorization) {
+            res.statusCode = 401
+            return res.end(JSON.stringify({ error: 'Unauthorized', message: 'No authorization header' }))
+          }
+          const token = req.headers.authorization
+          const decoded = jwt.verify(token, process.env.JWT_SECRET)
+          if (decoded.role !== 'professor' && decoded.role !== 'admin') {
+            res.statusCode = 401
+            return res.end(JSON.stringify({ error: 'Unauthorized'}))
+          }
+          const group = await query('SELECT * FROM practice_groups WHERE id = ?', [group_url])
+          if (group.results.length === 0) {
+            res.statusCode = 404
+            return res.end(JSON.stringify({ error: 'Group not found' }))
+          }
+          res.setHeader('Content-Type', 'application/json; charset=utf-8')
+          return res.end(JSON.stringify(group.results[0]))
         } catch (error) {
           console.error('Database query error:', error)
           res.statusCode = 500
@@ -412,6 +439,50 @@ export const processRequest = async (req, res) => {
           res.statusCode = 404
           res.setHeader('Content-Type', 'text/plain; charset=utf-8')
           return res.end('Not found')
+      }
+    }
+    case 'DELETE':
+    try {
+      group_url = await checkDeleteGroup(url)
+    }
+    catch (error) {
+      console.error('Error checking group ID:', error)
+    }
+    if (group_url) {
+      try {
+        if(!req.headers.authorization) {
+          res.statusCode = 401
+          return res.end(JSON.stringify({ error: 'Unauthorized', message: 'No authorization header' }))
+        }
+        const token = req.headers.authorization
+        const decoded = jwt.verify(token, process.env.JWT_SECRET)
+        if (decoded.role !== 'professor' && decoded.role !== 'admin') {
+          res.statusCode = 401
+          return res.end(JSON.stringify({ error: 'Unauthorized'}))
+        }
+        const result = await query('DELETE FROM practice_groups WHERE id = ?', [group_url])
+        if (result.results.affectedRows > 0) {
+          res.statusCode = 200
+          res.setHeader('Content-Type', 'application/json; charset=utf-8')
+          return res.end(JSON.stringify({ message: 'Group deleted successfully' }))
+        }
+        else {
+          res.statusCode = 404
+          res.setHeader('Content-Type', 'text/plain; charset=utf-8')
+          return res.end(JSON.stringify({ error: 'Group not found' }))
+        }
+      }
+      catch (error) {
+        console.error('Database query error:', error)
+        res.statusCode = 500
+        return res.end(JSON.stringify({ error: 'Internal server error' }))
+      }
+    } else {
+      switch(url) {
+        default:
+          res.statusCode = 404
+          res.setHeader('Content-Type', 'text/plain; charset=utf-8')
+          return res.end(JSON.stringify({ error: 'Not found' }))
       }
     }
   }
