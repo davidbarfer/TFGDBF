@@ -1,7 +1,9 @@
 import jwt from 'jsonwebtoken'
 import { query, hashPassword, verifyPassword } from './database.mjs'
 import { authProviders } from './database.mjs'
-import { checkGetSubject, checkPostPracticeCreate, checkGetSubjectPractices } from './regExp.mjs'
+import { checkGetSubject, checkGetSubjectPractices, checkGetSubjectPracticesGroups, checkGetGroup } from './regExpGet.mjs'
+import { checkPostPracticeCreate, checkPostPracticeGroupsCreate } from './regExpPost.mjs'
+import { checkDeleteGroup } from './regExpDelete.mjs'
 // CORS headers configuration
 const corsHeaders = {
   'Access-Control-Allow-Origin': 'http://localhost:4321', // Your frontend URL
@@ -27,21 +29,25 @@ export const processRequest = async (req, res) => {
   Object.entries(corsHeaders).forEach(([key, value]) => {
     res.setHeader(key, value)
   })
-  let subject_id = false
+  let subject_url = false
   let practices_url = false
+  let groups_url = false
+  let group_url = false
   switch (method) {
     case 'GET':
       try {
-        subject_id = await checkGetSubject(url)
+        subject_url = await checkGetSubject(url)
         practices_url = await checkGetSubjectPractices(url)
+        groups_url = await checkGetSubjectPracticesGroups(url)
+        group_url = await checkGetGroup(url)
       }
       catch (error) {
         console.error('Error checking subject ID:', error)
-        subject_id = false
+        subject_url = false
       }
-      if (subject_id) {
+      if (subject_url) {
         try {
-          const subject = await query('SELECT * FROM subject WHERE id = ?', [subject_id])
+          const subject = await query('SELECT * FROM subject WHERE id = ?', [subject_url])
           if (subject.results.length === 0) {
             res.statusCode = 404
             return res.end(JSON.stringify({ error: 'Subject not found' }))
@@ -72,6 +78,57 @@ export const processRequest = async (req, res) => {
           }
           res.setHeader('Content-Type', 'application/json; charset=utf-8')
           return res.end(JSON.stringify(practices.results))
+        } catch (error) {
+          console.error('Database query error:', error)
+          res.statusCode = 500
+          return res.end(JSON.stringify({ error: 'Internal server error' }))
+        }
+      } else if (groups_url) {
+        try {
+          if(!req.headers.authorization) {
+            res.statusCode = 401
+            return res.end(JSON.stringify({ error: 'Unauthorized', message: 'No authorization header' }))
+          }
+          const token = req.headers.authorization
+          const decoded = jwt.verify(token, process.env.JWT_SECRET)
+          if (decoded.role !== 'professor' && decoded.role !== 'admin') {
+            res.statusCode = 401
+            return res.end(JSON.stringify({ error: 'Unauthorized'}))
+          }
+          const groups = await query(
+            'SELECT pg.* FROM practice_groups pg JOIN practice p ON pg.practice_id = p.id WHERE pg.practice_id = ? AND p.subject_id = ?',
+            [groups_url.practice_id, groups_url.subject_id]
+          )
+          if (groups.results.length === 0) {
+            res.statusCode = 404
+            return res.end(JSON.stringify({ error: 'Groups not found' }))
+          }
+          res.setHeader('Content-Type', 'application/json; charset=utf-8')
+          return res.end(JSON.stringify(groups.results))
+        } catch (error) {
+          console.error('Database query error:', error)
+          res.statusCode = 500
+          return res.end(JSON.stringify({ error: 'Internal server error' }))
+        }
+      } else if (group_url) {
+        try {
+          if(!req.headers.authorization) {
+            res.statusCode = 401
+            return res.end(JSON.stringify({ error: 'Unauthorized', message: 'No authorization header' }))
+          }
+          const token = req.headers.authorization
+          const decoded = jwt.verify(token, process.env.JWT_SECRET)
+          if (decoded.role !== 'professor' && decoded.role !== 'admin') {
+            res.statusCode = 401
+            return res.end(JSON.stringify({ error: 'Unauthorized'}))
+          }
+          const group = await query('SELECT * FROM practice_groups WHERE id = ?', [group_url])
+          if (group.results.length === 0) {
+            res.statusCode = 404
+            return res.end(JSON.stringify({ error: 'Group not found' }))
+          }
+          res.setHeader('Content-Type', 'application/json; charset=utf-8')
+          return res.end(JSON.stringify(group.results[0]))
         } catch (error) {
           console.error('Database query error:', error)
           res.statusCode = 500
@@ -118,13 +175,14 @@ export const processRequest = async (req, res) => {
       }
     case 'POST':
       try {
-        subject_id = await checkPostPracticeCreate(url)
+        subject_url = await checkPostPracticeCreate(url);
+        groups_url = await checkPostPracticeGroupsCreate(url)
       }
       catch (error) {
         console.error('Error checking subject ID:', error)
-        subject_id = false
+        subject_url = false
       }
-      if (subject_id) {
+      if (subject_url) {
         try {
           if(req.headers.authorization){
             const token = req.headers.authorization
@@ -163,9 +221,9 @@ export const processRequest = async (req, res) => {
                 return res.end(JSON.stringify({ error: 'Name and description are required' }))
               }
 
-              const practice = await query('INSERT INTO practice (subject_id, name, description, deadline) VALUES (?, ?, ?, ?)', [subject_id, data.name, data.description, data.deadline])
+              const practice = await query('INSERT INTO practice (subject_id, name, description, deadline) VALUES (?, ?, ?, ?)', [subject_url, data.name, data.description, data.deadline])
               res.setHeader('Content-Type', 'application/json; charset=utf-8')
-              return res.end(JSON.stringify(practice.results[0]))
+              return res.end(JSON.stringify(practice.results))
             } catch (error) {
               console.error('Database query error:', error)
               res.statusCode = 500
@@ -174,6 +232,41 @@ export const processRequest = async (req, res) => {
           })
         } catch (error) {
           console.error('Error checking subject ID:', error)
+          res.statusCode = 500
+          return res.end(JSON.stringify({ error: 'Internal server error' }))
+        }
+      } else if(groups_url) {
+        try {
+          if(req.headers.authorization){
+            const token = req.headers.authorization
+            const decoded = jwt.verify(token, process.env.JWT_SECRET)
+            if (decoded.role !== 'professor' && decoded.role !== 'admin') {
+              res.statusCode = 401
+              return res.end(JSON.stringify({ error: 'Unauthorized'}))
+            }
+          }
+          let body = ''
+          req.on('data', chunk => {
+            body += chunk.toString()
+          })
+          req.on('end', async () => {
+            try {
+              const data = JSON.parse(body)
+              if (!data.group_name || !data.max_participants || !data.group_date || !data.start_time || !data.end_time) {
+                res.statusCode = 400
+                return res.end(JSON.stringify({ error: 'Group name, max participants, group date, start time and end time are required' }))
+              }
+              const group = await query('INSERT INTO practice_groups (practice_id, name, max_participants, practice_group_date, start_time, end_time) VALUES (?, ?, ?, ?, ?, ?)', [data.practice_id, data.group_name, data.max_participants, data.group_date, data.start_time, data.end_time])
+              res.statusCode = 201
+              res.setHeader('Content-Type', 'application/json; charset=utf-8')
+              return res.end(JSON.stringify(group.results))
+            } catch (error) {
+              console.error('Database query error:', error)
+              res.statusCode = 500
+              return res.end(JSON.stringify({ error: 'Internal server error' }))
+            }
+          })
+        } catch {
           res.statusCode = 500
           return res.end(JSON.stringify({ error: 'Internal server error' }))
         }
@@ -346,6 +439,50 @@ export const processRequest = async (req, res) => {
           res.statusCode = 404
           res.setHeader('Content-Type', 'text/plain; charset=utf-8')
           return res.end('Not found')
+      }
+    }
+    case 'DELETE':
+    try {
+      group_url = await checkDeleteGroup(url)
+    }
+    catch (error) {
+      console.error('Error checking group ID:', error)
+    }
+    if (group_url) {
+      try {
+        if(!req.headers.authorization) {
+          res.statusCode = 401
+          return res.end(JSON.stringify({ error: 'Unauthorized', message: 'No authorization header' }))
+        }
+        const token = req.headers.authorization
+        const decoded = jwt.verify(token, process.env.JWT_SECRET)
+        if (decoded.role !== 'professor' && decoded.role !== 'admin') {
+          res.statusCode = 401
+          return res.end(JSON.stringify({ error: 'Unauthorized'}))
+        }
+        const result = await query('DELETE FROM practice_groups WHERE id = ?', [group_url])
+        if (result.results.affectedRows > 0) {
+          res.statusCode = 200
+          res.setHeader('Content-Type', 'application/json; charset=utf-8')
+          return res.end(JSON.stringify({ message: 'Group deleted successfully' }))
+        }
+        else {
+          res.statusCode = 404
+          res.setHeader('Content-Type', 'text/plain; charset=utf-8')
+          return res.end(JSON.stringify({ error: 'Group not found' }))
+        }
+      }
+      catch (error) {
+        console.error('Database query error:', error)
+        res.statusCode = 500
+        return res.end(JSON.stringify({ error: 'Internal server error' }))
+      }
+    } else {
+      switch(url) {
+        default:
+          res.statusCode = 404
+          res.setHeader('Content-Type', 'text/plain; charset=utf-8')
+          return res.end(JSON.stringify({ error: 'Not found' }))
       }
     }
   }

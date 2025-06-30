@@ -67,6 +67,10 @@ CREATE TABLE IF NOT EXISTS practice_groups (
   practice_id INT NOT NULL,
   name NUMERIC NOT NULL,
   max_participants NUMERIC NOT NULL,
+  current_participants NUMERIC NOT NULL DEFAULT 0,
+  practice_group_date DATE NOT NULL,
+  start_time TIME NOT NULL,
+  end_time TIME NOT NULL,
   FOREIGN KEY (practice_id) REFERENCES practice(id)
 );
 
@@ -118,9 +122,10 @@ INSERT INTO practice (subject_id, name, description, deadline, file_url) VALUES
 (1, 'Control PI', 'Diseñe un control PI', '2025-09-18', 'https://example.com/practice1.pdf'),
 (2, 'Control GPC', 'Diseñe un control GPC', '2025-08-18', 'https://example.com/practice2.pdf');
 
-INSERT INTO practice_groups (practice_id, name, max_participants) VALUES
-(1, 1, 10),
-(2, 2, 10);
+INSERT INTO practice_groups (practice_id, name, max_participants, practice_group_date, start_time, end_time) VALUES
+(1, 1, 10, '2025-09-18', '08:00:00', '10:00:00'),
+(1, 2, 10, '2025-09-18', '10:00:00', '12:00:00'),
+(2, 1, 10, '2025-08-18', '08:00:00', '10:00:00');
 
 INSERT INTO users_subjects (user_id, subject_id) VALUES
 (3, 1),
