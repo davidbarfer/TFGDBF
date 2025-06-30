@@ -23,18 +23,8 @@ const practices = await getPractices(token, id);
 
 <script>
 import { createGroups } from "@/utils/professor";
-const form = document.getElementById('groupForm');
 const groupsNumber = document.getElementById('groupsNumber');
-if (form && groupsNumber) {
-  const subject_id = form.dataset.id;
-  const token = form.dataset.token;
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const data = Object.fromEntries(formData.entries());
-    createGroups(token, subject_id, data);
-  });
-}
+
 function renderGroups(count: number) {
   const groups = document.getElementById('groups');
   if (groups) {
@@ -42,23 +32,65 @@ function renderGroups(count: number) {
   }
   for (let i = 0; i < count; i++) {
     const group = document.createElement('div');
+    group.className = 'group-container';
     group.innerHTML = `
-      <label for="group_name">Grupo: </label>
-      <input type="text" id="group_name" name="group_name" value="${i + 1}" required readonly>
-      <label for="max_participants">Maximo de participantes</label>
-      <input type="number" id="max_participants" name="max_participants" required>
-      <label for="group_date">Fecha de grupo</label>
-      <input type="date" id="group_date" name="group_date" required>
-      <label for="start_time">Hora de inicio</label>
-      <input type="time" id="start_time" name="start_time" required>
-      <label for="end_time">Hora de fin</label>
-      <input type="time" id="end_time" name="end_time" required>
+      <label for="group_name_${i}">Grupo: </label>
+      <input type="text" id="group_name_${i}" name="group_name_${i}" value="${i + 1}" required>
+      <label for="max_participants_${i}">Máximo de participantes</label>
+      <input type="number" id="max_participants_${i}" name="max_participants_${i}" min="1" required>
+      <label for="group_date_${i}">Fecha del grupo</label>
+      <input type="date" id="group_date_${i}" name="group_date_${i}" required>
+      <label for="start_time_${i}">Hora de inicio</label>
+      <input type="time" id="start_time_${i}" name="start_time_${i}" required>
+      <label for="end_time_${i}">Hora de fin</label>
+      <input type="time" id="end_time_${i}" name="end_time_${i}" required>
     `;
     document.getElementById('groups')?.appendChild(group);
   }
 }
 groupsNumber?.addEventListener('input', (e) => {
   renderGroups(Number(e?.target?.value));
+  const form = document.getElementById('groupForm');
+  if (form) {
+    const subject_id = form.dataset.id;
+    const token = form.dataset.token;
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const practice_id = formData.get('practice_id');
+      const groupsNumber = formData.get('groupsNumber');
+      
+      if (!practice_id || !groupsNumber) {
+        alert('Por favor, completa todos los campos obligatorios');
+        return;
+      }
+
+      try {
+        // Create an array to store all group creation promises
+        const groupPromises = [];
+        
+        // Loop through each group and create it
+        for (let i = 0; i < Number(groupsNumber); i++) {
+          const groupData = {
+            practice_id: practice_id.toString(),
+            group_name: formData.get(`group_name_${i}`)?.toString() || `${i + 1}`,
+            max_participants: Number(formData.get(`max_participants_${i}`)),
+            group_date: formData.get(`group_date_${i}`)?.toString() || '',
+            start_time: formData.get(`start_time_${i}`)?.toString() || '',
+            end_time: formData.get(`end_time_${i}`)?.toString() || ''
+          };
+          groupPromises.push(createGroups(token, subject_id, groupData));
+        }
+        
+        // Wait for all groups to be created
+        await Promise.all(groupPromises);
+        alert('Grupos creados exitosamente');
+      } catch (error) {
+        console.error('Error creating groups:', error);
+        alert('Error al crear los grupos. Por favor, inténtalo de nuevo.');
+      }
+    });
+  } 
 });
 renderGroups(Number(groupsNumber?.value));
 </script>
