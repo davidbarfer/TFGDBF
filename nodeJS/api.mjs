@@ -1,7 +1,8 @@
 import jwt from 'jsonwebtoken'
 import { query, hashPassword, verifyPassword } from './database.mjs'
 import { authProviders } from './database.mjs'
-import { checkGetSubject, checkPostPracticeCreate, checkGetSubjectPractices, checkPostPracticeGroupsCreate } from './regExp.mjs'
+import { checkGetSubject, checkGetSubjectPractices, checkGetSubjectPracticesGroups } from './regExpGet.mjs'
+import { checkPostPracticeCreate, checkPostPracticeGroupsCreate } from './regExpPost.mjs'
 // CORS headers configuration
 const corsHeaders = {
   'Access-Control-Allow-Origin': 'http://localhost:4321', // Your frontend URL
@@ -35,6 +36,7 @@ export const processRequest = async (req, res) => {
       try {
         subject_url = await checkGetSubject(url)
         practices_url = await checkGetSubjectPractices(url)
+        groups_url = await checkGetSubjectPracticesGroups(url)
       }
       catch (error) {
         console.error('Error checking subject ID:', error)
@@ -73,6 +75,33 @@ export const processRequest = async (req, res) => {
           }
           res.setHeader('Content-Type', 'application/json; charset=utf-8')
           return res.end(JSON.stringify(practices.results))
+        } catch (error) {
+          console.error('Database query error:', error)
+          res.statusCode = 500
+          return res.end(JSON.stringify({ error: 'Internal server error' }))
+        }
+      } else if (groups_url) {
+        try {
+          if(!req.headers.authorization) {
+            res.statusCode = 401
+            return res.end(JSON.stringify({ error: 'Unauthorized', message: 'No authorization header' }))
+          }
+          const token = req.headers.authorization
+          const decoded = jwt.verify(token, process.env.JWT_SECRET)
+          if (decoded.role !== 'professor' && decoded.role !== 'admin') {
+            res.statusCode = 401
+            return res.end(JSON.stringify({ error: 'Unauthorized'}))
+          }
+          const groups = await query(
+            'SELECT pg.* FROM practice_groups pg JOIN practice p ON pg.practice_id = p.id WHERE pg.practice_id = ? AND p.subject_id = ?',
+            [groups_url.practice_id, groups_url.subject_id]
+          )
+          if (groups.results.length === 0) {
+            res.statusCode = 404
+            return res.end(JSON.stringify({ error: 'Groups not found' }))
+          }
+          res.setHeader('Content-Type', 'application/json; charset=utf-8')
+          return res.end(JSON.stringify(groups.results))
         } catch (error) {
           console.error('Database query error:', error)
           res.statusCode = 500

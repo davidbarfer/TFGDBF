@@ -1,9 +1,10 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import { getSubject } from "@/utils/public";
-import { getPractices } from "@/utils/professor";
+import { getPractices, getGroups } from "@/utils/professor";
 import jwt from 'jsonwebtoken'
 import { parse } from 'cookie';
+import { ContentSchemaContainsSlugError } from "node_modules/astro/dist/core/errors/errors-data";
 const cookies = parse(Astro.request.headers.get('cookie') || '');
 const token = cookies.token;
 const secret = import.meta.env.JWT_SECRET;
@@ -24,6 +25,20 @@ let practices = await getPractices(token, id);
 if (practices === null) {
   practices = [];
 }
+// Replace the forEach with Promise.all and map
+practices = await Promise.all(practices.map(async (practice: any) => {
+  const groups = await getGroups(token, id, practice.id);
+  if(groups && Array.isArray(groups)) {
+    return {
+      ...practice,
+      groups: groups
+    };
+  }
+  return {
+    ...practice,
+    groups: []
+  };
+}));
 ---
 <Layout>
   <div>
@@ -51,12 +66,12 @@ if (practices === null) {
           </tr>
         </thead>
         <tbody>
-          {practices.map(practice => (
+          {practices.map((practice: any) => (
             <tr>
               <td>{practice.name}</td>
               <td>{practice.description}</td>
               <td>{practice.deadline}</td>
-              <td>Ver Grupos (TODO)</td>
+              <td>{practice.groups.map((group: any) => group.name).join(', ')}</td>
               <td>Ver Entregas (TODO)</td>
             </tr>
           ))}

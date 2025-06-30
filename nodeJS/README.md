@@ -14,6 +14,10 @@ Returns a subject of the professor.
 
 Returns all practices of the subject.
 
+### /professor/subject/:id/practice/:id/groups
+
+Return all groups of the practice.
+
 ### /users
 
 Returns all users.
