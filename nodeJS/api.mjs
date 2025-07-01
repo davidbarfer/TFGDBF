@@ -273,89 +273,104 @@ export const processRequest = async (req, res) => {
       } else {
       switch (url) {
         case '/login': {
-          let body = ''
-          
-          // Collect request data
+          let body = '';
+          let requestComplete = false;
+      
+          // Handle request data
           req.on('data', chunk => {
-            body += chunk.toString()
-          })
-
+              if (requestComplete) return;
+              body += chunk.toString();
+          });
+      
           req.on('end', async () => {
-            try {
-              // Parse and validate request body
-              const data = JSON.parse(body)
-              
-              // JSON schema validation
-              const loginSchema = {
-                type: 'object',
-                required: ['username', 'password'],
-                properties: {
-                  username: { type: 'string' },
-                  password: { type: 'string', minLength: 8 }
-                },
-                additionalProperties: false
+              if (requestComplete) return;
+              requestComplete = true;
+      
+              try {
+                  // Parse and validate request body
+                  let data;
+                  try {
+                      data = JSON.parse(body);
+                  } catch (parseError) {
+                      res.statusCode = 400;
+                      return res.end(JSON.stringify({ error: 'Invalid JSON in request body' }));
+                  }
+                  
+                  // Simple validation
+                  if (!data.username || !data.password) {
+                      res.statusCode = 400;
+                      return res.end(JSON.stringify({ error: 'Username and password are required' }));
+                  }
+      
+                  // Find user by username
+                  const users = await query('SELECT * FROM users WHERE username = ?', [data.username]);
+                  const user = users.results[0];
+                  
+                  if (!user) {
+                      res.statusCode = 401;
+                      return res.end(JSON.stringify({ error: 'Invalid credentials' }));
+                  }
+                  
+                  // Verify password
+                  const isPasswordValid = await verifyPassword(data.password, user.password);
+                  if (!isPasswordValid) {
+                      res.statusCode = 401;
+                      return res.end(JSON.stringify({ error: 'Invalid credentials' }));
+                  }
+      
+                  // Generate token
+                  const token = jwt.sign(
+                      {
+                          userId: user.id,
+                          authMethod: authProviders.jwt,
+                          role: user.role,
+                      },
+                      process.env.JWT_SECRET,
+                      {
+                          expiresIn: '1h',
+                          issuer: 'http://localhost:1234'
+                      }
+                  );
+      
+                  // Set response headers
+                  const headers = {
+                      'Content-Type': 'application/json',
+                      'Set-Cookie': `token=${token}; HttpOnly; Secure; SameSite=None; Max-Age=3600; Path=/`,
+                      'Access-Control-Allow-Origin': 'http://localhost:4321',
+                      'Access-Control-Allow-Credentials': 'true'
+                  };
+      
+                  // Send successful response
+                  res.writeHead(200, headers);
+                  return res.end(JSON.stringify({ 
+                      message: 'Login successful',
+                      user: {
+                          id: user.id,
+                          username: user.username,
+                      }
+                  }));
+      
+              } catch (error) {
+                  console.error('Login error:', error);
+                  if (!res.headersSent) {
+                      res.statusCode = 500;
+                      res.end(JSON.stringify({ error: 'Internal server error' }));
+                  }
               }
-              
-              // Simple validation
-              if (!data.username || !data.password) {
-                res.statusCode = 400
-                return res.end(JSON.stringify({ error: 'Username and password are required' }))
+          });
+      
+          // Handle request errors
+          req.on('error', (error) => {
+              if (requestComplete) return;
+              requestComplete = true;
+              console.error('Request error:', error);
+              if (!res.headersSent) {
+                  res.statusCode = 500;
+                  res.end(JSON.stringify({ error: 'Error processing request' }));
               }
-
-              // Find user by username
-              const users = await query('SELECT * FROM users WHERE username = ?', [data.username])
-              const user = users.results[0]
-              
-              if (!user) {
-                res.statusCode = 401
-                return res.end(JSON.stringify({ error: 'Invalid credentials' }))
-              }
-              
-              // Verify password
-              const isPasswordValid = await verifyPassword(data.password, user.password)
-              
-              if (!isPasswordValid) {
-                res.statusCode = 401
-                return res.end(JSON.stringify({ error: 'Invalid credentials' }))
-              }
-
-              // Generate token
-              const token = jwt.sign(
-                {
-                  userId: user.id,
-                  authMehod: authProviders.jwt,
-                  role: user.role,
-                },
-                process.env.JWT_SECRET,
-                {
-                  expiresIn: '1h',
-                  issuer: 'http://localhost:1234'
-                }
-              );
-              
-              // Set as HttpOnly Secure cookie
-              res.writeHead(200, {
-                ...corsHeaders,
-                'Content-Type': 'application/json',
-                'Set-Cookie' : `token=${token}; HttpOnly; Secure; SameSite=None; Max-Age=3600; Path=/`
-              });
-              // Login successful
-              return res.end(JSON.stringify({ 
-                message: 'Login successful',
-                user: {
-                  id: user.id,
-                  username: user.username,
-                }
-              }))
-              
-            } catch (error) {
-              console.error('Login error:', error)
-              res.statusCode = 500
-              return res.end(JSON.stringify({ error: 'Internal server error' }))
-            }
-          })
-          
-          break
+          });
+      
+          return; // Prevent further execution
         }
         case '/logout': {
           // Clean HttpOnly cookie
