@@ -1,4 +1,4 @@
-export async function checkGetSubject(url) {
+export function checkGetSubject(url) {
   const regex = /^\/subject\/\d+$/;
   if (regex.test(url)) {
     const id = url.split('/').pop();
@@ -7,7 +7,7 @@ export async function checkGetSubject(url) {
   return false;
 }
 
-export async function checkGetSubjectPractices(url) {
+export function checkGetSubjectPractices(url) {
   const regex = /^\/subject\/\d+\/practices$/;
   if (regex.test(url)) {
     const id = url.split('/')[2];
@@ -16,7 +16,7 @@ export async function checkGetSubjectPractices(url) {
   return false;
 }
 
-export async function checkGetSubjectPracticesGroups(url) {
+export function checkGetSubjectPracticesGroups(url) {
   const regex = /^\/subject\/\d+\/practice\/\d+\/groups$/;
   if (regex.test(url)) {
     const subject_id = url.split('/')[2];
@@ -26,7 +26,7 @@ export async function checkGetSubjectPracticesGroups(url) {
   return false;
 }
 
-export async function  checkGetGroup(url) {
+export function checkGetGroup(url) {
   const regex = /^\/group\/\d+$/;
   if (regex.test(url)) {
     const id = url.split('/').pop();

@@ -1,54 +1,58 @@
-import mysql from 'mysql2/promise'
-import bcrypt from 'bcrypt'
-import jwt from 'jsonwebtoken'
+import mysql from 'mysql2/promise';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 // Create the connection to database
 export const connection = await mysql.createConnection({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME
-})
+  database: process.env.DB_NAME,
+});
 
 export async function query(sql, params) {
-  const [results, fields] = await connection.query(sql, params)
+  const [results, fields] = await connection.query(sql, params);
   return {
     results,
-    fields
-  }
+    fields,
+  };
 }
 
 export async function hashPassword(password) {
-  const saltRounds = 12
-  return await bcrypt.hash(password, saltRounds)
+  const saltRounds = 12;
+  return await bcrypt.hash(password, saltRounds);
 }
 
 export async function verifyPassword(password, hash) {
-  return await bcrypt.compare(password, hash)
+  return await bcrypt.compare(password, hash);
 }
 
 export const authProviders = {
   jwt: 'jwt',
   google: 'google',
-  saml: 'smal'
-}
+  saml: 'smal',
+};
 
 export async function authenticate(req, res) {
   try {
-    if(!req.headers.authorization) {
-      res.statusCode = 401
-      return res.end(JSON.stringify({ error: 'Unauthorized', message: 'No authorization header' }))
+    if (!req.headers.authorization) {
+      res.statusCode = 401;
+      return res.end(
+        JSON.stringify({
+          error: 'Unauthorized',
+          message: 'No authorization header',
+        })
+      );
     }
-    const token = req.headers.authorization
-    const decoded = jwt.verify(token, process.env.JWT_SECRET)
+    const token = req.headers.authorization;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     if (decoded.role !== 'professor' && decoded.role !== 'admin') {
-      res.statusCode = 401
-      return res.end(JSON.stringify({ error: 'Unauthorized'}))
+      res.statusCode = 401;
+      return res.end(JSON.stringify({ error: 'Unauthorized' }));
     }
-    return decoded
-  }
-  catch (error) {
-    console.error('Authentication error:', error)
-    res.statusCode = 500
-    return res.end(JSON.stringify({ error: 'Internal server error' }))
+    return decoded;
+  } catch (error) {
+    console.error('Authentication error:', error);
+    res.statusCode = 500;
+    return res.end(JSON.stringify({ error: 'Internal server error' }));
   }
 }
