@@ -182,7 +182,7 @@ export const processRequest = async (req, res) => {
               res.setHeader('Content-Type', 'application/json; charset=utf-8')
               return res.end(JSON.stringify(practice.results))
             } catch (error) {
-              console.error('Database query error:', error)
+              console.error('Database query error on create practice:', error)
               res.statusCode = 500
               return res.end(JSON.stringify({ error: 'Internal server error' }))
             }
@@ -211,7 +211,7 @@ export const processRequest = async (req, res) => {
               res.setHeader('Content-Type', 'application/json; charset=utf-8')
               return res.end(JSON.stringify(group.results))
             } catch (error) {
-              console.error('Database query error:', error)
+              console.error('Database query error on create group:', error)
               res.statusCode = 500
               return res.end(JSON.stringify({ error: 'Internal server error' }))
             }
