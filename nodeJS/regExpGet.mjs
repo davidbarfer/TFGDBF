@@ -43,3 +43,12 @@ export function checkGetGroup(url) {
   }
   return false;
 }
+
+export function checkGetGroupStudents(url) {
+  const regex = /^\/group\/\d+\/students$/;
+  if (regex.test(url)) {
+    const id = url.split('/')[2];
+    return id;
+  }
+  return false;
+}
