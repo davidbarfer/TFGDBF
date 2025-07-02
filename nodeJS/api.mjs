@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken'
 import { query, hashPassword, verifyPassword } from './database.mjs'
-import { authProviders } from './database.mjs'
+import { authProviders, authenticate } from './database.mjs'
 import { checkGetSubject, checkGetSubjectPractices, checkGetSubjectPracticesGroups, checkGetGroup } from './regExpGet.mjs'
 import { checkPostPracticeCreate, checkPostPracticeGroupsCreate } from './regExpPost.mjs'
 import { checkDeleteGroup } from './regExpDelete.mjs'
@@ -61,16 +61,7 @@ export const processRequest = async (req, res) => {
         }
       } else if (practices_url) {
         try {
-          if(!req.headers.authorization) {
-            res.statusCode = 401
-            return res.end(JSON.stringify({ error: 'Unauthorized', message: 'No authorization header' }))
-          }
-          const token = req.headers.authorization
-          const decoded = jwt.verify(token, process.env.JWT_SECRET)
-          if (decoded.role !== 'professor' && decoded.role !== 'admin') {
-            res.statusCode = 401
-            return res.end(JSON.stringify({ error: 'Unauthorized'}))
-          }
+          await authenticate(req, res)
           const practices = await query('SELECT * FROM practice WHERE subject_id = ?', [practices_url])
           if (practices.results.length === 0) {
             res.statusCode = 404
@@ -85,16 +76,7 @@ export const processRequest = async (req, res) => {
         }
       } else if (groups_url) {
         try {
-          if(!req.headers.authorization) {
-            res.statusCode = 401
-            return res.end(JSON.stringify({ error: 'Unauthorized', message: 'No authorization header' }))
-          }
-          const token = req.headers.authorization
-          const decoded = jwt.verify(token, process.env.JWT_SECRET)
-          if (decoded.role !== 'professor' && decoded.role !== 'admin') {
-            res.statusCode = 401
-            return res.end(JSON.stringify({ error: 'Unauthorized'}))
-          }
+          await authenticate(req, res)
           const groups = await query(
             'SELECT pg.* FROM practice_groups pg JOIN practice p ON pg.practice_id = p.id WHERE pg.practice_id = ? AND p.subject_id = ?',
             [groups_url.practice_id, groups_url.subject_id]
@@ -112,16 +94,7 @@ export const processRequest = async (req, res) => {
         }
       } else if (group_url) {
         try {
-          if(!req.headers.authorization) {
-            res.statusCode = 401
-            return res.end(JSON.stringify({ error: 'Unauthorized', message: 'No authorization header' }))
-          }
-          const token = req.headers.authorization
-          const decoded = jwt.verify(token, process.env.JWT_SECRET)
-          if (decoded.role !== 'professor' && decoded.role !== 'admin') {
-            res.statusCode = 401
-            return res.end(JSON.stringify({ error: 'Unauthorized'}))
-          }
+          await authenticate(req, res)
           const group = await query('SELECT * FROM practice_groups WHERE id = ?', [group_url])
           if (group.results.length === 0) {
             res.statusCode = 404
@@ -138,16 +111,7 @@ export const processRequest = async (req, res) => {
         switch (url) {
         case '/professor/subjects':
           try {
-            if (!req.headers.authorization) {
-              res.statusCode = 401
-              return res.end(JSON.stringify({ error: 'Unauthorized', message: 'No authorization header' }))
-            }
-            const token = req.headers.authorization
-            const decoded = jwt.verify(token, process.env.JWT_SECRET)
-            if (decoded.role !== 'professor' && decoded.role !== 'admin') {
-              res.statusCode = 401
-              return res.end(JSON.stringify({ error: 'Unauthorized'}))
-            }
+            const decoded = await authenticate(req, res)
             const subjects_id = await query('SELECT subject_id FROM users_subjects WHERE user_id = ?', [decoded.userId])
             const subjects = await query('SELECT * FROM subject WHERE id IN (?)', [subjects_id.results.map(subject => subject.subject_id).flat()])
             res.setHeader('Content-Type', 'application/json; charset=utf-8')
@@ -184,14 +148,7 @@ export const processRequest = async (req, res) => {
       }
       if (subject_url) {
         try {
-          if(req.headers.authorization){
-            const token = req.headers.authorization
-            const decoded = jwt.verify(token, process.env.JWT_SECRET)
-            if (decoded.role !== 'professor' && decoded.role !== 'admin') {
-              res.statusCode = 401
-              return res.end(JSON.stringify({ error: 'Unauthorized'}))
-            }
-          }
+          await authenticate(req, res)
           let body = ''
           
           // Collect request data
@@ -237,14 +194,7 @@ export const processRequest = async (req, res) => {
         }
       } else if(groups_url) {
         try {
-          if(req.headers.authorization){
-            const token = req.headers.authorization
-            const decoded = jwt.verify(token, process.env.JWT_SECRET)
-            if (decoded.role !== 'professor' && decoded.role !== 'admin') {
-              res.statusCode = 401
-              return res.end(JSON.stringify({ error: 'Unauthorized'}))
-            }
-          }
+          await authenticate(req, res)
           let body = ''
           req.on('data', chunk => {
             body += chunk.toString()
@@ -465,16 +415,7 @@ export const processRequest = async (req, res) => {
     }
     if (group_url) {
       try {
-        if(!req.headers.authorization) {
-          res.statusCode = 401
-          return res.end(JSON.stringify({ error: 'Unauthorized', message: 'No authorization header' }))
-        }
-        const token = req.headers.authorization
-        const decoded = jwt.verify(token, process.env.JWT_SECRET)
-        if (decoded.role !== 'professor' && decoded.role !== 'admin') {
-          res.statusCode = 401
-          return res.end(JSON.stringify({ error: 'Unauthorized'}))
-        }
+        await authenticate(req, res)
         const result = await query('DELETE FROM practice_groups WHERE id = ?', [group_url])
         if (result.results.affectedRows > 0) {
           res.statusCode = 200

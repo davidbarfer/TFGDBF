@@ -32,18 +32,23 @@ export const authProviders = {
   saml: 'smal'
 }
 
-export async function authenticate(req, res, next) {
-  const token = req.cookies.token;
-  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-    if (err || decoded.authMethod !== 'jwt') {
-      return res.status(401).send('Invalid token');
+export async function authenticate(req, res) {
+  try {
+    if(!req.headers.authorization) {
+      res.statusCode = 401
+      return res.end(JSON.stringify({ error: 'Unauthorized', message: 'No authorization header' }))
     }
-    
-    // Attach minimal user data to request
-    req.auth = {
-      userId: decoded.userId,
-      method: 'jwt'
-    };
-    next();
-  });
+    const token = req.headers.authorization
+    const decoded = jwt.verify(token, process.env.JWT_SECRET)
+    if (decoded.role !== 'professor' && decoded.role !== 'admin') {
+      res.statusCode = 401
+      return res.end(JSON.stringify({ error: 'Unauthorized'}))
+    }
+    return decoded
+  }
+  catch (error) {
+    console.error('Authentication error:', error)
+    res.statusCode = 500
+    return res.end(JSON.stringify({ error: 'Internal server error' }))
+  }
 }
