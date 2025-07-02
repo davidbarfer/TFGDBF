@@ -121,22 +121,38 @@ export const processRequest = async (req, res) => {
       } else if (students_url) {
         try {
           await authenticate(req, res);
-          const students_ids = await query(
+          const users_ids = await query(
             'SELECT user_id FROM users_subjects WHERE subject_id = ?',
             [students_url]
           );
-          if (students_ids.results.length === 0) {
+          if (users_ids.results.length === 0) {
             res.statusCode = 404;
             return res.end(JSON.stringify({ error: 'Students not found' }));
           }
+          const users_ids_array = users_ids.results
+            .map(user => user.user_id)
+            .flat();
           const students = await query(
-            'SELECT username, name, surname FROM users WHERE id = ? AND role = "student"',
-            students_ids.results.map(student => student.user_id).flat()
+            `SELECT id, username, name, surname FROM users WHERE id IN (${users_ids_array.map(() => '?').join(',')}) AND role = "student"`,
+            users_ids_array
           );
           if (students.results.length === 0) {
             res.statusCode = 404;
             return res.end(JSON.stringify({ error: 'Students not found' }));
           }
+          const groups = await query(
+            `SELECT * FROM practice_groups_users WHERE user_id IN (${students.results
+              .map(student => student.id)
+              .flat()
+              .map(() => '?')
+              .join(',')})`,
+            students.results.map(student => student.id).flat()
+          );
+          students.results.forEach(student => {
+            student.groups = groups.results.filter(
+              group => group.user_id === student.id
+            );
+          });
           return res.end(JSON.stringify(students.results));
         } catch (error) {
           console.error('Database query error on get students:', error);
