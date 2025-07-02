@@ -135,6 +135,10 @@ INSERT INTO users_subjects (user_id, subject_id) VALUES
 (3, 1),
 (3, 2);
 
+INSERT INTO practice_groups_users (group_id, user_id) VALUES
+(1, 2),
+(2, 2);
+
 -- Show tables
 SHOW TABLES;
 
