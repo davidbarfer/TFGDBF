@@ -87,8 +87,9 @@ practices = await Promise.all(practices.map(async (practice: any) => {
       <table>
         <thead>
           <tr>
+            <th>Nombre de Usuario (DNI)</th>
             <th>Nombre</th>
-            <th>Apellido</th>
+            <th>Apellidos</th>
             <th>Grupo</th>
           </tr>
         </thead>
@@ -96,7 +97,8 @@ practices = await Promise.all(practices.map(async (practice: any) => {
           {students.map((student: any) => (
             <tr>
               <td>{student.username}</td>
-              {/* <td>{student.surname}</td> */}
+              <td>{student.name}</td>
+              <td>{student.surname}</td>
               {/* <td>{student.group}</td> */}
             </tr>
           ))}

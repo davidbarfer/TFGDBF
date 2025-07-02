@@ -125,16 +125,14 @@ export const processRequest = async (req, res) => {
             'SELECT user_id FROM users_subjects WHERE subject_id = ?',
             [students_url]
           );
-          console.log('Stundets id:', students_ids.results);
           if (students_ids.results.length === 0) {
             res.statusCode = 404;
             return res.end(JSON.stringify({ error: 'Students not found' }));
           }
           const students = await query(
-            'SELECT username FROM users WHERE id = ? AND role = "student"',
+            'SELECT username, name, surname FROM users WHERE id = ? AND role = "student"',
             students_ids.results.map(student => student.user_id).flat()
           );
-          console.log('Stundets:', students.results);
           if (students.results.length === 0) {
             res.statusCode = 404;
             return res.end(JSON.stringify({ error: 'Students not found' }));

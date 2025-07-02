@@ -29,6 +29,8 @@ CREATE TABLE IF NOT EXISTS users (
     auth_provider ENUM('jwt', 'google', 'saml') DEFAULT 'jwt',
     provider_id VARCHAR(255),
     role ENUM('professor', 'student', 'admin') DEFAULT 'student',
+    name VARCHAR(50) NOT NULL,
+    surname VARCHAR(50) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -107,10 +109,10 @@ CREATE TABLE IF NOT EXISTS practice_groups_users (
 );
 
 -- Insert sample data
-INSERT INTO users (username, password, password_salt, role) VALUES
-('admin', '$2b$12$W16liLOZR6U4Zp3iptOPEOPNCl8ob/ieZqmEkdOWrrD5yo3qYK5xW',12,'admin'),
-('student', '$2b$12$W16liLOZR6U4Zp3iptOPEOPNCl8ob/ieZqmEkdOWrrD5yo3qYK5xW',12,'student'),
-('professor', '$2b$12$W16liLOZR6U4Zp3iptOPEOPNCl8ob/ieZqmEkdOWrrD5yo3qYK5xW',12,'professor')
+INSERT INTO users (username, password, password_salt, role, name, surname) VALUES
+('admin', '$2b$12$W16liLOZR6U4Zp3iptOPEOPNCl8ob/ieZqmEkdOWrrD5yo3qYK5xW',12,'admin', 'David', 'Barrero'),
+('student', '$2b$12$W16liLOZR6U4Zp3iptOPEOPNCl8ob/ieZqmEkdOWrrD5yo3qYK5xW',12,'student', 'Manolo', 'Garcia'),
+('professor', '$2b$12$W16liLOZR6U4Zp3iptOPEOPNCl8ob/ieZqmEkdOWrrD5yo3qYK5xW',12,'professor', 'Mortadelo', 'LaVieja')
 ON DUPLICATE KEY UPDATE username = username;
 
 INSERT INTO subject (name, course, degree) VALUES
