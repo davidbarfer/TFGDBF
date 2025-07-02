@@ -35,10 +35,6 @@ export async function getGroups(token: string, subject_id: string, practice_id: 
             },
         }
     );
-    if(!response.ok) {
-        const errorText = await response.json();
-        throw new Error(`Error ${response.status}: ${errorText.error}`);
-    }
     return response.json();
 }
 export async function getGroup(token: string, group_id: string) {
