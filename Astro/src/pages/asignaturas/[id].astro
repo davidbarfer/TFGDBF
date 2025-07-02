@@ -99,7 +99,7 @@ practices = await Promise.all(practices.map(async (practice: any) => {
               <td>{student.username}</td>
               <td>{student.name}</td>
               <td>{student.surname}</td>
-              <td>{student.groups.map((group: any) => group.group_id).join(', ')}</td>
+              <td><div class="groups-table">{student.groups.map((group_id: any) => <a href={`/asignaturas/${id}/grupos/${group_id}`}>{group_id}</a>)}</div></td>
             </tr>
           ))}
         </tbody>

@@ -149,9 +149,9 @@ export const processRequest = async (req, res) => {
             students.results.map(student => student.id).flat()
           );
           students.results.forEach(student => {
-            student.groups = groups.results.filter(
-              group => group.user_id === student.id
-            );
+            student.groups = groups.results
+              .filter(group => group.user_id === student.id)
+              .map(group => group.group_id);
           });
           return res.end(JSON.stringify(students.results));
         } catch (error) {
