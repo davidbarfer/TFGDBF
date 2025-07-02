@@ -112,7 +112,8 @@ CREATE TABLE IF NOT EXISTS practice_groups_users (
 INSERT INTO users (username, password, password_salt, role, name, surname) VALUES
 ('admin', '$2b$12$W16liLOZR6U4Zp3iptOPEOPNCl8ob/ieZqmEkdOWrrD5yo3qYK5xW',12,'admin', 'David', 'Barrero'),
 ('student', '$2b$12$W16liLOZR6U4Zp3iptOPEOPNCl8ob/ieZqmEkdOWrrD5yo3qYK5xW',12,'student', 'Manolo', 'Garcia'),
-('professor', '$2b$12$W16liLOZR6U4Zp3iptOPEOPNCl8ob/ieZqmEkdOWrrD5yo3qYK5xW',12,'professor', 'Mortadelo', 'LaVieja')
+('professor', '$2b$12$W16liLOZR6U4Zp3iptOPEOPNCl8ob/ieZqmEkdOWrrD5yo3qYK5xW',12,'professor', 'Mortadelo', 'Filemon'),
+('student2', '$2b$12$W16liLOZR6U4Zp3iptOPEOPNCl8ob/ieZqmEkdOWrrD5yo3qYK5xW',12,'student', 'Manolo', 'Garcia')
 ON DUPLICATE KEY UPDATE username = username;
 
 INSERT INTO subject (name, course, degree) VALUES
@@ -133,11 +134,15 @@ INSERT INTO users_subjects (user_id, subject_id) VALUES
 (2, 1),
 (2, 2),
 (3, 1),
-(3, 2);
+(3, 2),
+(4, 1),
+(4, 2);
 
 INSERT INTO practice_groups_users (group_id, user_id) VALUES
 (1, 2),
-(2, 2);
+(2, 2),
+(1, 4),
+(2, 4);
 
 -- Show tables
 SHOW TABLES;
