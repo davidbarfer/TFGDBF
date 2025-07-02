@@ -2,7 +2,7 @@
 import Layout from "@/layouts/Layout.astro";
 import { parse } from 'cookie';
 import jwt from 'jsonwebtoken'
-import { getGroup } from "@/utils/professor";
+import { getGroup, getGroupStudents } from "@/utils/professor";
 const { id } = Astro.params;
 const cookies = parse(Astro.request.headers.get('cookie') || '');
 const token = cookies.token;
@@ -16,6 +16,7 @@ if (token) {
   }
 }
 const group = await getGroup(token, id);
+const students = await getGroupStudents(token, id);
 ---
 
 <Layout>
@@ -36,15 +37,19 @@ const group = await getGroup(token, id);
       <table>
         <thead>
           <tr>
+            <th>Nombre de Usuario (DNI)</th>
             <th>Nombre</th>
             <th>Apellido</th>
           </tr>
         </thead>
         <tbody>
-          <tr>  
-            <td>myName</td>
-            <td>mySurname</td>
-          </tr>
+          {students.map((student: any) => (
+            <tr>
+              <td>{student.username}</td>
+              <td>{student.name}</td>
+              <td>{student.surname}</td>
+            </tr>
+          ))}
         </tbody>
       </table>
     </section>

@@ -1,7 +1,7 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import { getSubject } from "@/utils/public";
-import { getPractices, getGroups } from "@/utils/professor";
+import { getPractices, getGroups, getSubjectsStudents } from "@/utils/professor";
 import jwt from 'jsonwebtoken'
 import { parse } from 'cookie';
 import { ContentSchemaContainsSlugError } from "node_modules/astro/dist/core/errors/errors-data";
@@ -17,17 +17,21 @@ if (token) {
   }
 }
 const { id } = Astro.params;
-const subject = await getSubject(id);
+const subject = await getSubject(id as string);
 if (subject === null) {
   return Astro.redirect('/404');
 }
-let practices = await getPractices(token, id);
+let students = await getSubjectsStudents(token as string, id as string);
+if (students === null) {
+  students = [];
+}
+let practices = await getPractices(token as string, id as string);
 if (practices === null) {
   practices = [];
 }
 // Replace the forEach with Promise.all and map
 practices = await Promise.all(practices.map(async (practice: any) => {
-  const groups = await getGroups(token, id, practice.id);
+  const groups = await getGroups(token as string, id as string, practice.id as string);
   if(groups && Array.isArray(groups)) {
     return {
       ...practice,
@@ -83,22 +87,21 @@ practices = await Promise.all(practices.map(async (practice: any) => {
       <table>
         <thead>
           <tr>
+            <th>Nombre de Usuario (DNI)</th>
             <th>Nombre</th>
-            <th>Apellido</th>
+            <th>Apellidos</th>
             <th>Grupo</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>Nombre</td>
-            <td>Apellido</td>
-            <td>Grupo</td>
-          </tr>
-          <tr>
-            <td>Nombre</td>
-            <td>Apellido</td>
-            <td>Grupo</td>
-          </tr>
+          {students.map((student: any) => (
+            <tr>
+              <td>{student.username}</td>
+              <td>{student.name}</td>
+              <td>{student.surname}</td>
+              <td><div class="groups-table">{student.groups.map((group_id: any) => <a href={`/asignaturas/${id}/grupos/${group_id}`}>{group_id}</a>)}</div></td>
+            </tr>
+          ))}
         </tbody>
       </table>
     </section>
@@ -141,15 +144,4 @@ div {
   flex-wrap: wrap;
   gap: 1rem;
 }
-table {
-    width: fit-content;
-    border-collapse: collapse;
-    margin: 0 auto;
-  }
-  th, td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: left;
-  }
-
 </style>

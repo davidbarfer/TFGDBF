@@ -19,8 +19,10 @@ import { roles } from '@/consts/users';
 	{user?.role === roles.professor || user?.role === roles.admin ? (
 		<a href="/asignaturas">Asignaturas</a>
 	) : (
-		<a href="/practicas">Prácticas</a>
-		) }
+		user?.role === roles.student ? (
+			<a href="/practicas">Prácticas</a>
+		) : null
+	) }
 </header>
 
 <style>

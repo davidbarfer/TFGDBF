@@ -6,6 +6,8 @@ import {
   checkGetSubjectPractices,
   checkGetSubjectPracticesGroups,
   checkGetGroup,
+  checkGetGroupStudents,
+  checkGetSubjectStudents,
 } from './regExpGet.mjs';
 import {
   checkPostPracticeCreate,
@@ -43,12 +45,16 @@ export const processRequest = async (req, res) => {
   let practices_url = false;
   let groups_url = false;
   let group_url = false;
+  let students_url = false;
+  let students_group_url = false;
   switch (method) {
     case 'GET':
       subject_url = checkGetSubject(url);
       practices_url = checkGetSubjectPractices(url);
       groups_url = checkGetSubjectPracticesGroups(url);
       group_url = checkGetGroup(url);
+      students_url = checkGetSubjectStudents(url);
+      students_group_url = checkGetGroupStudents(url);
       if (subject_url) {
         try {
           const subject = await query('SELECT * FROM subject WHERE id = ?', [
@@ -112,6 +118,75 @@ export const processRequest = async (req, res) => {
           return res.end(JSON.stringify(group.results[0]));
         } catch (error) {
           console.error('Database query error on get group:', error);
+          res.statusCode = 500;
+          return res.end(JSON.stringify({ error: 'Internal server error' }));
+        }
+      } else if (students_url) {
+        try {
+          await authenticate(req, res);
+          const users_ids = await query(
+            'SELECT user_id FROM users_subjects WHERE subject_id = ?',
+            [students_url]
+          );
+          if (users_ids.results.length === 0) {
+            res.statusCode = 404;
+            return res.end(JSON.stringify({ error: 'Students not found' }));
+          }
+          const users_ids_array = users_ids.results
+            .map(user => user.user_id)
+            .flat();
+          const students = await query(
+            `SELECT id, username, name, surname FROM users WHERE id IN (${users_ids_array.map(() => '?').join(',')}) AND role = "student"`,
+            users_ids_array
+          );
+          if (students.results.length === 0) {
+            res.statusCode = 404;
+            return res.end(JSON.stringify({ error: 'Students not found' }));
+          }
+          const groups = await query(
+            `SELECT * FROM practice_groups_users WHERE user_id IN (${students.results
+              .map(student => student.id)
+              .flat()
+              .map(() => '?')
+              .join(',')})`,
+            students.results.map(student => student.id).flat()
+          );
+          students.results.forEach(student => {
+            student.groups = groups.results
+              .filter(group => group.user_id === student.id)
+              .map(group => group.group_id);
+          });
+          return res.end(JSON.stringify(students.results));
+        } catch (error) {
+          console.error('Database query error on get students:', error);
+          res.statusCode = 500;
+          return res.end(JSON.stringify({ error: 'Internal server error' }));
+        }
+      } else if (students_group_url) {
+        try {
+          await authenticate(req, res);
+          const users_ids = await query(
+            'SELECT user_id FROM practice_groups_users WHERE group_id = ?',
+            [students_group_url]
+          );
+          if (users_ids.results.length === 0) {
+            res.statusCode = 404;
+            return res.end(JSON.stringify({ error: 'Students not found' }));
+          }
+          const users_ids_array = users_ids.results
+            .map(user => user.user_id)
+            .flat();
+          const students = await query(
+            `SELECT id, username, name, surname FROM users WHERE id IN (${users_ids_array.map(() => '?').join(',')}) AND role = "student"`,
+            users_ids_array
+          );
+          if (students.results.length === 0) {
+            res.statusCode = 404;
+            return res.end(JSON.stringify({ error: 'Students not found' }));
+          }
+          return res.end(JSON.stringify(students.results));
+        } catch (error) {
+          console.error('Database query error on get students:', error);
           res.statusCode = 500;
           return res.end(JSON.stringify({ error: 'Internal server error' }));
         }
