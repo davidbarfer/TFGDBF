@@ -43,3 +43,17 @@ Create a practice for the subject.
 ### /subject/:id/practice/:id/groups/create
 
 Create groups for the practice.
+
+## Scripts
+
+### Check for linting issues
+npm run lint
+
+### Fix linting issues automatically
+npm run lint:fix
+
+### Format code with Prettier
+npm run format
+
+### Check if code is properly formatted
+npm run format:check

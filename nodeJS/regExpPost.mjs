@@ -1,4 +1,4 @@
-export async function checkPostPracticeCreate(url) {
+export function checkPostPracticeCreate(url) {
   const regex = /^\/subject\/\d+\/create$/;
   if (regex.test(url)) {
     const id = url.split('/')[2];
@@ -7,7 +7,7 @@ export async function checkPostPracticeCreate(url) {
   return false;
 }
 
-export async function checkPostPracticeGroupsCreate(url) {
+export function checkPostPracticeGroupsCreate(url) {
   const regex = /^\/subject\/\d+\/practice\/\d+\/groups\/create$/;
   if (regex.test(url)) {
     const subject_id = url.split('/')[2];

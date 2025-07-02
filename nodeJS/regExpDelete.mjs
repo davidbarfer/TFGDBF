@@ -1,4 +1,4 @@
-export async function checkDeleteGroup(url) {
+export function checkDeleteGroup(url) {
   const regex = /^\/group\/\d+$/;
   if (regex.test(url)) {
     const id = url.split('/').pop();
