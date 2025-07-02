@@ -21,7 +21,6 @@ export async function getSubjectsStudents(token: string, subject_id: string) {
             },
         }
     );
-    console.log('Stundets', response)
     if(!response.ok) {
         const errorText = await response.json();
         throw new Error(`Error ${response.status}: ${errorText.error}`);
