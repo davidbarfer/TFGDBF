@@ -17,21 +17,21 @@ if (token) {
   }
 }
 const { id } = Astro.params;
-const subject = await getSubject(id);
+const subject = await getSubject(id as string);
 if (subject === null) {
   return Astro.redirect('/404');
 }
-let students = await getSubjectsStudents(token, id);
+let students = await getSubjectsStudents(token as string, id as string);
 if (students === null) {
   students = [];
 }
-let practices = await getPractices(token, id);
+let practices = await getPractices(token as string, id as string);
 if (practices === null) {
   practices = [];
 }
 // Replace the forEach with Promise.all and map
 practices = await Promise.all(practices.map(async (practice: any) => {
-  const groups = await getGroups(token, id, practice.id);
+  const groups = await getGroups(token as string, id as string, practice.id as string);
   if(groups && Array.isArray(groups)) {
     return {
       ...practice,
