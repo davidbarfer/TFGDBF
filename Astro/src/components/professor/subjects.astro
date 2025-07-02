@@ -1,8 +1,17 @@
 ---
+import Error from "@/components/Error.astro";
 import { getSubjects } from "@/utils/professor.ts";
 const { token } = Astro.props;
-const subjects = await getSubjects(token);
+let subjects = [];
+let error = '';
+try {
+  subjects = await getSubjects(token);
+}
+catch (err : any) {
+  error = err.message;
+}
 ---
+{error ? (<Error error={error} />) : (
 <section>
   <table>
     <thead>
@@ -23,7 +32,7 @@ const subjects = await getSubjects(token);
     </tbody>
   </table>
 </section>
-
+)}
 <style>
   section {
     display: flex;

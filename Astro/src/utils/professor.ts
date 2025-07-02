@@ -7,6 +7,10 @@ export async function getSubjects(token: string) {
             },
         }
     );
+    if(!response.ok) {
+        const errorText = await response.json();
+        throw new Error(`Error ${response.status}: ${errorText.error}`);
+    }
     return response.json();
 }
 export async function getPractices(token: string, subject_id: string) {
@@ -17,6 +21,10 @@ export async function getPractices(token: string, subject_id: string) {
             },
         }
     );
+    if(!response.ok) {
+        const errorText = await response.json();
+        throw new Error(`Error ${response.status}: ${errorText.error}`);
+    }
     return response.json();
 }
 export async function getGroups(token: string, subject_id: string, practice_id: string) {
@@ -37,6 +45,10 @@ export async function getGroup(token: string, group_id: string) {
             },
         }
     );
+    if(!response.ok) {
+        const errorText = await response.json();
+        throw new Error(`Error ${response.status}: ${errorText.error}`);
+    }
     return response.json();
 }
 export async function deleteGroup(token: string, group_id: string) {
@@ -46,8 +58,12 @@ export async function deleteGroup(token: string, group_id: string) {
             headers: {
                 'Authorization': token,
             },
-        }
+        }   
     );
+    if(!response.ok) {
+        const errorText = await response.json();
+        throw new Error(`Error ${response.status}: ${errorText.error}`);
+    }
     return response.json();
 }
 export async function createPractice(token:string, subject_id:string, practice_data: { name: string, description: string, deadline: string}) {
@@ -61,6 +77,10 @@ export async function createPractice(token:string, subject_id:string, practice_d
             body: JSON.stringify(practice_data),
         }
     );
+    if(!response.ok) {
+        const errorText = await response.json();
+        throw new Error(`Error ${response.status}: ${errorText.error}`);
+    }
     return response.json();
 }
 export async function createGroups(token:string, subject_id:string, group_data: {practice_id:string, group_name: string, max_participants: number, group_date: string, start_time: string, end_time: string}) {
@@ -74,5 +94,9 @@ export async function createGroups(token:string, subject_id:string, group_data: 
             body: JSON.stringify(group_data),
         }
     );
+    if(!response.ok) {
+        const errorText = await response.json();
+        throw new Error(`Error ${response.status}: ${errorText.error}`);
+    }
     return response.json();
 }
