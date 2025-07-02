@@ -7,6 +7,15 @@ export function checkGetSubject(url) {
   return false;
 }
 
+export function checkGetSubjectStudents(url) {
+  const regex = /^\/subject\/\d+\/students$/;
+  if (regex.test(url)) {
+    const id = url.split('/')[2];
+    return id;
+  }
+  return false;
+}
+
 export function checkGetSubjectPractices(url) {
   const regex = /^\/subject\/\d+\/practices$/;
   if (regex.test(url)) {

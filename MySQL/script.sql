@@ -128,6 +128,8 @@ INSERT INTO practice_groups (practice_id, name, max_participants, practice_group
 (2, 1, 10, '2025-08-18', '08:00:00', '10:00:00');
 
 INSERT INTO users_subjects (user_id, subject_id) VALUES
+(2, 1),
+(2, 2),
 (3, 1),
 (3, 2);
 

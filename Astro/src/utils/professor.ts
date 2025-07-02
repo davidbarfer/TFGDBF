@@ -13,6 +13,21 @@ export async function getSubjects(token: string) {
     }
     return response.json();
 }
+export async function getSubjectsStudents(token: string, subject_id: string) {
+    const response = await fetch('http://localhost:1234/subject/' + subject_id + '/students',
+        {
+            headers: {
+                'Authorization': token,
+            },
+        }
+    );
+    console.log('Stundets', response)
+    if(!response.ok) {
+        const errorText = await response.json();
+        throw new Error(`Error ${response.status}: ${errorText.error}`);
+    }
+    return response.json();
+}
 export async function getPractices(token: string, subject_id: string) {
     const response = await fetch('http://localhost:1234/subject/' + subject_id + '/practices',
         {

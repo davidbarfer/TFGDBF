@@ -10,6 +10,10 @@ Returns all subjects of the professor.
 
 Returns a subject of the professor.
 
+### /professor/subject/:id/students
+
+Returns all students of the subject.
+
 ### /professor/subject/:id/practices
 
 Returns all practices of the subject.
