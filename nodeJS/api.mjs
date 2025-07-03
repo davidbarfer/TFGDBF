@@ -13,7 +13,7 @@ import {
   checkPostPracticeCreate,
   checkPostPracticeGroupsCreate,
 } from './regExpPost.mjs';
-import { checkDeleteGroup } from './regExpDelete.mjs';
+import { checkDeleteGroup, checkDeleteStudentGroup } from './regExpDelete.mjs';
 // CORS headers configuration
 const corsHeaders = {
   'Access-Control-Allow-Origin': `${process.env.FRONTEND_URL}`, // Your frontend URL
@@ -47,6 +47,7 @@ export const processRequest = async (req, res) => {
   let group_url = false;
   let students_url = false;
   let students_group_url = false;
+  let student_group_url = false;
   switch (method) {
     case 'GET':
       subject_url = checkGetSubject(url);
@@ -533,6 +534,7 @@ export const processRequest = async (req, res) => {
       break;
     case 'DELETE':
       group_url = checkDeleteGroup(url);
+      student_group_url = checkDeleteStudentGroup(url);
       if (group_url) {
         try {
           await authenticate(req, res);
@@ -548,6 +550,29 @@ export const processRequest = async (req, res) => {
           } else {
             res.statusCode = 404;
             return res.end(JSON.stringify({ error: 'Group not found' }));
+          }
+        } catch (error) {
+          console.error('Database query error:', error);
+          res.statusCode = 500;
+          return res.end(JSON.stringify({ error: 'Internal server error' }));
+        }
+      } else if(student_group_url){
+        try {
+          await authenticate(req, res);
+          const result = await query(
+            'DELETE FROM practice_groups_users WHERE group_id = ? AND user_id = ?',
+            [student_group_url.group_id, student_group_url.student_id]
+          );
+          if (result.results.affectedRows > 0) {
+            res.statusCode = 200;
+            return res.end(
+              JSON.stringify({ message: 'Student deleted from group successfully' })
+            );
+          } else {
+            res.statusCode = 404;
+            return res.end(
+              JSON.stringify({ error: 'Student not found in group' })
+            );
           }
         } catch (error) {
           console.error('Database query error:', error);
