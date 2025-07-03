@@ -27,5 +27,20 @@ BEGIN
   DELETE FROM practice_groups_users WHERE group_id = OLD.id;
 END//
 
+CREATE TRIGGER delete_user_group
+AFTER DELETE ON practice_groups_users
+FOR EACH ROW
+BEGIN
+  UPDATE practice_groups SET current_participants = current_participants - 1 WHERE id = OLD.group_id;
+END//
+
+CREATE TRIGGER insert_user_group
+AFTER INSERT ON practice_groups_users
+FOR EACH ROW
+BEGIN
+  UPDATE practice_groups SET current_participants = current_participants + 1 WHERE id = NEW.group_id;
+END//
+
+
 -- Reset delimiter back to default
 DELIMITER ;
