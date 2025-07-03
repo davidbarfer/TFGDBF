@@ -15,20 +15,6 @@ let practices = await getPractices(token as string, subject?.id as string);
 if (practices === null) {
   practices = [];
 }
-// Replace the forEach with Promise.all and map
-// practices = await Promise.all(practices.map(async (practice: any) => {
-//   const groups = await getGroups(token as string, subject?.id as string, practice.id as string);
-//   if(groups && Array.isArray(groups)) {
-//     return {
-//       ...practice,
-//       groups: groups
-//     };
-//   }
-//   return {
-//     ...practice,
-//     groups: []
-//   };
-// }));
 ---
   <div>
     <section class="subject-info">
@@ -38,6 +24,9 @@ if (practices === null) {
         <p>Titulación: {subject?.degree}</p>
       </div>
     </section>
+    <section class="actions">
+      <button><a href="#">Apuntarme a un Grupo</a></button>
+    </section>
     <section class="practice">
       <h1>Prácticas</h1>
       <table>
@@ -46,8 +35,8 @@ if (practices === null) {
             <th>Nombre</th>
             <th>Descripción</th>
             <th>Fecha de entrega</th>
-            <th>Grupos</th>
-            <th>Entregas</th>
+            <th>Grupo</th>
+            <th>Entrega</th>
           </tr>
         </thead>
         <tbody>
@@ -56,8 +45,8 @@ if (practices === null) {
               <td>{practice.name}</td>
               <td>{practice.description}</td>
               <td>{practice.deadline}</td>
-              {/* <td><div class="groups-table">{practice.groups.map((group: any) => <a href={`/asignaturas/${subject?.id}/grupos/${group.id}`}>{group.name}</a>)}</div></td> */}
-              <td>Ver Entregas (TODO)</td>
+              <td>Ver Grupo (TODO)</td>
+              <td>Ver Entrega (TODO)</td>
             </tr>
           ))}
         </tbody>
