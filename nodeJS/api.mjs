@@ -57,6 +57,7 @@ export const processRequest = async (req, res) => {
       students_group_url = checkGetGroupStudents(url);
       if (subject_url) {
         try {
+          await authenticate(req, res, true);
           const subject = await query('SELECT * FROM subject WHERE id = ?', [
             subject_url,
           ]);
@@ -72,7 +73,7 @@ export const processRequest = async (req, res) => {
         }
       } else if (practices_url) {
         try {
-          await authenticate(req, res);
+          await authenticate(req, res, true);
           const practices = await query(
             'SELECT * FROM practice WHERE subject_id = ?',
             [practices_url]
