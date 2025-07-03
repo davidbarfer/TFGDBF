@@ -1,10 +1,11 @@
 ---
 import Layout from "@/layouts/Layout.astro";
+import SubjectProffesor from "@/components/subjects/subjectProffesor.astro";
+import SubjectStudent from "@/components/subjects/subjectStudent.astro";
 import { getSubject } from "@/utils/public";
-import { getPractices, getGroups, getSubjectsStudents } from "@/utils/professor";
+import { roles } from "@/consts/users";
 import jwt from 'jsonwebtoken'
 import { parse } from 'cookie';
-import { ContentSchemaContainsSlugError } from "node_modules/astro/dist/core/errors/errors-data";
 const cookies = parse(Astro.request.headers.get('cookie') || '');
 const token = cookies.token;
 const secret = import.meta.env.JWT_SECRET;
@@ -17,94 +18,21 @@ if (token) {
   }
 }
 const { id } = Astro.params;
-const subject = await getSubject(id as string);
+const subject = await getSubject(id as string, token as string);
 if (subject === null) {
   return Astro.redirect('/404');
 }
-let students = await getSubjectsStudents(token as string, id as string);
-if (students === null) {
-  students = [];
-}
-let practices = await getPractices(token as string, id as string);
-if (practices === null) {
-  practices = [];
-}
-// Replace the forEach with Promise.all and map
-practices = await Promise.all(practices.map(async (practice: any) => {
-  const groups = await getGroups(token as string, id as string, practice.id as string);
-  if(groups && Array.isArray(groups)) {
-    return {
-      ...practice,
-      groups: groups
-    };
-  }
-  return {
-    ...practice,
-    groups: []
-  };
-}));
 ---
 <Layout>
   <div>
-    <section class="subject-info">
-      <h1>{subject?.name}</h1>
-      <div>
-        <p>Curso: {subject?.course}</p>
-        <p>Titulación: {subject?.degree}</p>
-      </div>
-    </section>
-    <section class="actions">
-      <button><a href={`/asignaturas/${id}/create`}>Crear prácticas</a></button>
-      <button><a href={`/asignaturas/${id}/grupos/create`}>Crear grupos</a></button>
-    </section>
-    <section class="practice">
-      <h1>Prácticas</h1>
-      <table>
-        <thead>
-          <tr>
-            <th>Nombre</th>
-            <th>Descripción</th>
-            <th>Fecha de entrega</th>
-            <th>Grupos</th>
-            <th>Entregas</th>
-          </tr>
-        </thead>
-        <tbody>
-          {practices.map((practice: any) => (
-            <tr>
-              <td>{practice.name}</td>
-              <td>{practice.description}</td>
-              <td>{practice.deadline}</td>
-              <td><div class="groups-table">{practice.groups.map((group: any) => <a href={`/asignaturas/${id}/grupos/${group.id}`}>{group.name}</a>)}</div></td>
-              <td>Ver Entregas (TODO)</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </section>
-    <section class="students">
-      <h1>Alumnos</h1>
-      <table>
-        <thead>
-          <tr>
-            <th>Nombre de Usuario (DNI)</th>
-            <th>Nombre</th>
-            <th>Apellidos</th>
-            <th>Grupo</th>
-          </tr>
-        </thead>
-        <tbody>
-          {students.map((student: any) => (
-            <tr>
-              <td>{student.username}</td>
-              <td>{student.name}</td>
-              <td>{student.surname}</td>
-              <td><div class="groups-table">{student.groups.map((group_id: any) => <a href={`/asignaturas/${id}/grupos/${group_id}`}>{group_id}</a>)}</div></td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </section>
+    {user?.role === roles.professor || user?.role === roles.admin ? (
+      <SubjectProffesor subject={subject} token={token} />
+    ) : ( user?.role === roles.student ? (
+      <SubjectStudent subject={subject} token={token} />
+    ) : (
+      <p>No tienes permiso para ver esta página</p>
+      <a href="/">Volver al inicio</a>
+    ))}
   </div>
 </Layout>
 

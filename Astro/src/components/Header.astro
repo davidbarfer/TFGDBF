@@ -16,13 +16,12 @@ import { roles } from '@/consts/users';
 		<a href="/login">Iniciar Sesión</a>
 		<a href="/signup">Registrarse</a>
 	)}
-	{user?.role === roles.professor || user?.role === roles.admin ? (
+	{user?.role === roles.admin || user?.role === roles.professor || user?.role === roles.student ? (
 		<a href="/asignaturas">Asignaturas</a>
-	) : (
-		user?.role === roles.student ? (
-			<a href="/practicas">Prácticas</a>
-		) : null
-	) }
+	) : null}
+	{user?.role === roles.admin || user?.role === roles.professor || user?.role === roles.student ? (
+		<a href="/entregas">Entregas</a>
+	) : null}
 </header>
 
 <style>

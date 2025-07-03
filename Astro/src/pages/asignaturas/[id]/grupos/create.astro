@@ -1,6 +1,6 @@
 ---
 import Layout from "@/layouts/Layout.astro"
-import GroupCreate from "@/components/professor/groupCreate.astro"
+import GroupCreate from "@/components/groups/groupCreate.astro";
 import jwt from 'jsonwebtoken'
 import { parse } from 'cookie';
 import { roles } from "@/consts/users";
@@ -17,7 +17,7 @@ if (token) {
     console.warn("Invalid or expired token", err);
   }
 }
-const subject = await getSubject(id);
+const subject = await getSubject(id as string, token as string);
 ---
 
 <Layout>
