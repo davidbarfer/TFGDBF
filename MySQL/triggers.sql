@@ -35,10 +35,28 @@ BEGIN
 END//
 
 CREATE TRIGGER insert_user_group
-AFTER INSERT ON practice_groups_users
+BEFORE INSERT ON practice_groups_users
 FOR EACH ROW
 BEGIN
-  UPDATE practice_groups SET current_participants = current_participants + 1 WHERE id = NEW.group_id;
+  DECLARE current_count INT;
+  DECLARE max_count INT;
+  
+  -- Get current and max participants for the group
+  SELECT current_participants, max_participants 
+  INTO current_count, max_count
+  FROM practice_groups 
+  WHERE id = NEW.group_id;
+  
+  -- Check if group is full
+  IF current_count >= max_count THEN
+    SIGNAL SQLSTATE '45000' 
+    SET MESSAGE_TEXT = 'Cannot add user to group: group is already full';
+  ELSE
+    -- Increment the participant count
+    UPDATE practice_groups 
+    SET current_participants = current_participants + 1 
+    WHERE id = NEW.group_id;
+  END IF;
 END//
 
 
