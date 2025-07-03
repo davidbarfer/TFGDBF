@@ -16,7 +16,7 @@ import {
 import { checkDeleteGroup } from './regExpDelete.mjs';
 // CORS headers configuration
 const corsHeaders = {
-  'Access-Control-Allow-Origin': 'http://localhost:4321', // Your frontend URL
+  'Access-Control-Allow-Origin': `${process.env.FRONTEND_URL}`, // Your frontend URL
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
   'Access-Control-Allow-Credentials': 'true', // Crucial for cookies
@@ -394,7 +394,7 @@ export const processRequest = async (req, res) => {
                   process.env.JWT_SECRET,
                   {
                     expiresIn: '1h',
-                    issuer: 'http://localhost:1234',
+                    issuer: `${process.env.BACKEND_URL}`,
                   }
                 );
 
@@ -402,7 +402,7 @@ export const processRequest = async (req, res) => {
                 const headers = {
                   'Content-Type': 'application/json',
                   'Set-Cookie': `token=${token}; HttpOnly; Secure; SameSite=None; Max-Age=3600; Path=/`,
-                  'Access-Control-Allow-Origin': 'http://localhost:4321',
+                  'Access-Control-Allow-Origin': `${process.env.FRONTEND_URL}`,
                   'Access-Control-Allow-Credentials': 'true',
                 };
 
