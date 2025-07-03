@@ -9,7 +9,9 @@ COLLATE utf8mb4_unicode_ci;
 
 -- Use the database
 USE doctus_lite;
-
+-- Drop Triggers if exist
+DROP TRIGGER IF EXISTS create_group;
+DROP TRIGGER IF EXISTS delete_group;
 -- Drop tables if they exist (for fresh start)
 DROP TABLE IF EXISTS users_subjects;
 DROP TABLE IF EXISTS practice_groups_users;
@@ -107,6 +109,38 @@ CREATE TABLE IF NOT EXISTS practice_groups_users (
   FOREIGN KEY (group_id) REFERENCES practice_groups(id),
   FOREIGN KEY (user_id) REFERENCES users(id)
 );
+
+-- Change delimiter to allow for multiple statements in triggers
+DELIMITER //
+
+-- Create security triggers
+CREATE TRIGGER create_group
+BEFORE INSERT ON practice_groups
+FOR EACH ROW
+BEGIN
+  DECLARE max_group_name NUMERIC;
+  
+  -- Check if a group with the same name already exists for this practice
+  IF EXISTS (SELECT 1 FROM practice_groups WHERE practice_id = NEW.practice_id AND name = NEW.name) THEN
+    -- Find the maximum group name for this practice and increment it by 1
+    SELECT COALESCE(MAX(name), 0) + 1 INTO max_group_name
+    FROM practice_groups
+    WHERE practice_id = NEW.practice_id;
+    
+    -- Set the new group name to the incremented value
+    SET NEW.name = max_group_name;
+  END IF;
+END//
+
+CREATE TRIGGER delete_group
+BEFORE DELETE ON practice_groups
+FOR EACH ROW
+BEGIN
+  DELETE FROM practice_groups_users WHERE group_id = OLD.id;
+END//
+
+-- Reset delimiter back to default
+DELIMITER ;
 
 -- Insert sample data
 INSERT INTO users (username, password, password_salt, role, name, surname) VALUES
