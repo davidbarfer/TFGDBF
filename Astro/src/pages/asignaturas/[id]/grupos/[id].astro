@@ -30,7 +30,7 @@ const students = await getGroupStudents(token, id);
       <p>Hora de fin: {group?.end_time}</p>
     </section>
     <section class="group-actions">
-      <button>Editar</button>
+      <a href={`/asignaturas/${id}/grupos/${id}/edit`}><button>Editar</button></a>
       <button id="deleteGroupBtn" data-id={id} data-token={token}>Eliminar</button>
     </section>
     <section>
@@ -62,6 +62,10 @@ const students = await getGroupStudents(token, id);
 </Layout>
 
 <style>
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
   .group-info, .group-actions {
     display: flex;
     flex-direction: row;

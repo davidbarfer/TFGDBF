@@ -44,8 +44,12 @@ practices = await Promise.all(practices.map(async (practice: any) => {
       </div>
     </section>
     <section class="actions">
-      <button><a href={`/asignaturas/${subject?.id}/create`}>Crear prácticas</a></button>
-      <button><a href={`/asignaturas/${subject?.id}/grupos/create`}>Crear grupos</a></button>
+      <a href={`/asignaturas/${subject?.id}/create`}>
+        <button>Crear prácticas</button>
+      </a>
+      <a href={`/asignaturas/${subject?.id}/grupos/create`}>
+        <button>Crear grupos</button>
+      </a>
     </section>
     <section class="practice">
       <h1>Prácticas</h1>
