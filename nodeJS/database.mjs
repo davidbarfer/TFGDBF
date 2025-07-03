@@ -32,7 +32,7 @@ export const authProviders = {
   saml: 'smal',
 };
 
-export async function authenticate(req, res) {
+export async function authenticate(req, res, student = false) {
   try {
     if (!req.headers.authorization) {
       res.statusCode = 401;
@@ -45,7 +45,16 @@ export async function authenticate(req, res) {
     }
     const token = req.headers.authorization;
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    if (decoded.role !== 'professor' && decoded.role !== 'admin') {
+    if (decoded.role !== 'professor' && decoded.role !== 'admin' && !student) {
+      res.statusCode = 401;
+      return res.end(JSON.stringify({ error: 'Unauthorized' }));
+    }
+    if (
+      student &&
+      decoded.role !== 'student' &&
+      decoded.role !== 'professor' &&
+      decoded.role !== 'admin'
+    ) {
       res.statusCode = 401;
       return res.end(JSON.stringify({ error: 'Unauthorized' }));
     }

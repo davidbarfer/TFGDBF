@@ -1,6 +1,5 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import Subjects from "@/components/subjects/subjects.astro";
 import jwt from 'jsonwebtoken'
 import { parse } from 'cookie';
 import { roles } from "@/consts/users";
@@ -20,9 +19,8 @@ if (token) {
 
 <Layout>
   <section>
-
-    {user?.role === roles.admin || user?.role === roles.professor || user?.role === roles.student ? (
-      <Subjects token={token as string} />
+    {user?.role === roles.student || user?.role === roles.admin ? (
+      <p>TODO: Tabla con las entregas de cada práctica</p>
     ) : (
       <p>No tienes permiso para ver esta página</p>
       <a href="/">Volver al inicio</a>

@@ -192,9 +192,9 @@ export const processRequest = async (req, res) => {
         }
       } else {
         switch (url) {
-          case '/professor/subjects':
+          case '/subjects':
             try {
-              const decoded = await authenticate(req, res);
+              const decoded = await authenticate(req, res, true);
               const subjects_id = await query(
                 'SELECT subject_id FROM users_subjects WHERE user_id = ?',
                 [decoded.userId]

@@ -4,7 +4,7 @@
 
 | URL                                 | Description                                           |
 | :------------------------           | :----------------------------------------------- |
-| `/professor/subjects`               | Returns all subjects of the professor                            |
+| `/subjects`               | Returns all subjects of a user                            |
 | `/subject/:id`                      | Returns a subject of the professor      |
 | `/subject/:id/students`             | Returns all students of the subject          |
 | `/subject/:id/practices`            | Returns all practices of the subject     |
