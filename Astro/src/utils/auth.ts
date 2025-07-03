@@ -1,5 +1,6 @@
+import { API_URL } from "@/utils/enviroment";
 export async function login(data: { username: string; password: string }){
-  const response = await fetch("http://localhost:1234/login", {
+  const response = await fetch(`${API_URL}/login`, {
     method: "POST",
     credentials: "include",
     headers: {
@@ -14,7 +15,7 @@ export async function login(data: { username: string; password: string }){
   }
 }
 export function logout() {
-  fetch('http://localhost:1234/logout', {
+  fetch(`${API_URL}/logout`, {
     method: 'POST',
     credentials: 'include',
   })
@@ -26,7 +27,7 @@ export function logout() {
     });
 }
 export async function signup(data: { username: string; password: string; role: string }) {
-  const response = await fetch('http://localhost:1234/signup', {
+  const response = await fetch(`${API_URL}/signup`, {
     method: 'POST',
     credentials: 'include',
     headers: {

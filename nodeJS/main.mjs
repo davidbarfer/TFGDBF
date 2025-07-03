@@ -3,6 +3,8 @@ import { processRequest } from './api.mjs';
 
 const server = http.createServer(processRequest);
 
-server.listen(1234, () => {
-  console.log('server listening on port http://localhost:1234');
+server.listen(Number(process.env.BACKEND_PORT), () => {
+  console.log(
+    `server listening on port http://localhost:${process.env.BACKEND_PORT}`
+  );
 });
