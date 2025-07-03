@@ -1,7 +1,7 @@
 ---
-import { getPractices } from "@/utils/professor";
+import { getPractices } from "@/utils/public";
 const { id, token, subject } = Astro.props;
-const practices = await getPractices(token, id);
+const practices = await getPractices(token as string, id as string);
 ---
 <section>
   <h1>Crear grupo</h1>
