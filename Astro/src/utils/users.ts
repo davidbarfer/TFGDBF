@@ -65,3 +65,20 @@ export async function getGroups(token: string, subject_id: string, practice_id: 
   );
   return response.json();
 }
+export async function getStudentGroups(token: string, user_id: string) {
+  const response = await fetch(`${API_URL}/student/${user_id}/groups`,
+      {
+          headers: {
+              'Authorization': token,
+          },
+      }
+  );
+  if(response.status === 404) {
+    return [];
+  }
+  if(!response.ok) {
+      const errorText = await response.json();
+      throw new Error(`Error ${response.status}: ${errorText.error}`);
+  }
+  return response.json();
+}

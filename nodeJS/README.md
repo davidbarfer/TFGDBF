@@ -12,6 +12,7 @@
 | `/practice/:id`                     | Returns a practice |
 | `/group/:id`                        | Returns a group |
 | `/group/:id/students`               | Returns all students of the group |
+| `/student/:id/groups`               | Returns all groups of the student |
 | `/users`                            | Returns all users                     |
 
 ## Endpoints POST
@@ -29,6 +30,7 @@
 | URL                       | Description                                           |
 | :------------------------ | :----------------------------------------------- |
 | `/group/:id`              | Delete a group                            |
+| `/group/:id/student/:id`  | Delete a student from a group |
 
 ## Scripts
 

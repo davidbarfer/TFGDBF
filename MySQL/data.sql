@@ -25,7 +25,8 @@ INSERT INTO users_subjects (user_id, subject_id) VALUES
 (2, 2),
 (3, 1),
 (3, 2),
-(4, 2);
+(4, 2),
+(4, 1);
 
 INSERT INTO practice_groups_users (group_id, user_id) VALUES
 (1, 2),

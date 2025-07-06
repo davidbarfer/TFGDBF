@@ -9,6 +9,7 @@ import {
   getGroupStudents,
   getSubjectStudents,
   getPractice,
+  getStudentGroups,
 } from './regExpGet.mjs';
 import { postPracticeCreate, postPracticeGroupsCreate } from './regExpPost.mjs';
 import { deleteGroup, deleteStudentGroup } from './regExpDelete.mjs';
@@ -47,6 +48,7 @@ export const processRequest = async (req, res) => {
   let group_id_students = false;
   let group_id_student_id = false;
   let practice_id = false;
+  let student_id_groups = false;
   switch (method) {
     case 'GET':
       subject_id = getSubject(url);
@@ -56,6 +58,7 @@ export const processRequest = async (req, res) => {
       subject_id_students = getSubjectStudents(url);
       group_id_students = getGroupStudents(url);
       practice_id = getPractice(url);
+      student_id_groups = getStudentGroups(url);
       if (subject_id) {
         try {
           await authenticate(req, res, true);
@@ -208,6 +211,31 @@ export const processRequest = async (req, res) => {
           return res.end(JSON.stringify(practice.results[0]));
         } catch (error) {
           console.error('Database query error on get practice:', error);
+          res.statusCode = 500;
+          return res.end(JSON.stringify({ error: 'Internal server error' }));
+        }
+      } else if (student_id_groups) {
+        try {
+          await authenticate(req, res, true);
+          const groups_ids = await query(
+            'SELECT group_id FROM practice_groups_users WHERE user_id = ?',
+            [student_id_groups]
+          );
+          if (groups_ids.results.length === 0) {
+            res.statusCode = 404;
+            return res.end(JSON.stringify({ error: 'Groups not found' }));
+          }
+          const groups = await query(
+            'SELECT * FROM practice_groups WHERE id IN (?)',
+            [groups_ids.results.map(group => group.group_id)]
+          );
+          if (groups.results.length === 0) {
+            res.statusCode = 404;
+            return res.end(JSON.stringify({ error: 'Groups not found' }));
+          }
+          return res.end(JSON.stringify(groups.results));
+        } catch (error) {
+          console.error('Database query error on get groups:', error);
           res.statusCode = 500;
           return res.end(JSON.stringify({ error: 'Internal server error' }));
         }

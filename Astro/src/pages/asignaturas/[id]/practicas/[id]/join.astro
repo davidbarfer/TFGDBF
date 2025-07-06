@@ -2,7 +2,7 @@
 import Layout from "@/layouts/Layout.astro";
 import jwt from 'jsonwebtoken'
 import { parse } from 'cookie';
-import { getPractice, getGroups } from "@/utils/users";
+import { getPractice, getGroups, getStudentGroups } from "@/utils/users";
 const { id } = Astro.params;
 const cookies = parse(Astro.request.headers.get('cookie') || '');
 const token = cookies.token;
@@ -23,6 +23,17 @@ if(groups && Array.isArray(groups)) {
     groups: groups
   };
 }
+const userGroups = await getStudentGroups(token as string, user?.userId as string);
+// Create a Set of group ids for quick lookup
+const groupIds = new Set(groups.map((g: any) => g.id));
+
+// Find matching userGroup ids
+const matchingIds = userGroups
+  .map((ug: any) => ug.id)
+  .filter((id: any) => groupIds.has(id));
+
+// Result
+const isEnrolled = matchingIds.length > 0;
 ---
 <Layout>
 <div>
@@ -52,7 +63,9 @@ if(groups && Array.isArray(groups)) {
             <td>{group.start_time} - {group.end_time}</td>
             <td>{Number(group.current_participants)} / {Number(group.max_participants)}</td>
             <td>
-              {Number(group.current_participants) < Number(group.max_participants) ? (
+              {isEnrolled && Number(group.id) === Number(matchingIds[0]) ? (
+                <button disabled>Ya estás inscrito</button>
+              ) : Number(group.current_participants) < Number(group.max_participants) ? (
                 <button>Inscribirme</button>
               ) : (
                 <button disabled>Grupo lleno</button>
