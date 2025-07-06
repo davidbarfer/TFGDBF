@@ -40,7 +40,7 @@ export const processRequest = async (req, res) => {
   // Set respose
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   let subject_id = false;
-  let practices_url = false;
+  let subject_id_practices = false;
   let groups_url = false;
   let group_url = false;
   let students_url = false;
@@ -50,7 +50,7 @@ export const processRequest = async (req, res) => {
   switch (method) {
     case 'GET':
       subject_id = getSubject(url);
-      practices_url = getSubjectPractices(url);
+      subject_id_practices = getSubjectPractices(url);
       groups_url = getSubjectPracticesGroups(url);
       group_url = getGroup(url);
       students_url = getSubjectStudents(url);
@@ -72,12 +72,12 @@ export const processRequest = async (req, res) => {
           res.statusCode = 500;
           return res.end(JSON.stringify({ error: 'Internal server error' }));
         }
-      } else if (practices_url) {
+      } else if (subject_id_practices) {
         try {
           await authenticate(req, res, true);
           const practices = await query(
             'SELECT * FROM practice WHERE subject_id = ?',
-            [practices_url]
+            [subject_id_practices]
           );
           if (practices.results.length === 0) {
             res.statusCode = 404;
@@ -246,9 +246,9 @@ export const processRequest = async (req, res) => {
         }
       }
     case 'POST':
-      subject_url = postPracticeCreate(url);
+      subject_id_practices = postPracticeCreate(url);
       groups_url = postPracticeGroupsCreate(url);
-      if (subject_url) {
+      if (subject_id_practices) {
         try {
           await authenticate(req, res);
           let body = '';
@@ -272,7 +272,12 @@ export const processRequest = async (req, res) => {
 
               const practice = await query(
                 'INSERT INTO practice (subject_id, name, description, deadline) VALUES (?, ?, ?, ?)',
-                [subject_url, data.name, data.description, data.deadline]
+                [
+                  subject_id_practices,
+                  data.name,
+                  data.description,
+                  data.deadline,
+                ]
               );
               return res.end(JSON.stringify(practice.results));
             } catch (error) {
