@@ -11,7 +11,11 @@ import {
   getPractice,
   getStudentGroups,
 } from './regExpGet.mjs';
-import { postPracticeCreate, postPracticeGroupsCreate } from './regExpPost.mjs';
+import {
+  postPracticeCreate,
+  postPracticeGroupsCreate,
+  postGroupStudent,
+} from './regExpPost.mjs';
 import { deleteGroup, deleteStudentGroup } from './regExpDelete.mjs';
 // CORS headers configuration
 const corsHeaders = {
@@ -279,6 +283,7 @@ export const processRequest = async (req, res) => {
     case 'POST':
       subject_id_practices = postPracticeCreate(url);
       subject_id_practices_id_groups = postPracticeGroupsCreate(url);
+      group_id_student_id = postGroupStudent(url);
       if (subject_id_practices) {
         try {
           await authenticate(req, res);
@@ -362,6 +367,42 @@ export const processRequest = async (req, res) => {
               );
               res.statusCode = 201;
               return res.end(JSON.stringify(group.results));
+            } catch (error) {
+              console.error('Database query error on create group:', error);
+              res.statusCode = 500;
+              return res.end(
+                JSON.stringify({ error: 'Internal server error' })
+              );
+            }
+          });
+        } catch {
+          res.statusCode = 500;
+          return res.end(JSON.stringify({ error: 'Internal server error' }));
+        }
+      } else if (group_id_student_id) {
+        try {
+          await authenticate(req, res, true);
+          let body = '';
+          req.on('data', chunk => {
+            body += chunk.toString();
+          });
+          req.on('end', async () => {
+            try {
+              const data = JSON.parse(body);
+              if (!data.group_id || !data.student_id) {
+                res.statusCode = 400;
+                return res.end(
+                  JSON.stringify({
+                    error: 'Group ID and student ID are required',
+                  })
+                );
+              }
+              const result = await query(
+                'INSERT INTO practice_groups_users (group_id, user_id) VALUES (?, ?)',
+                [data.group_id, data.student_id]
+              );
+              res.statusCode = 201;
+              return res.end(JSON.stringify(result.results));
             } catch (error) {
               console.error('Database query error on create group:', error);
               res.statusCode = 500;

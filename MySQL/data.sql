@@ -30,12 +30,8 @@ INSERT INTO users_subjects (user_id, subject_id) VALUES
 
 INSERT INTO practice_groups_users (group_id, user_id) VALUES
 (1, 2),
-(3, 2),
-(2, 4),
-(3, 4);
-INSERT INTO practice_groups_users (group_id, user_id) VALUES
-(3, 2),
-(3, 4);
+(2, 4);
+
 
 -- Show tables
 SHOW TABLES;
