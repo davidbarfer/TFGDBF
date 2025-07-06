@@ -63,8 +63,12 @@ const isEnrolled = matchingIds.length > 0;
             <td>{group.start_time} - {group.end_time}</td>
             <td>{Number(group.current_participants)} / {Number(group.max_participants)}</td>
             <td>
-              {isEnrolled && Number(group.id) === Number(matchingIds[0]) ? (
-                <button disabled>Ya estás inscrito</button>
+              {isEnrolled ? (
+                Number(group.id) === Number(matchingIds[0]) ? (
+                  <button disabled>Inscrito Aquí</button>
+                ) : (
+                  <button disabled>Ya estás inscrito en otro grupo</button>
+                )
               ) : Number(group.current_participants) < Number(group.max_participants) ? (
                 <button class="joinGroupBtn" data-groupId={group.id} data-token={token} data-userId={user?.userId}>Inscribirme</button>
               ) : (
