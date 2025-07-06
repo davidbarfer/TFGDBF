@@ -44,7 +44,7 @@ export const processRequest = async (req, res) => {
   let subject_id_practices_id_groups = false;
   let group_id = false;
   let subject_id_students = false;
-  let students_group_url = false;
+  let group_id_students = false;
   let student_group_url = false;
   let practice_url = false;
   switch (method) {
@@ -54,7 +54,7 @@ export const processRequest = async (req, res) => {
       subject_id_practices_id_groups = getSubjectPracticesGroups(url);
       group_id = getGroup(url);
       subject_id_students = getSubjectStudents(url);
-      students_group_url = getGroupStudents(url);
+      group_id_students = getGroupStudents(url);
       practice_url = getPractice(url);
       if (subject_id) {
         try {
@@ -167,12 +167,12 @@ export const processRequest = async (req, res) => {
           res.statusCode = 500;
           return res.end(JSON.stringify({ error: 'Internal server error' }));
         }
-      } else if (students_group_url) {
+      } else if (group_id_students) {
         try {
           await authenticate(req, res);
           const users_ids = await query(
             'SELECT user_id FROM practice_groups_users WHERE group_id = ?',
-            [students_group_url]
+            [group_id_students]
           );
           if (users_ids.results.length === 0) {
             res.statusCode = 404;
