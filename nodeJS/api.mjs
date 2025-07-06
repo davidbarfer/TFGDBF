@@ -46,7 +46,7 @@ export const processRequest = async (req, res) => {
   let subject_id_students = false;
   let group_id_students = false;
   let student_group_url = false;
-  let practice_url = false;
+  let practice_id = false;
   switch (method) {
     case 'GET':
       subject_id = getSubject(url);
@@ -55,7 +55,7 @@ export const processRequest = async (req, res) => {
       group_id = getGroup(url);
       subject_id_students = getSubjectStudents(url);
       group_id_students = getGroupStudents(url);
-      practice_url = getPractice(url);
+      practice_id = getPractice(url);
       if (subject_id) {
         try {
           await authenticate(req, res, true);
@@ -195,11 +195,11 @@ export const processRequest = async (req, res) => {
           res.statusCode = 500;
           return res.end(JSON.stringify({ error: 'Internal server error' }));
         }
-      } else if (practice_url) {
+      } else if (practice_id) {
         try {
           await authenticate(req, res, true);
           const practice = await query('SELECT * FROM practice WHERE id = ?', [
-            practice_url,
+            practice_id,
           ]);
           if (practice.results.length === 0) {
             res.statusCode = 404;
