@@ -1,0 +1,104 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import jwt from 'jsonwebtoken'
+import { parse } from 'cookie';
+import { getPractice, getGroups, getStudentGroups } from "@/utils/users";
+const { id } = Astro.params;
+const cookies = parse(Astro.request.headers.get('cookie') || '');
+const token = cookies.token;
+const secret = import.meta.env.JWT_SECRET;
+let user = null;
+if (token) {
+  try {
+    user = jwt.verify(token, secret); // same secret as backend
+  } catch (err) {
+    console.warn("Invalid or expired token", err);
+  }
+}
+let practice = await getPractice(token as string, id as string);
+const groups = await getGroups(token as string, practice.subject_id as string, practice.id as string);
+if(groups && Array.isArray(groups)) {
+  practice = {
+    ...practice,
+    groups: groups
+  };
+}
+const userGroups = await getStudentGroups(token as string, user?.userId as string);
+// Create a Set of group ids for quick lookup
+const groupIds = new Set(groups.map((g: any) => g.id));
+
+// Find matching userGroup ids
+const matchingIds = userGroups
+  .map((ug: any) => ug.id)
+  .filter((id: any) => groupIds.has(id));
+
+// Result
+const isEnrolled = matchingIds.length > 0;
+---
+<Layout>
+<div>
+    <section>
+      <h1>Práctica {practice?.name}</h1>
+      <div>
+        <p>{practice?.description}</p>
+        <p>{practice?.deadline}</p>
+      </div>
+    </section>
+    <section>
+      <table>
+        <thead>
+          <tr>
+            <th>Grupo</th>
+            <th>Fecha</th>
+            <th>Horario</th>
+            <th>Alumnos</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {practice?.groups.map((group: any) => (
+            <tr>
+            <td>{group.name}</td>
+            <td>{group.practice_group_date}</td>
+            <td>{group.start_time} - {group.end_time}</td>
+            <td>{Number(group.current_participants)} / {Number(group.max_participants)}</td>
+            <td>
+              {isEnrolled ? (
+                Number(group.id) === Number(matchingIds[0]) ? (
+                  <button disabled>Inscrito Aquí</button>
+                ) : (
+                  <button disabled>Ya estás inscrito en otro grupo</button>
+                )
+              ) : Number(group.current_participants) < Number(group.max_participants) ? (
+                <button class="joinGroupBtn" data-groupId={group.id} data-token={token} data-userId={user?.userId}>Inscribirme</button>
+              ) : (
+                <button disabled>Grupo lleno</button>
+              )}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </section>
+</div>
+</Layout>
+
+<script>
+import { addStudentToGroup } from "@/utils/users";
+const buttons = document.querySelectorAll('.joinGroupBtn');
+buttons.forEach(button => {
+  button.addEventListener('click', async (event) => {
+    const groupId = event?.target?.dataset.groupid;
+    const token = event?.target?.dataset.token;
+    const userId = event?.target?.dataset.userid;
+    const response = await addStudentToGroup(token as string, groupId as string, userId as string);
+    if(response.error) {
+      alert(response.error);
+    }
+    else {
+      alert('Alumno inscrito');
+      window.location.reload();
+    }
+  });
+});
+</script>

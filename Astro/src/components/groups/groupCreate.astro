@@ -1,5 +1,5 @@
 ---
-import { getPractices } from "@/utils/public";
+import { getPractices } from "@/utils/users";
 const { id, token, subject } = Astro.props;
 const practices = await getPractices(token as string, id as string);
 ---

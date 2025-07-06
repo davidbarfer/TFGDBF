@@ -1,5 +1,5 @@
 ---
-import { getPractices } from "@/utils/public";
+import { getPractices, getStudentGroups } from "@/utils/users";
 import jwt from 'jsonwebtoken'
 const secret = import.meta.env.JWT_SECRET;
 const { subject, token } = Astro.props;
@@ -15,6 +15,7 @@ let practices = await getPractices(token as string, subject?.id as string);
 if (practices === null) {
   practices = [];
 }
+const userGroups = await getStudentGroups(token as string, user?.userId as string);
 ---
   <div>
     <section class="subject-info">
@@ -23,9 +24,6 @@ if (practices === null) {
         <p>Curso: {subject?.course}</p>
         <p>Titulación: {subject?.degree}</p>
       </div>
-    </section>
-    <section class="actions">
-      <a href="#"><button>Apuntarme a un Grupo</button></a>
     </section>
     <section class="practice">
       <h1>Prácticas</h1>
@@ -45,7 +43,12 @@ if (practices === null) {
               <td>{practice.name}</td>
               <td>{practice.description}</td>
               <td>{practice.deadline}</td>
-              <td>Ver Grupo (TODO)</td>
+              <td> {userGroups.find((group: any) => group.practice_id === practice.id) !== undefined ? (
+                <a href={`/asignaturas/${subject?.id}/grupos/${userGroups.find((group: any) => group.practice_id === practice.id)?.id}`}><button>Ver Grupo</button></a>
+              ) : (
+                <a href={`/asignaturas/${subject?.id}/practicas/${practice.id}/join`}><button>Inscribirme</button></a>
+              )}
+              </td>
               <td>Ver Entrega (TODO)</td>
             </tr>
           ))}

@@ -1,4 +1,4 @@
-export function checkDeleteGroup(url) {
+export function deleteGroup(url) {
   const regex = /^\/group\/\d+$/;
   if (regex.test(url)) {
     const id = url.split('/').pop();
@@ -6,7 +6,7 @@ export function checkDeleteGroup(url) {
   }
   return false;
 }
-export function checkDeleteStudentGroup(url) {
+export function deleteStudentGroup(url) {
   const regex = /^\/group\/\d+\/student\/\d+$/;
   if (regex.test(url)) {
     const group_id = url.split('/')[2];

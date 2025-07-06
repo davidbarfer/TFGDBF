@@ -1,4 +1,4 @@
-export function checkGetSubject(url) {
+export function getSubject(url) {
   const regex = /^\/subject\/\d+$/;
   if (regex.test(url)) {
     const id = url.split('/').pop();
@@ -7,7 +7,7 @@ export function checkGetSubject(url) {
   return false;
 }
 
-export function checkGetSubjectStudents(url) {
+export function getSubjectStudents(url) {
   const regex = /^\/subject\/\d+\/students$/;
   if (regex.test(url)) {
     const id = url.split('/')[2];
@@ -16,7 +16,7 @@ export function checkGetSubjectStudents(url) {
   return false;
 }
 
-export function checkGetSubjectPractices(url) {
+export function getSubjectPractices(url) {
   const regex = /^\/subject\/\d+\/practices$/;
   if (regex.test(url)) {
     const id = url.split('/')[2];
@@ -24,8 +24,16 @@ export function checkGetSubjectPractices(url) {
   }
   return false;
 }
+export function getPractice(url) {
+  const regex = /^\/practice\/\d+$/;
+  if (regex.test(url)) {
+    const id = url.split('/').pop();
+    return id;
+  }
+  return false;
+}
 
-export function checkGetSubjectPracticesGroups(url) {
+export function getSubjectPracticesGroups(url) {
   const regex = /^\/subject\/\d+\/practice\/\d+\/groups$/;
   if (regex.test(url)) {
     const subject_id = url.split('/')[2];
@@ -35,7 +43,7 @@ export function checkGetSubjectPracticesGroups(url) {
   return false;
 }
 
-export function checkGetGroup(url) {
+export function getGroup(url) {
   const regex = /^\/group\/\d+$/;
   if (regex.test(url)) {
     const id = url.split('/').pop();
@@ -44,8 +52,17 @@ export function checkGetGroup(url) {
   return false;
 }
 
-export function checkGetGroupStudents(url) {
+export function getGroupStudents(url) {
   const regex = /^\/group\/\d+\/students$/;
+  if (regex.test(url)) {
+    const id = url.split('/')[2];
+    return id;
+  }
+  return false;
+}
+
+export function getStudentGroups(url) {
+  const regex = /^\/student\/\d+\/groups$/;
   if (regex.test(url)) {
     const id = url.split('/')[2];
     return id;

@@ -9,8 +9,10 @@
 | `/subject/:id/students`             | Returns all students of the subject          |
 | `/subject/:id/practices`            | Returns all practices of the subject     |
 | `/subject/:id/practice/:id/groups`  | Return all groups of the practice |
+| `/practice/:id`                     | Returns a practice |
 | `/group/:id`                        | Returns a group |
 | `/group/:id/students`               | Returns all students of the group |
+| `/student/:id/groups`               | Returns all groups of the student |
 | `/users`                            | Returns all users                     |
 
 ## Endpoints POST
@@ -22,12 +24,14 @@
 | `/signup`               | Returns a user          |
 | `/subject/:id/create`   | Create a practice for the subject     |
 | `/subject/:id/practice/:id/groups/create`       | Create groups for the practice |
+| `/group/:id/student/:id`       | Add a student to a group |
 
 ## Endopints DELETE
 
 | URL                       | Description                                           |
 | :------------------------ | :----------------------------------------------- |
 | `/group/:id`              | Delete a group                            |
+| `/group/:id/student/:id`  | Delete a student from a group |
 
 ## Scripts
 

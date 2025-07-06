@@ -13,16 +13,6 @@ export async function getSubjectsStudents(token: string, subject_id: string) {
     }
     return response.json();
 }
-export async function getGroups(token: string, subject_id: string, practice_id: string) {
-    const response = await fetch(`${API_URL}/subject/${subject_id}/practice/${practice_id}/groups`,
-        {
-            headers: {
-                'Authorization': token,
-            },
-        }
-    );
-    return response.json();
-}
 export async function getGroup(token: string, group_id: string) {
     const response = await fetch(`${API_URL}/group/${group_id}`,
         {

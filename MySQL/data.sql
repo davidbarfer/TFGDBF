@@ -18,23 +18,20 @@ INSERT INTO practice (subject_id, name, description, deadline, file_url) VALUES
 INSERT INTO practice_groups (practice_id, name, max_participants, practice_group_date, start_time, end_time) VALUES
 (1, 1, 10, '2025-09-18', '08:00:00', '10:00:00'),
 (1, 2, 15, '2025-09-18', '10:00:00', '12:00:00'),
-(2, 1, 1, '2025-08-18', '08:00:00', '10:00:00');
+(2, 1, 20, '2025-08-18', '08:00:00', '10:00:00');
 
 INSERT INTO users_subjects (user_id, subject_id) VALUES
 (2, 1),
 (2, 2),
 (3, 1),
 (3, 2),
-(4, 2);
+(4, 2),
+(4, 1);
 
 INSERT INTO practice_groups_users (group_id, user_id) VALUES
 (1, 2),
-(2, 2),
-(1, 4),
 (2, 4);
-INSERT INTO practice_groups_users (group_id, user_id) VALUES
-(3, 2),
-(3, 4);
+
 
 -- Show tables
 SHOW TABLES;

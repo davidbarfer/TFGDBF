@@ -2,18 +2,21 @@ import jwt from 'jsonwebtoken';
 import { query, hashPassword, verifyPassword } from './database.mjs';
 import { authProviders, authenticate } from './database.mjs';
 import {
-  checkGetSubject,
-  checkGetSubjectPractices,
-  checkGetSubjectPracticesGroups,
-  checkGetGroup,
-  checkGetGroupStudents,
-  checkGetSubjectStudents,
+  getSubject,
+  getSubjectPractices,
+  getSubjectPracticesGroups,
+  getGroup,
+  getGroupStudents,
+  getSubjectStudents,
+  getPractice,
+  getStudentGroups,
 } from './regExpGet.mjs';
 import {
-  checkPostPracticeCreate,
-  checkPostPracticeGroupsCreate,
+  postPracticeCreate,
+  postPracticeGroupsCreate,
+  postGroupStudent,
 } from './regExpPost.mjs';
-import { checkDeleteGroup, checkDeleteStudentGroup } from './regExpDelete.mjs';
+import { deleteGroup, deleteStudentGroup } from './regExpDelete.mjs';
 // CORS headers configuration
 const corsHeaders = {
   'Access-Control-Allow-Origin': `${process.env.FRONTEND_URL}`, // Your frontend URL
@@ -41,26 +44,30 @@ export const processRequest = async (req, res) => {
   });
   // Set respose
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
-  let subject_url = false;
-  let practices_url = false;
-  let groups_url = false;
-  let group_url = false;
-  let students_url = false;
-  let students_group_url = false;
-  let student_group_url = false;
+  let subject_id = false;
+  let subject_id_practices = false;
+  let subject_id_practices_id_groups = false;
+  let group_id = false;
+  let subject_id_students = false;
+  let group_id_students = false;
+  let group_id_student_id = false;
+  let practice_id = false;
+  let student_id_groups = false;
   switch (method) {
     case 'GET':
-      subject_url = checkGetSubject(url);
-      practices_url = checkGetSubjectPractices(url);
-      groups_url = checkGetSubjectPracticesGroups(url);
-      group_url = checkGetGroup(url);
-      students_url = checkGetSubjectStudents(url);
-      students_group_url = checkGetGroupStudents(url);
-      if (subject_url) {
+      subject_id = getSubject(url);
+      subject_id_practices = getSubjectPractices(url);
+      subject_id_practices_id_groups = getSubjectPracticesGroups(url);
+      group_id = getGroup(url);
+      subject_id_students = getSubjectStudents(url);
+      group_id_students = getGroupStudents(url);
+      practice_id = getPractice(url);
+      student_id_groups = getStudentGroups(url);
+      if (subject_id) {
         try {
           await authenticate(req, res, true);
           const subject = await query('SELECT * FROM subject WHERE id = ?', [
-            subject_url,
+            subject_id,
           ]);
           if (subject.results.length === 0) {
             res.statusCode = 404;
@@ -72,12 +79,12 @@ export const processRequest = async (req, res) => {
           res.statusCode = 500;
           return res.end(JSON.stringify({ error: 'Internal server error' }));
         }
-      } else if (practices_url) {
+      } else if (subject_id_practices) {
         try {
           await authenticate(req, res, true);
           const practices = await query(
             'SELECT * FROM practice WHERE subject_id = ?',
-            [practices_url]
+            [subject_id_practices]
           );
           if (practices.results.length === 0) {
             res.statusCode = 404;
@@ -89,12 +96,15 @@ export const processRequest = async (req, res) => {
           res.statusCode = 500;
           return res.end(JSON.stringify({ error: 'Internal server error' }));
         }
-      } else if (groups_url) {
+      } else if (subject_id_practices_id_groups) {
         try {
-          await authenticate(req, res);
+          await authenticate(req, res, true);
           const groups = await query(
             'SELECT pg.* FROM practice_groups pg JOIN practice p ON pg.practice_id = p.id WHERE pg.practice_id = ? AND p.subject_id = ?',
-            [groups_url.practice_id, groups_url.subject_id]
+            [
+              subject_id_practices_id_groups.practice_id,
+              subject_id_practices_id_groups.subject_id,
+            ]
           );
           if (groups.results.length === 0) {
             res.statusCode = 404;
@@ -106,12 +116,12 @@ export const processRequest = async (req, res) => {
           res.statusCode = 500;
           return res.end(JSON.stringify({ error: 'Internal server error' }));
         }
-      } else if (group_url) {
+      } else if (group_id) {
         try {
           await authenticate(req, res);
           const group = await query(
             'SELECT * FROM practice_groups WHERE id = ?',
-            [group_url]
+            [group_id]
           );
           if (group.results.length === 0) {
             res.statusCode = 404;
@@ -123,12 +133,12 @@ export const processRequest = async (req, res) => {
           res.statusCode = 500;
           return res.end(JSON.stringify({ error: 'Internal server error' }));
         }
-      } else if (students_url) {
+      } else if (subject_id_students) {
         try {
           await authenticate(req, res);
           const users_ids = await query(
             'SELECT user_id FROM users_subjects WHERE subject_id = ?',
-            [students_url]
+            [subject_id_students]
           );
           if (users_ids.results.length === 0) {
             res.statusCode = 404;
@@ -164,12 +174,12 @@ export const processRequest = async (req, res) => {
           res.statusCode = 500;
           return res.end(JSON.stringify({ error: 'Internal server error' }));
         }
-      } else if (students_group_url) {
+      } else if (group_id_students) {
         try {
           await authenticate(req, res);
           const users_ids = await query(
             'SELECT user_id FROM practice_groups_users WHERE group_id = ?',
-            [students_group_url]
+            [group_id_students]
           );
           if (users_ids.results.length === 0) {
             res.statusCode = 404;
@@ -189,6 +199,47 @@ export const processRequest = async (req, res) => {
           return res.end(JSON.stringify(students.results));
         } catch (error) {
           console.error('Database query error on get students:', error);
+          res.statusCode = 500;
+          return res.end(JSON.stringify({ error: 'Internal server error' }));
+        }
+      } else if (practice_id) {
+        try {
+          await authenticate(req, res, true);
+          const practice = await query('SELECT * FROM practice WHERE id = ?', [
+            practice_id,
+          ]);
+          if (practice.results.length === 0) {
+            res.statusCode = 404;
+            return res.end(JSON.stringify({ error: 'Practice not found' }));
+          }
+          return res.end(JSON.stringify(practice.results[0]));
+        } catch (error) {
+          console.error('Database query error on get practice:', error);
+          res.statusCode = 500;
+          return res.end(JSON.stringify({ error: 'Internal server error' }));
+        }
+      } else if (student_id_groups) {
+        try {
+          await authenticate(req, res, true);
+          const groups_ids = await query(
+            'SELECT group_id FROM practice_groups_users WHERE user_id = ?',
+            [student_id_groups]
+          );
+          if (groups_ids.results.length === 0) {
+            res.statusCode = 404;
+            return res.end(JSON.stringify({ error: 'Groups not found' }));
+          }
+          const groups = await query(
+            'SELECT * FROM practice_groups WHERE id IN (?)',
+            [groups_ids.results.map(group => group.group_id)]
+          );
+          if (groups.results.length === 0) {
+            res.statusCode = 404;
+            return res.end(JSON.stringify({ error: 'Groups not found' }));
+          }
+          return res.end(JSON.stringify(groups.results));
+        } catch (error) {
+          console.error('Database query error on get groups:', error);
           res.statusCode = 500;
           return res.end(JSON.stringify({ error: 'Internal server error' }));
         }
@@ -230,9 +281,10 @@ export const processRequest = async (req, res) => {
         }
       }
     case 'POST':
-      subject_url = checkPostPracticeCreate(url);
-      groups_url = checkPostPracticeGroupsCreate(url);
-      if (subject_url) {
+      subject_id_practices = postPracticeCreate(url);
+      subject_id_practices_id_groups = postPracticeGroupsCreate(url);
+      group_id_student_id = postGroupStudent(url);
+      if (subject_id_practices) {
         try {
           await authenticate(req, res);
           let body = '';
@@ -256,7 +308,12 @@ export const processRequest = async (req, res) => {
 
               const practice = await query(
                 'INSERT INTO practice (subject_id, name, description, deadline) VALUES (?, ?, ?, ?)',
-                [subject_url, data.name, data.description, data.deadline]
+                [
+                  subject_id_practices,
+                  data.name,
+                  data.description,
+                  data.deadline,
+                ]
               );
               return res.end(JSON.stringify(practice.results));
             } catch (error) {
@@ -272,7 +329,7 @@ export const processRequest = async (req, res) => {
           res.statusCode = 500;
           return res.end(JSON.stringify({ error: 'Internal server error' }));
         }
-      } else if (groups_url) {
+      } else if (subject_id_practices_id_groups) {
         try {
           await authenticate(req, res);
           let body = '';
@@ -310,6 +367,42 @@ export const processRequest = async (req, res) => {
               );
               res.statusCode = 201;
               return res.end(JSON.stringify(group.results));
+            } catch (error) {
+              console.error('Database query error on create group:', error);
+              res.statusCode = 500;
+              return res.end(
+                JSON.stringify({ error: 'Internal server error' })
+              );
+            }
+          });
+        } catch {
+          res.statusCode = 500;
+          return res.end(JSON.stringify({ error: 'Internal server error' }));
+        }
+      } else if (group_id_student_id) {
+        try {
+          await authenticate(req, res, true);
+          let body = '';
+          req.on('data', chunk => {
+            body += chunk.toString();
+          });
+          req.on('end', async () => {
+            try {
+              const data = JSON.parse(body);
+              if (!data.group_id || !data.student_id) {
+                res.statusCode = 400;
+                return res.end(
+                  JSON.stringify({
+                    error: 'Group ID and student ID are required',
+                  })
+                );
+              }
+              const result = await query(
+                'INSERT INTO practice_groups_users (group_id, user_id) VALUES (?, ?)',
+                [data.group_id, data.student_id]
+              );
+              res.statusCode = 201;
+              return res.end(JSON.stringify(result.results));
             } catch (error) {
               console.error('Database query error on create group:', error);
               res.statusCode = 500;
@@ -533,14 +626,14 @@ export const processRequest = async (req, res) => {
       }
       break;
     case 'DELETE':
-      group_url = checkDeleteGroup(url);
-      student_group_url = checkDeleteStudentGroup(url);
-      if (group_url) {
+      group_id = deleteGroup(url);
+      group_id_student_id = deleteStudentGroup(url);
+      if (group_id) {
         try {
           await authenticate(req, res);
           const result = await query(
             'DELETE FROM practice_groups WHERE id = ?',
-            [group_url]
+            [group_id]
           );
           if (result.results.affectedRows > 0) {
             res.statusCode = 200;
@@ -556,17 +649,19 @@ export const processRequest = async (req, res) => {
           res.statusCode = 500;
           return res.end(JSON.stringify({ error: 'Internal server error' }));
         }
-      } else if(student_group_url){
+      } else if (group_id_student_id) {
         try {
           await authenticate(req, res);
           const result = await query(
             'DELETE FROM practice_groups_users WHERE group_id = ? AND user_id = ?',
-            [student_group_url.group_id, student_group_url.student_id]
+            [group_id_student_id.group_id, group_id_student_id.student_id]
           );
           if (result.results.affectedRows > 0) {
             res.statusCode = 200;
             return res.end(
-              JSON.stringify({ message: 'Student deleted from group successfully' })
+              JSON.stringify({
+                message: 'Student deleted from group successfully',
+              })
             );
           } else {
             res.statusCode = 404;
