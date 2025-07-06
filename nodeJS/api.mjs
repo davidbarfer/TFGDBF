@@ -8,6 +8,7 @@ import {
   checkGetGroup,
   checkGetGroupStudents,
   checkGetSubjectStudents,
+  checkGetPractice,
 } from './regExpGet.mjs';
 import {
   checkPostPracticeCreate,
@@ -48,6 +49,7 @@ export const processRequest = async (req, res) => {
   let students_url = false;
   let students_group_url = false;
   let student_group_url = false;
+  let practice_url = false;
   switch (method) {
     case 'GET':
       subject_url = checkGetSubject(url);
@@ -56,6 +58,7 @@ export const processRequest = async (req, res) => {
       group_url = checkGetGroup(url);
       students_url = checkGetSubjectStudents(url);
       students_group_url = checkGetGroupStudents(url);
+      practice_url = checkGetPractice(url);
       if (subject_url) {
         try {
           await authenticate(req, res, true);
@@ -91,7 +94,7 @@ export const processRequest = async (req, res) => {
         }
       } else if (groups_url) {
         try {
-          await authenticate(req, res);
+          await authenticate(req, res, true);
           const groups = await query(
             'SELECT pg.* FROM practice_groups pg JOIN practice p ON pg.practice_id = p.id WHERE pg.practice_id = ? AND p.subject_id = ?',
             [groups_url.practice_id, groups_url.subject_id]
@@ -189,6 +192,22 @@ export const processRequest = async (req, res) => {
           return res.end(JSON.stringify(students.results));
         } catch (error) {
           console.error('Database query error on get students:', error);
+          res.statusCode = 500;
+          return res.end(JSON.stringify({ error: 'Internal server error' }));
+        }
+      } else if (practice_url) {
+        try {
+          await authenticate(req, res, true);
+          const practice = await query('SELECT * FROM practice WHERE id = ?', [
+            practice_url,
+          ]);
+          if (practice.results.length === 0) {
+            res.statusCode = 404;
+            return res.end(JSON.stringify({ error: 'Practice not found' }));
+          }
+          return res.end(JSON.stringify(practice.results[0]));
+        } catch (error) {
+          console.error('Database query error on get practice:', error);
           res.statusCode = 500;
           return res.end(JSON.stringify({ error: 'Internal server error' }));
         }

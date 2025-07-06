@@ -9,6 +9,7 @@
 | `/subject/:id/students`             | Returns all students of the subject          |
 | `/subject/:id/practices`            | Returns all practices of the subject     |
 | `/subject/:id/practice/:id/groups`  | Return all groups of the practice |
+| `/practice/:id`                     | Returns a practice |
 | `/group/:id`                        | Returns a group |
 | `/group/:id/students`               | Returns all students of the group |
 | `/users`                            | Returns all users                     |

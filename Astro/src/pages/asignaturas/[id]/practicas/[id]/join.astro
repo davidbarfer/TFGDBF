@@ -1,0 +1,68 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import jwt from 'jsonwebtoken'
+import { parse } from 'cookie';
+import { getPractice, getGroups } from "@/utils/public";
+const { id } = Astro.params;
+const cookies = parse(Astro.request.headers.get('cookie') || '');
+const token = cookies.token;
+const secret = import.meta.env.JWT_SECRET;
+let user = null;
+if (token) {
+  try {
+    user = jwt.verify(token, secret); // same secret as backend
+  } catch (err) {
+    console.warn("Invalid or expired token", err);
+  }
+}
+let practice = await getPractice(token as string, id as string);
+const groups = await getGroups(token as string, practice.subject_id as string, practice.id as string);
+if(groups && Array.isArray(groups)) {
+  practice = {
+    ...practice,
+    groups: groups
+  };
+}
+---
+<Layout>
+<div>
+    <section>
+      <h1>Práctica {practice?.name}</h1>
+      <div>
+        <p>{practice?.description}</p>
+        <p>{practice?.deadline}</p>
+      </div>
+    </section>
+    <section>
+      <table>
+        <thead>
+          <tr>
+            <th>Grupo</th>
+            <th>Fecha</th>
+            <th>Horario</th>
+            <th>Alumnos</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {practice?.groups.map((group: any) => (
+            <tr>
+            <td>{group.name}</td>
+            <td>{group.practice_group_date}</td>
+            <td>{group.start_time} - {group.end_time}</td>
+            <td>{Number(group.current_participants)} / {Number(group.max_participants)}</td>
+            <td>
+              {Number(group.current_participants) < Number(group.max_participants) ? (
+                <button>Inscribirme</button>
+              ) : (
+                <button disabled>Grupo lleno</button>
+              )}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </section>
+</div>
+</Layout>
+

@@ -24,9 +24,6 @@ if (practices === null) {
         <p>Titulación: {subject?.degree}</p>
       </div>
     </section>
-    <section class="actions">
-      <a href="#"><button>Apuntarme a un Grupo</button></a>
-    </section>
     <section class="practice">
       <h1>Prácticas</h1>
       <table>
@@ -45,7 +42,7 @@ if (practices === null) {
               <td>{practice.name}</td>
               <td>{practice.description}</td>
               <td>{practice.deadline}</td>
-              <td>Ver Grupo (TODO)</td>
+              <td><a href={`/asignaturas/${subject?.id}/practicas/${practice.id}/join`}><button>Inscribirme</button></a></td>
               <td>Ver Entrega (TODO)</td>
             </tr>
           ))}

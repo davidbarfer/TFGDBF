@@ -24,6 +24,14 @@ export function checkGetSubjectPractices(url) {
   }
   return false;
 }
+export function checkGetPractice(url) {
+  const regex = /^\/practice\/\d+$/;
+  if (regex.test(url)) {
+    const id = url.split('/').pop();
+    return id;
+  }
+  return false;
+}
 
 export function checkGetSubjectPracticesGroups(url) {
   const regex = /^\/subject\/\d+\/practice\/\d+\/groups$/;
