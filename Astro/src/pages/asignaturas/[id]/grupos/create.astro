@@ -4,7 +4,7 @@ import GroupCreate from "@/components/groups/groupCreate.astro";
 import jwt from 'jsonwebtoken'
 import { parse } from 'cookie';
 import { roles } from "@/consts/users";
-import { getSubject } from "@/utils/public";
+import { getSubject } from "@/utils/users";
 const { id } = Astro.params;
 const cookies = parse(Astro.request.headers.get('cookie') || '');
 const token = cookies.token;
