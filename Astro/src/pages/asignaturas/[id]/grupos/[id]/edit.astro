@@ -1,7 +1,30 @@
 ---
 import Layout from "@/layouts/Layout.astro";
+import GroupEdit from "@/components/groups/groupEdit.astro";
+import jwt from 'jsonwebtoken'
+import { parse } from 'cookie';
+import { getGroup } from "@/utils/professor";
+import { roles } from "@/consts/users";
+const { id } = Astro.params;
+const cookies = parse(Astro.request.headers.get('cookie') || '');
+const token = cookies.token;
+const secret = import.meta.env.JWT_SECRET;
+let user = null;
+if (token) {
+  try {
+    user = jwt.verify(token, secret); // same secret as backend
+  } catch (err) {
+    console.warn("Invalid or expired token", err);
+  }
+}
+const group = await getGroup(token as string, id as string);
 ---
 
 <Layout>
-<p>Editar grupo</p>
+  {user?.role === roles.professor || user?.role === roles.admin ? (
+    <GroupEdit group={group} token={token} />
+  ) : (
+    <p>No tienes permiso para editar grupos</p>
+    <a href="/">Volver al inicio</a>
+  )}
 </Layout>
