@@ -13,7 +13,7 @@ USE doctus_lite;
 DROP TRIGGER IF EXISTS create_group;
 DROP TRIGGER IF EXISTS delete_group;
 DROP TRIGGER IF EXISTS delete_user_group;
-DROP TRIGGER IF EXISTS insert_user_group;
+DROP TRIGGER IF EXISTS update_user_group_count;
 
 -- Drop tables if they exist (for fresh start)
 DROP TABLE IF EXISTS users_subjects;
