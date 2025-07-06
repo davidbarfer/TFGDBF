@@ -42,7 +42,7 @@ export const processRequest = async (req, res) => {
   let subject_id = false;
   let subject_id_practices = false;
   let subject_id_practices_id_groups = false;
-  let group_url = false;
+  let group_id = false;
   let students_url = false;
   let students_group_url = false;
   let student_group_url = false;
@@ -52,7 +52,7 @@ export const processRequest = async (req, res) => {
       subject_id = getSubject(url);
       subject_id_practices = getSubjectPractices(url);
       subject_id_practices_id_groups = getSubjectPracticesGroups(url);
-      group_url = getGroup(url);
+      group_id = getGroup(url);
       students_url = getSubjectStudents(url);
       students_group_url = getGroupStudents(url);
       practice_url = getPractice(url);
@@ -109,12 +109,12 @@ export const processRequest = async (req, res) => {
           res.statusCode = 500;
           return res.end(JSON.stringify({ error: 'Internal server error' }));
         }
-      } else if (group_url) {
+      } else if (group_id) {
         try {
           await authenticate(req, res);
           const group = await query(
             'SELECT * FROM practice_groups WHERE id = ?',
-            [group_url]
+            [group_id]
           );
           if (group.results.length === 0) {
             res.statusCode = 404;
@@ -557,14 +557,14 @@ export const processRequest = async (req, res) => {
       }
       break;
     case 'DELETE':
-      group_url = deleteGroup(url);
+      group_id = deleteGroup(url);
       student_group_url = deleteStudentGroup(url);
-      if (group_url) {
+      if (group_id) {
         try {
           await authenticate(req, res);
           const result = await query(
             'DELETE FROM practice_groups WHERE id = ?',
-            [group_url]
+            [group_id]
           );
           if (result.results.affectedRows > 0) {
             res.statusCode = 200;
