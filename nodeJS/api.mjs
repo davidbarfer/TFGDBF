@@ -2,19 +2,16 @@ import jwt from 'jsonwebtoken';
 import { query, hashPassword, verifyPassword } from './database.mjs';
 import { authProviders, authenticate } from './database.mjs';
 import {
-  checkGetSubject,
-  checkGetSubjectPractices,
-  checkGetSubjectPracticesGroups,
-  checkGetGroup,
-  checkGetGroupStudents,
-  checkGetSubjectStudents,
-  checkGetPractice,
+  getSubject,
+  getSubjectPractices,
+  getSubjectPracticesGroups,
+  getGroup,
+  getGroupStudents,
+  getSubjectStudents,
+  getPractice,
 } from './regExpGet.mjs';
-import {
-  checkPostPracticeCreate,
-  checkPostPracticeGroupsCreate,
-} from './regExpPost.mjs';
-import { checkDeleteGroup, checkDeleteStudentGroup } from './regExpDelete.mjs';
+import { postPracticeCreate, postPracticeGroupsCreate } from './regExpPost.mjs';
+import { deleteGroup, deleteStudentGroup } from './regExpDelete.mjs';
 // CORS headers configuration
 const corsHeaders = {
   'Access-Control-Allow-Origin': `${process.env.FRONTEND_URL}`, // Your frontend URL
@@ -52,13 +49,13 @@ export const processRequest = async (req, res) => {
   let practice_url = false;
   switch (method) {
     case 'GET':
-      subject_url = checkGetSubject(url);
-      practices_url = checkGetSubjectPractices(url);
-      groups_url = checkGetSubjectPracticesGroups(url);
-      group_url = checkGetGroup(url);
-      students_url = checkGetSubjectStudents(url);
-      students_group_url = checkGetGroupStudents(url);
-      practice_url = checkGetPractice(url);
+      subject_url = getSubject(url);
+      practices_url = getSubjectPractices(url);
+      groups_url = getSubjectPracticesGroups(url);
+      group_url = getGroup(url);
+      students_url = getSubjectStudents(url);
+      students_group_url = getGroupStudents(url);
+      practice_url = getPractice(url);
       if (subject_url) {
         try {
           await authenticate(req, res, true);
@@ -249,8 +246,8 @@ export const processRequest = async (req, res) => {
         }
       }
     case 'POST':
-      subject_url = checkPostPracticeCreate(url);
-      groups_url = checkPostPracticeGroupsCreate(url);
+      subject_url = postPracticeCreate(url);
+      groups_url = postPracticeGroupsCreate(url);
       if (subject_url) {
         try {
           await authenticate(req, res);
@@ -552,8 +549,8 @@ export const processRequest = async (req, res) => {
       }
       break;
     case 'DELETE':
-      group_url = checkDeleteGroup(url);
-      student_group_url = checkDeleteStudentGroup(url);
+      group_url = deleteGroup(url);
+      student_group_url = deleteStudentGroup(url);
       if (group_url) {
         try {
           await authenticate(req, res);
@@ -575,7 +572,7 @@ export const processRequest = async (req, res) => {
           res.statusCode = 500;
           return res.end(JSON.stringify({ error: 'Internal server error' }));
         }
-      } else if(student_group_url){
+      } else if (student_group_url) {
         try {
           await authenticate(req, res);
           const result = await query(
@@ -585,7 +582,9 @@ export const processRequest = async (req, res) => {
           if (result.results.affectedRows > 0) {
             res.statusCode = 200;
             return res.end(
-              JSON.stringify({ message: 'Student deleted from group successfully' })
+              JSON.stringify({
+                message: 'Student deleted from group successfully',
+              })
             );
           } else {
             res.statusCode = 404;
