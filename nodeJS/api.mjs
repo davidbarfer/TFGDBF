@@ -39,7 +39,7 @@ export const processRequest = async (req, res) => {
   });
   // Set respose
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
-  let subject_url = false;
+  let subject_id = false;
   let practices_url = false;
   let groups_url = false;
   let group_url = false;
@@ -49,18 +49,18 @@ export const processRequest = async (req, res) => {
   let practice_url = false;
   switch (method) {
     case 'GET':
-      subject_url = getSubject(url);
+      subject_id = getSubject(url);
       practices_url = getSubjectPractices(url);
       groups_url = getSubjectPracticesGroups(url);
       group_url = getGroup(url);
       students_url = getSubjectStudents(url);
       students_group_url = getGroupStudents(url);
       practice_url = getPractice(url);
-      if (subject_url) {
+      if (subject_id) {
         try {
           await authenticate(req, res, true);
           const subject = await query('SELECT * FROM subject WHERE id = ?', [
-            subject_url,
+            subject_id,
           ]);
           if (subject.results.length === 0) {
             res.statusCode = 404;
