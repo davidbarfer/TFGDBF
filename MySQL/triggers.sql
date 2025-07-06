@@ -59,6 +59,39 @@ BEGIN
   END IF;
 END//
 
+CREATE TRIGGER check_user_already_in_group
+BEFORE INSERT ON practice_groups_users
+FOR EACH ROW
+BEGIN
+  IF EXISTS (SELECT 1 FROM practice_groups_users WHERE group_id = NEW.group_id AND user_id = NEW.user_id) THEN
+    SIGNAL SQLSTATE '45000' 
+    SET MESSAGE_TEXT = 'User is already in this group';
+  END IF;
+END//
+
+CREATE TRIGGER check_user_already_in_group_of_practice
+BEFORE INSERT ON practice_groups_users
+FOR EACH ROW
+BEGIN
+  DECLARE practice_id_var INT;
+  
+  -- Get the practice_id of the group being inserted into
+  SELECT practice_id INTO practice_id_var 
+  FROM practice_groups 
+  WHERE id = NEW.group_id;
+  
+  -- Check if user is already in any group of this practice
+  IF EXISTS (
+    SELECT 1 
+    FROM practice_groups_users pgu
+    JOIN practice_groups pg ON pgu.group_id = pg.id
+    WHERE pgu.user_id = NEW.user_id 
+    AND pg.practice_id = practice_id_var
+  ) THEN
+    SIGNAL SQLSTATE '45000' 
+    SET MESSAGE_TEXT = 'User is already in a group of this practice';
+  END IF;
+END//
 
 -- Reset delimiter back to default
 DELIMITER ;

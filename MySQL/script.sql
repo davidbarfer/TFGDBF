@@ -9,21 +9,10 @@ COLLATE utf8mb4_unicode_ci;
 
 -- Use the database
 USE doctus_lite;
--- Drop Triggers if exist
-DROP TRIGGER IF EXISTS create_group;
-DROP TRIGGER IF EXISTS delete_group;
-DROP TRIGGER IF EXISTS delete_user_group;
-DROP TRIGGER IF EXISTS update_user_group_count;
 
--- Drop tables if they exist (for fresh start)
-DROP TABLE IF EXISTS users_subjects;
-DROP TABLE IF EXISTS practice_groups_users;
-DROP TABLE IF EXISTS practice_groups;
-DROP TABLE IF EXISTS submissions;
-DROP TABLE IF EXISTS practice;
-DROP TABLE IF EXISTS subject;
-DROP TABLE IF EXISTS saml_sessions;
-DROP TABLE IF EXISTS users;
+-- Drop Triggers and Tables if exist
+source /home/davidbarfer/Dev/DoctusLite/MySQL/drop.sql;
+
 
 -- Table: users
 CREATE TABLE IF NOT EXISTS users (
