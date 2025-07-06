@@ -41,7 +41,7 @@ export const processRequest = async (req, res) => {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   let subject_id = false;
   let subject_id_practices = false;
-  let groups_url = false;
+  let subject_id_practices_id_groups = false;
   let group_url = false;
   let students_url = false;
   let students_group_url = false;
@@ -51,7 +51,7 @@ export const processRequest = async (req, res) => {
     case 'GET':
       subject_id = getSubject(url);
       subject_id_practices = getSubjectPractices(url);
-      groups_url = getSubjectPracticesGroups(url);
+      subject_id_practices_id_groups = getSubjectPracticesGroups(url);
       group_url = getGroup(url);
       students_url = getSubjectStudents(url);
       students_group_url = getGroupStudents(url);
@@ -89,12 +89,15 @@ export const processRequest = async (req, res) => {
           res.statusCode = 500;
           return res.end(JSON.stringify({ error: 'Internal server error' }));
         }
-      } else if (groups_url) {
+      } else if (subject_id_practices_id_groups) {
         try {
           await authenticate(req, res, true);
           const groups = await query(
             'SELECT pg.* FROM practice_groups pg JOIN practice p ON pg.practice_id = p.id WHERE pg.practice_id = ? AND p.subject_id = ?',
-            [groups_url.practice_id, groups_url.subject_id]
+            [
+              subject_id_practices_id_groups.practice_id,
+              subject_id_practices_id_groups.subject_id,
+            ]
           );
           if (groups.results.length === 0) {
             res.statusCode = 404;
@@ -247,7 +250,7 @@ export const processRequest = async (req, res) => {
       }
     case 'POST':
       subject_id_practices = postPracticeCreate(url);
-      groups_url = postPracticeGroupsCreate(url);
+      subject_id_practices_id_groups = postPracticeGroupsCreate(url);
       if (subject_id_practices) {
         try {
           await authenticate(req, res);
@@ -293,7 +296,7 @@ export const processRequest = async (req, res) => {
           res.statusCode = 500;
           return res.end(JSON.stringify({ error: 'Internal server error' }));
         }
-      } else if (groups_url) {
+      } else if (subject_id_practices_id_groups) {
         try {
           await authenticate(req, res);
           let body = '';
