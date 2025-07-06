@@ -12,6 +12,9 @@ USE doctus_lite;
 -- Drop Triggers if exist
 DROP TRIGGER IF EXISTS create_group;
 DROP TRIGGER IF EXISTS delete_group;
+DROP TRIGGER IF EXISTS delete_user_group;
+DROP TRIGGER IF EXISTS insert_user_group;
+
 -- Drop tables if they exist (for fresh start)
 DROP TABLE IF EXISTS users_subjects;
 DROP TABLE IF EXISTS practice_groups_users;
@@ -110,83 +113,6 @@ CREATE TABLE IF NOT EXISTS practice_groups_users (
   FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
--- Change delimiter to allow for multiple statements in triggers
-DELIMITER //
-
--- Create security triggers
-CREATE TRIGGER create_group
-BEFORE INSERT ON practice_groups
-FOR EACH ROW
-BEGIN
-  DECLARE max_group_name NUMERIC;
-  
-  -- Check if a group with the same name already exists for this practice
-  IF EXISTS (SELECT 1 FROM practice_groups WHERE practice_id = NEW.practice_id AND name = NEW.name) THEN
-    -- Find the maximum group name for this practice and increment it by 1
-    SELECT COALESCE(MAX(name), 0) + 1 INTO max_group_name
-    FROM practice_groups
-    WHERE practice_id = NEW.practice_id;
-    
-    -- Set the new group name to the incremented value
-    SET NEW.name = max_group_name;
-  END IF;
-END//
-
-CREATE TRIGGER delete_group
-BEFORE DELETE ON practice_groups
-FOR EACH ROW
-BEGIN
-  DELETE FROM practice_groups_users WHERE group_id = OLD.id;
-END//
-
--- Reset delimiter back to default
-DELIMITER ;
-
--- Insert sample data
-INSERT INTO users (username, password, password_salt, role, name, surname) VALUES
-('admin', '$2b$12$W16liLOZR6U4Zp3iptOPEOPNCl8ob/ieZqmEkdOWrrD5yo3qYK5xW',12,'admin', 'David', 'Barrero'),
-('student', '$2b$12$W16liLOZR6U4Zp3iptOPEOPNCl8ob/ieZqmEkdOWrrD5yo3qYK5xW',12,'student', 'Manolo', 'Garcia'),
-('professor', '$2b$12$W16liLOZR6U4Zp3iptOPEOPNCl8ob/ieZqmEkdOWrrD5yo3qYK5xW',12,'professor', 'Mortadelo', 'Filemon'),
-('student2', '$2b$12$W16liLOZR6U4Zp3iptOPEOPNCl8ob/ieZqmEkdOWrrD5yo3qYK5xW',12,'student', 'Manolo', 'Garcia')
-ON DUPLICATE KEY UPDATE username = username;
-
-INSERT INTO subject (name, course, degree) VALUES
-('Fundametos de Control Automático', 2, 'Grado en Ingeniería de Tecnologías Industriales'),
-('Complentos de Control', 4, 'Grado en Ingeniería de Tecnologías Industriales')
-ON DUPLICATE KEY UPDATE name = name, course = course, degree = degree; 
-
-INSERT INTO practice (subject_id, name, description, deadline, file_url) VALUES
-(1, 'Control PI', 'Diseñe un control PI', '2025-09-18', 'https://example.com/practice1.pdf'),
-(2, 'Control GPC', 'Diseñe un control GPC', '2025-08-18', 'https://example.com/practice2.pdf');
-
-INSERT INTO practice_groups (practice_id, name, max_participants, practice_group_date, start_time, end_time) VALUES
-(1, 1, 10, '2025-09-18', '08:00:00', '10:00:00'),
-(1, 2, 10, '2025-09-18', '10:00:00', '12:00:00'),
-(2, 1, 10, '2025-08-18', '08:00:00', '10:00:00');
-
-INSERT INTO users_subjects (user_id, subject_id) VALUES
-(2, 1),
-(2, 2),
-(3, 1),
-(3, 2),
-(4, 2);
-
-INSERT INTO practice_groups_users (group_id, user_id) VALUES
-(1, 2),
-(2, 2),
-(1, 4),
-(2, 4);
-
--- Show tables
-SHOW TABLES;
-
--- Display sample data
-SELECT * FROM users;
-SELECT * FROM subject;
-SELECT * FROM practice;
-SELECT * FROM practice_groups;
-SELECT * FROM submissions;
-SELECT * FROM users_subjects;
-SELECT * FROM practice_groups_users;
-
+source /home/davidbarfer/Dev/DoctusLite/MySQL/triggers.sql;
+source /home/davidbarfer/Dev/DoctusLite/MySQL/data.sql;
 

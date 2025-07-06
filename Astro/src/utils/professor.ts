@@ -54,6 +54,21 @@ export async function getGroupStudents(token: string, group_id: string) {
     }
     return response.json();
 }
+export async function deleteStudentGroup(token: string, group_id: string, student_id: string) {
+    const response = await fetch(`${API_URL}/group/${group_id}/student/${student_id}`,
+        {
+            method: 'DELETE',
+            headers: {
+                'Authorization': token,
+            },
+        }   
+    );
+    if(!response.ok) {
+        const errorText = await response.json();
+        throw new Error(`Error ${response.status}: ${errorText.error}`);
+    }
+    return response.json();
+}
 export async function deleteGroup(token: string, group_id: string) {
     const response = await fetch(`${API_URL}/group/${group_id}`,
         {
