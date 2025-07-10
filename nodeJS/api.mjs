@@ -118,7 +118,7 @@ export const processRequest = async (req, res) => {
         }
       } else if (group_id) {
         try {
-          await authenticate(req, res);
+          await authenticate(req, res, true);
           const group = await query(
             'SELECT * FROM practice_groups WHERE id = ?',
             [group_id]
@@ -176,7 +176,7 @@ export const processRequest = async (req, res) => {
         }
       } else if (group_id_students) {
         try {
-          await authenticate(req, res);
+          await authenticate(req, res, true);
           const users_ids = await query(
             'SELECT user_id FROM practice_groups_users WHERE group_id = ?',
             [group_id_students]

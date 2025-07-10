@@ -101,3 +101,34 @@ export async function addStudentToGroup(token: string, group_id: string, student
   }
   return response.json();
 }
+export async function getGroup(token: string, group_id: string) {
+  const response = await fetch(`${API_URL}/group/${group_id}`,
+      {
+          headers: {
+              'Authorization': token,
+          },
+      }
+  );
+  if(!response.ok) {
+      const errorText = await response.json();
+      throw new Error(`Error ${response.status}: ${errorText.error}`);
+  }
+  return response.json();
+}
+export async function getGroupStudents(token: string, group_id: string) {
+  const response = await fetch(`${API_URL}/group/${group_id}/students`,
+      {
+          headers: {
+              'Authorization': token,
+          },
+      }
+  );
+  if(response.status === 404) {
+      return [];
+  }
+  if(!response.ok) {
+      const errorText = await response.json();
+      throw new Error(`Error ${response.status}: ${errorText.error}`);
+  }
+  return response.json();
+}
