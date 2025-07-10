@@ -1,6 +1,6 @@
 ---
 import jwt from 'jsonwebtoken'
-import { getGroupStudents } from '@/utils/professor';
+import { getGroupStudents } from '@/utils/users';
 const secret = import.meta.env.JWT_SECRET;
 const { group, token } = Astro.props;
 let user = null;
