@@ -27,7 +27,6 @@ const students = await getGroupStudents(token, group?.id as string);
     <table>
       <thead>
         <tr>
-          <th>Nombre de Usuario (DNI)</th>
           <th>Nombre</th>
           <th>Apellido</th>
         </tr>
@@ -35,7 +34,6 @@ const students = await getGroupStudents(token, group?.id as string);
       <tbody>
         {students.map((student: any) => (
           <tr>
-            <td>{student.username}</td>
             <td>{student.name}</td>
             <td>{student.surname}</td>
           </tr>
