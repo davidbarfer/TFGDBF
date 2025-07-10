@@ -2,7 +2,7 @@
 import jwt from 'jsonwebtoken'
 import { getGroupStudents } from '@/utils/users';
 const secret = import.meta.env.JWT_SECRET;
-const { group, token } = Astro.props;
+const { group, practice, token } = Astro.props;
 let user = null;
 if (token) {
   try {
@@ -15,7 +15,7 @@ const students = await getGroupStudents(token, group?.id as string);
 ---
 
 <div>
-  <h1>Grupo {group?.name}</h1>
+  <h1>Grupo {group?.name} - {practice?.name}</h1>
   <section class="group-info">
     <p>Participantes: {group?.current_participants} / {group?.max_participants}</p>
     <p>Fecha: {group?.practice_group_date}</p>
