@@ -1,6 +1,7 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import GroupInfoProfessor from "@/components/groups/groupInfoProfessor.astro";
+import GroupInfoStudent from "@/components/groups/groupInfoStudent.astro";
 import { parse } from 'cookie';
 import jwt from 'jsonwebtoken'
 import { getGroup } from "@/utils/users";
@@ -23,8 +24,10 @@ const group = await getGroup(token as string, id as string);
 <Layout>
   {user?.role === roles.professor || user?.role === roles.admin ? (
     <GroupInfoProfessor group={group} token={token} />
+  ) : ( user?.role === roles.student ? (
+    <GroupInfoStudent group={group} token={token} />
   ) : (
     <p>No tienes permiso para ver esta página</p>
-    <a href="/">Volver al inicio</a>
-  )}
+    <a href="/"><button>Volver al inicio</button></a>
+  ))}
 </Layout>
