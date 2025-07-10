@@ -18,7 +18,7 @@ const students = await getGroupStudents(token, group?.id as string);
   <h1>Grupo {group?.name} - {practice?.name}</h1>
   <section class="group-info">
     <p>Participantes: {group?.current_participants} / {group?.max_participants}</p>
-    <p>Fecha: {group?.practice_group_date}</p>
+    <p>Fecha: {new Date(group?.practice_group_date).toLocaleDateString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit' })}</p>
     <p>Hora de inicio: {group?.start_time}</p>
     <p>Hora de fin: {group?.end_time}</p>
   </section>

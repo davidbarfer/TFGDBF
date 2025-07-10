@@ -42,7 +42,7 @@ const userGroups = await getStudentGroups(token as string, user?.userId as strin
             <tr>
               <td>{practice.name}</td>
               <td>{practice.description}</td>
-              <td>{practice.deadline}</td>
+              <td>{new Date(practice.deadline).toLocaleDateString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit' })}</td>
               <td> {userGroups.find((group: any) => group.practice_id === practice.id) !== undefined ? (
                 <a href={`/asignaturas/${subject?.id}/grupos/${userGroups.find((group: any) => group.practice_id === practice.id)?.id}`}><button>Ver Grupo</button></a>
               ) : (
