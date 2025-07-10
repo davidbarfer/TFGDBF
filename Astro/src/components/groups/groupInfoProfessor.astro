@@ -1,0 +1,99 @@
+---
+import jwt from 'jsonwebtoken'
+import { getGroupStudents } from '@/utils/professor';
+const secret = import.meta.env.JWT_SECRET;
+const { group, token } = Astro.props;
+let user = null;
+if (token) {
+  try {
+    user = jwt.verify(token, secret); // same secret as backend
+  } catch (err) {
+    console.warn("Invalid or expired token", err);
+  }
+}
+const students = await getGroupStudents(token, group?.id as string);
+---
+
+<div>
+  <h1>Grupo {group?.name}</h1>
+  <section class="group-info">
+    <p>Participantes: {group?.current_participants} / {group?.max_participants}</p>
+    <p>Fecha: {group?.practice_group_date}</p>
+    <p>Hora de inicio: {group?.start_time}</p>
+    <p>Hora de fin: {group?.end_time}</p>
+  </section>
+  <section class="group-actions">
+    <a href={`/asignaturas/${group?.subject_id}/grupos/${group?.id}/edit`}><button>Editar</button></a>
+    <button id="deleteGroupBtn" data-id={group?.id} data-token={token}>Eliminar</button>
+  </section>
+  <section>
+    <h2>Alumnos</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Nombre de Usuario (DNI)</th>
+          <th>Nombre</th>
+          <th>Apellido</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {students.map((student: any) => (
+          <tr>
+            <td>{student.username}</td>
+            <td>{student.name}</td>
+            <td>{student.surname}</td>
+            <td>
+              <button id="deleteStudentBtn" data-group_id={group?.id} data-student_id={student.id} data-token={token}>Eliminar</button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </section>
+</div>
+
+<style>
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
+  .group-info, .group-actions {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    gap: 1rem;
+  }
+</style>
+<script>
+  import { deleteGroup, deleteStudentGroup } from "@/utils/professor";
+  const deleteGroupBtn = document.getElementById('deleteGroupBtn');
+  deleteGroupBtn?.addEventListener('click',async () => {
+    const id = deleteGroupBtn?.dataset.id;
+    const token = deleteGroupBtn?.dataset.token;
+    const response = await deleteGroup(token, id);
+    if(response.error) {
+      alert(response.error);
+    }
+    else {
+      alert('Grupo eliminado');
+      window.location.href = `/asignaturas/${group?.subject_id}/grupos`;
+    }
+  });
+  const deleteStudentBtn = document.getElementById('deleteStudentBtn');
+  deleteStudentBtn?.addEventListener('click',async () => {
+    const group_id = deleteStudentBtn?.dataset.group_id;
+    const student_id = deleteStudentBtn?.dataset.student_id;
+    const token = deleteStudentBtn?.dataset.token;
+    const response = await deleteStudentGroup(token as string, group_id as string, student_id as string);
+    if(response.error) {
+      alert(response.error);
+    }
+    else {
+      alert('Alumno eliminado');
+      window.location.reload();
+    }
+  });
+</script>
