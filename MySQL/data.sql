@@ -16,9 +16,9 @@ INSERT INTO practice (subject_id, name, description, deadline, file_url) VALUES
 (2, 'Control GPC', 'Diseñe un control GPC', '2025-08-18', 'https://example.com/practice2.pdf');
 
 INSERT INTO practice_groups (practice_id, name, max_participants, practice_group_date, start_time, end_time) VALUES
-(1, 1, 10, '2025-09-18', '08:00:00', '10:00:00'),
-(1, 2, 15, '2025-09-18', '10:00:00', '12:00:00'),
-(2, 1, 20, '2025-08-18', '08:00:00', '10:00:00');
+(1, 1, 10, '2025-09-17', '08:00:00', '10:00:00'),
+(1, 2, 15, '2025-09-17', '10:00:00', '12:00:00'),
+(2, 1, 20, '2025-08-17', '08:00:00', '10:00:00');
 
 INSERT INTO users_subjects (user_id, subject_id) VALUES
 (2, 1),
