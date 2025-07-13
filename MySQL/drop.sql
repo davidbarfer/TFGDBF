@@ -5,6 +5,8 @@ DROP TRIGGER IF EXISTS delete_user_group;
 DROP TRIGGER IF EXISTS update_user_group_count;
 DROP TRIGGER IF EXISTS check_user_already_in_group;
 DROP TRIGGER IF EXISTS check_user_already_in_group_of_practice;
+DROP TRIGGER IF EXISTS check_group_date_after_practice_deadline;
+DROP TRIGGER IF EXISTS check_groups_dates_compability;
 
 -- Drop tables if they exist (for fresh start)
 DROP TABLE IF EXISTS users_subjects;
