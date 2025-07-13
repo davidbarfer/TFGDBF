@@ -1,6 +1,10 @@
 import jwt from 'jsonwebtoken';
 import { query, hashPassword, verifyPassword } from './database.mjs';
-import { authProviders, authenticate, unhandledUserDefinedException } from './database.mjs';
+import {
+  authProviders,
+  authenticate,
+  unhandledUserDefinedException,
+} from './database.mjs';
 import {
   getSubject,
   getSubjectPractices,
