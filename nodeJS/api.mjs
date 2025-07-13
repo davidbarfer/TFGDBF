@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { query, hashPassword, verifyPassword } from './database.mjs';
-import { authProviders, authenticate } from './database.mjs';
+import { authProviders, authenticate, unhandledUserDefinedException } from './database.mjs';
 import {
   getSubject,
   getSubjectPractices,
@@ -367,8 +367,12 @@ export const processRequest = async (req, res) => {
               );
               res.statusCode = 201;
               return res.end(JSON.stringify(group.results));
-            } catch (error) {
-              console.error('Database query error on create group:', error);
+            } catch (err) {
+              console.error('Database query error on create group:', err);
+              if (err.sqlState === unhandledUserDefinedException) {
+                res.statusCode = 400;
+                return res.end(JSON.stringify({ error: err.sqlMessage }));
+              }
               res.statusCode = 500;
               return res.end(
                 JSON.stringify({ error: 'Internal server error' })
