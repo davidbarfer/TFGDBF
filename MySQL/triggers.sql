@@ -133,12 +133,48 @@ BEGIN
 END//
 
 -- Groups of the same practice cannot exist on the same time at the same day
--- CREATE TRIGGER check_groups_dates_compability
--- BEFORE INSERT ON practice_groups
--- FOR EACH ROW
--- BEGIN
-
--- END//
+CREATE TRIGGER check_groups_dates_compability
+BEFORE INSERT ON practice_groups
+FOR EACH ROW
+BEGIN
+  DECLARE practice_count INT;
+  
+  -- Check if practice exists
+  SELECT COUNT(*) INTO practice_count 
+  FROM practice 
+  WHERE id = NEW.practice_id;
+  
+  IF practice_count = 0 THEN
+    SIGNAL SQLSTATE '45000'
+    SET MESSAGE_TEXT = 'Invalid practice_id: Practice does not exist';
+  ELSE
+    -- Check for time overlaps with existing groups of the same practice on the same day
+    -- An overlap occurs if:
+    -- 1. New group starts during an existing group
+    -- 2. New group ends during an existing group
+    -- 3. New group completely contains an existing group
+    IF EXISTS (
+      SELECT 1 
+      FROM practice_groups pg
+      WHERE pg.practice_id = NEW.practice_id
+        AND pg.practice_group_date = NEW.practice_group_date
+        AND pg.id != NEW.id  -- For updates, don't compare with self
+        AND (
+          -- New group starts during existing group
+          (NEW.start_time >= pg.start_time AND NEW.start_time < pg.end_time) OR
+          -- New group ends during existing group
+          (NEW.end_time > pg.start_time AND NEW.end_time <= pg.end_time) OR
+          -- New group completely contains existing group
+          (NEW.start_time <= pg.start_time AND NEW.end_time >= pg.end_time)
+        )
+    ) THEN
+      SET @message = CONCAT('Time slot conflicts with another group of the same practice on ', 
+                           NEW.practice_group_date);
+      SIGNAL SQLSTATE '45000'
+      SET MESSAGE_TEXT = @message;
+    END IF;
+  END IF;
+END//
 
 -- Reset delimiter back to default
 DELIMITER ;
