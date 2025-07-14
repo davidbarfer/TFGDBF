@@ -85,9 +85,8 @@ groupsNumber?.addEventListener('input', (e) => {
         // Wait for all groups to be created
         await Promise.all(groupPromises);
         alert('Grupos creados exitosamente');
-      } catch (error) {
-        console.error('Error creating groups:', error);
-        alert('Error al crear los grupos. Por favor, inténtalo de nuevo.');
+      } catch (error : any) {
+        alert(`Error al crear los grupos: ${error}`);
       }
     });
   } 
