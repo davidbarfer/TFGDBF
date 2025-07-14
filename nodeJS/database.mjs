@@ -67,3 +67,4 @@ export async function authenticate(req, res, student = false) {
     return res.end(JSON.stringify({ error: 'Internal server error' }));
   }
 }
+export const unhandledUserDefinedException = '45000';

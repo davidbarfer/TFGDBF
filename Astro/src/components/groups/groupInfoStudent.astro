@@ -2,7 +2,7 @@
 import jwt from 'jsonwebtoken'
 import { getGroupStudents } from '@/utils/users';
 const secret = import.meta.env.JWT_SECRET;
-const { group, token } = Astro.props;
+const { group, practice, token } = Astro.props;
 let user = null;
 if (token) {
   try {
@@ -15,10 +15,10 @@ const students = await getGroupStudents(token, group?.id as string);
 ---
 
 <div>
-  <h1>Grupo {group?.name}</h1>
+  <h1>Grupo {group?.name} - {practice?.name}</h1>
   <section class="group-info">
     <p>Participantes: {group?.current_participants} / {group?.max_participants}</p>
-    <p>Fecha: {group?.practice_group_date}</p>
+    <p>Fecha: {new Date(group?.practice_group_date).toLocaleDateString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit' })}</p>
     <p>Hora de inicio: {group?.start_time}</p>
     <p>Hora de fin: {group?.end_time}</p>
   </section>
@@ -27,7 +27,6 @@ const students = await getGroupStudents(token, group?.id as string);
     <table>
       <thead>
         <tr>
-          <th>Nombre de Usuario (DNI)</th>
           <th>Nombre</th>
           <th>Apellido</th>
         </tr>
@@ -35,7 +34,6 @@ const students = await getGroupStudents(token, group?.id as string);
       <tbody>
         {students.map((student: any) => (
           <tr>
-            <td>{student.username}</td>
             <td>{student.name}</td>
             <td>{student.surname}</td>
           </tr>

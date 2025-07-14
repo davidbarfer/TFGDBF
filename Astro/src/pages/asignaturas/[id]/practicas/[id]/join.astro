@@ -41,7 +41,7 @@ const isEnrolled = matchingIds.length > 0;
       <h1>Práctica {practice?.name}</h1>
       <div>
         <p>{practice?.description}</p>
-        <p>{practice?.deadline}</p>
+        <p>Fecha de entrega: {new Date(practice?.deadline).toLocaleDateString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit' })}</p>
       </div>
     </section>
     <section>
@@ -59,7 +59,7 @@ const isEnrolled = matchingIds.length > 0;
           {practice?.groups.map((group: any) => (
             <tr>
             <td>{group.name}</td>
-            <td>{group.practice_group_date}</td>
+            <td>{new Date(group.practice_group_date).toLocaleDateString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit' })}</td>
             <td>{group.start_time} - {group.end_time}</td>
             <td>{Number(group.current_participants)} / {Number(group.max_participants)}</td>
             <td>

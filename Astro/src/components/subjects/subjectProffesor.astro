@@ -68,7 +68,7 @@ practices = await Promise.all(practices.map(async (practice: any) => {
             <tr>
               <td>{practice.name}</td>
               <td>{practice.description}</td>
-              <td>{practice.deadline}</td>
+              <td>{new Date(practice.deadline).toLocaleDateString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit' })}</td>
               <td><div class="groups-table">{practice.groups.map((group: any) => <a href={`/asignaturas/${subject?.id}/grupos/${group.id}`}>{group.name}</a>)}</div></td>
               <td>Ver Entregas (TODO)</td>
             </tr>
@@ -93,7 +93,16 @@ practices = await Promise.all(practices.map(async (practice: any) => {
               <td>{student.username}</td>
               <td>{student.name}</td>
               <td>{student.surname}</td>
-              <td><div class="groups-table">{student.groups.map((group_id: any) => <a href={`/asignaturas/${subject?.id}/grupos/${group_id}`}>{group_id}</a>)}</div></td>
+              <td>
+                <div class="groups-table">
+                  {
+                    student.groups.map((group_id: any) => practices.find((practice: any) => practice.groups.find((group: any) => group.id === group_id)) !== undefined ? 
+                    <a href={`/asignaturas/${subject?.id}/grupos/${group_id}`}>
+                      {practices.find((practice: any) => practice.groups.find((group: any) => group.id === group_id))?.groups.find((group: any) => group.id === group_id)?.name}-{practices.find((practice: any) => practice.groups.find((group: any) => group.id === group_id))?.name}
+                    </a> : null)
+                  }
+                </div>
+              </td>
             </tr>
           ))}
         </tbody>

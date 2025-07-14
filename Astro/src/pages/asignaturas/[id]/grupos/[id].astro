@@ -4,7 +4,7 @@ import GroupInfoProfessor from "@/components/groups/groupInfoProfessor.astro";
 import GroupInfoStudent from "@/components/groups/groupInfoStudent.astro";
 import { parse } from 'cookie';
 import jwt from 'jsonwebtoken'
-import { getGroup } from "@/utils/users";
+import { getGroup, getPractice } from "@/utils/users";
 import { roles } from "@/consts/users";
 const { id } = Astro.params;
 const cookies = parse(Astro.request.headers.get('cookie') || '');
@@ -19,13 +19,14 @@ if (token) {
   }
 }
 const group = await getGroup(token as string, id as string);
+const practice = await getPractice(token as string, group.practice_id as string);
 ---
 
 <Layout>
   {user?.role === roles.professor || user?.role === roles.admin ? (
-    <GroupInfoProfessor group={group} token={token} />
+    <GroupInfoProfessor group={group} practice={practice} token={token} />
   ) : ( user?.role === roles.student ? (
-    <GroupInfoStudent group={group} token={token} />
+    <GroupInfoStudent group={group} practice={practice} token={token} />
   ) : (
     <p>No tienes permiso para ver esta página</p>
     <a href="/"><button>Volver al inicio</button></a>
