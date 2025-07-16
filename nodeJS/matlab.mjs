@@ -9,12 +9,13 @@ function sendToMatlab(socket, data) {
 }
 export const processMatlabRequest = socket => {
   console.log('MATLAB client connected');
-  sendToMatlab(socket, 'Hello from Node.js');
   // Handle data from MATLAB
   socket.on('data', data => {
     const received = data.toString();
     // Process the response (you'll implement this)
     handleMatlabResponse(received);
+    socket.write('hello from Node JS\r\n');
+    socket.pipe(socket);
   });
 
   socket.on('end', () => {
