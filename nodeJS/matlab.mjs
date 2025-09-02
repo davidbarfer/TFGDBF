@@ -1,5 +1,5 @@
-import { connectHandshake, errorHandshake } from './matlabHandshakes.mjs';
-const activeConnections = new Set();
+import { connectHandshake, errorHandshake } from './matlabFunctions.mjs';
+export const activeConnections = new Set();
 const handshakeMethods = new Set(['connect', 'evaluate']);
 export const processMatlabRequest = socket => {
   console.log('MATLAB client connected');
