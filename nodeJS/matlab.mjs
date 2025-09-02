@@ -1,5 +1,6 @@
+import { connectHandshake, errorHandshake } from './matlabHandshakes.mjs';
 const activeConnections = new Set();
-
+const handshakeMethods = new Set(['connect', 'evaluate']);
 export const processMatlabRequest = socket => {
   console.log('MATLAB client connected');
   activeConnections.add(socket);
@@ -30,25 +31,15 @@ export const processMatlabRequest = socket => {
         try {
           const request = JSON.parse(msg);
           console.log('Received from MATLAB:', request);
-
           // Handle different methods
-          if (request.method === 'handshake') {
-            const response = {
-              type: 'evaluation_result',
-              result: 1,
-              timestamp: new Date().toISOString(),
-              id: request.id,
-            };
+          if (handshakeMethods.has(request.method)) {
+            const response = connectHandshake(request);
             socket.write(JSON.stringify(response) + '\n');
           }
           // Add more method handlers as needed
         } catch (parseError) {
           console.error('Error parsing message:', msg, 'Error:', parseError);
-          const errorResponse = {
-            type: 'error',
-            message: 'Invalid JSON format',
-            id: null,
-          };
+          const errorResponse = errorHandshake;
           socket.write(JSON.stringify(errorResponse) + '\n');
         }
       }

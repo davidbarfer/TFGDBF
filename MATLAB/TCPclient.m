@@ -1,5 +1,5 @@
 clear; clc;
-% MATLAB TCP Client
+%% MATLAB TCP Client
 % Configuration
 HOST = 'localhost';
 PORT = 1235; % Must match the MATLAB_PORT in your .env file
@@ -14,7 +14,7 @@ catch e
 end
 
 % Send initial handshake message
-write(t, JSONPRCRequest('handshake', {}));
+write(t, JSONPRCRequest('connect', {}));
 
 % Main loop
 while isvalid(t) && ~t.UserData
@@ -61,7 +61,7 @@ if isvalid(t)
     delete(t); 
 end
 clear t;
-
+%% Function jsonRPCRequest
 function jsonStr = JSONPRCRequest(method, params)
     % Helper function to create JSON-RPC like requests
     request = struct();
