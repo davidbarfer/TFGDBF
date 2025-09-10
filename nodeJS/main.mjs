@@ -3,6 +3,7 @@ import net from 'node:net';
 import { processRequest } from './api.mjs';
 import { processMatlabRequest, activeConnections } from './matlab.mjs';
 import { launchMatlabClient } from './matlabFunctions.mjs';
+import { generateFileSystem } from './fileSystem.mjs';
 
 const server = http.createServer(processRequest);
 
@@ -26,4 +27,9 @@ matlabServer.listen(Number(process.env.MATLAB_PORT), () => {
       console.error('Failed to launch MATLAB:', matlabError);
     }
   }
+});
+
+// Generate file system
+generateFileSystem().catch(error => {
+  console.error('Error generating file system:', error);
 });
