@@ -1,6 +1,7 @@
 import * as fs from 'node:fs/promises';
+import { query } from './database.mjs';
 
-export const getFileSystemPath = () => {
+export const getFileSystemBasePath = () => {
   const path = process.env.FILESYSTEM_PATH;
   if (!path) {
     throw new Error('FILESYSTEM_PATH is not defined in environment variables.');
@@ -8,18 +9,34 @@ export const getFileSystemPath = () => {
   return path;
 };
 export const generateFileSystem = async () => {
-  const path = getFileSystemPath();
-  await fs.mkdir(path, { recursive: true });
-  await fs.mkdir(`${path}/templates`, { recursive: true });
-  await fs.mkdir(`${path}/submissions`, { recursive: true });
-};
-
-export const getTemplatesPath = () => {
-  const path = getFileSystemPath();
-  return `${path}/templates`;
-};
-
-export const getSubmissionsPath = () => {
-  const path = getFileSystemPath();
-  return `${path}/submissions`;
+  const path = getFileSystemBasePath();
+  // Remove existing directory and its contents for development purposes
+  await fs.rm(path, { recursive: true }).catch(err => {
+    if (err.code !== 'ENOENT') {
+      console.error('Error removing directory:', err);
+    }
+  });
+  // Generate file system structure
+  await fs.mkdir(path, { recursive: true }).catch(err => {
+    console.error('Error creating base directory:', err);
+  });
+  try {
+    const subjects = await query('SELECT id FROM subject');
+    subjects.results.forEach(async subject => {
+      const practices = await query(
+        'SELECT id FROM practice WHERE subject_id = ?',
+        [subject.id]
+      );
+      const subjectPath = `${path}/${subject.id}`;
+      await fs.mkdir(subjectPath, { recursive: true });
+      practices.results.forEach(async practice => {
+        const practicePath = `${subjectPath}/${practice.id}`;
+        await fs.mkdir(practicePath, { recursive: true });
+        await fs.mkdir(`${practicePath}/submissions`, { recursive: true });
+        await fs.mkdir(`${practicePath}/evaluations`, { recursive: true });
+      });
+    });
+  } catch (error) {
+    console.error('Error generating file system:', error);
+  }
 };
