@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken'
 import { parse } from 'cookie';
 import { roles } from "@/consts/users";
 
+const practiceId = Astro.params.id;
 const cookies = parse(Astro.request.headers.get('cookie') || '');
 const token = cookies.token;
 const secret = import.meta.env.JWT_SECRET;
@@ -20,7 +21,8 @@ if (token) {
 <Layout>
   <section>
     { (user?.role === roles.student || user?.role === roles.admin || user?.role === roles.professor) ? (
-      <p>TODO: Tabla con las entregas de cada práctica</p>
+      <h1>Entrega de la práctica {practiceId}</h1>
+      <p>TODO: Tabla con toda la info para entregar la práctica</p>
     ) : (
       <p>No tienes permiso para ver esta página</p>
       <a href="/">Volver al inicio</a>
