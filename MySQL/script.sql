@@ -78,7 +78,7 @@ CREATE TABLE IF NOT EXISTS submissions (
     practice_id INT NOT NULL,
     file_url VARCHAR(255),
     delivery_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    grade DECIMAL(5,2),
+    grade DECIMAL(5,2) DEFAULT NULL,
     feedback TEXT,
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (practice_id) REFERENCES practice(id)

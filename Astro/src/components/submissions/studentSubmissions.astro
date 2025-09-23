@@ -1,6 +1,7 @@
 ---
 import jwt from 'jsonwebtoken'
-import { getPractice, getStudentSubmissions } from "@/utils/users";
+import { getStudentSubmissions } from "@/utils/users";
+import { submissionStatus} from "@/consts/submissions";
 const secret = import.meta.env.JWT_SECRET;
 const { userId, token } = Astro.props;
 let user = null;
@@ -34,10 +35,18 @@ let submissions = await getStudentSubmissions(token as string, userId as string)
           <td>{submission.practice_name}</td>
           <td>{new Date(submission.delivery_date).toLocaleDateString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit' })}</td>
           <td>{submission.grade}</td>
-          <td>TODO: Status</td>
-          <td><a href="#">Ver</a> | <a href="#">Descargar</a></td>
+          <td><p class="status">{submissionStatus(submission.grade, submission.delivery_date)}</p></td>
+          <td><a href="#"><button>Ver</button></a></td>
         </tr>
       ))}
     </tbody>
   </table>
 </div>
+
+<style scoped>
+.status {
+  text-transform: uppercase;
+  font-weight: bold;
+  color: var(--color-tertiary);
+}
+</style>
