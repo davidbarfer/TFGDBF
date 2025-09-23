@@ -13,6 +13,7 @@
 | `/group/:id`                        | Returns a group |
 | `/group/:id/students`               | Returns all students of the group |
 | `/student/:id/groups`               | Returns all groups of the student |
+| `/student/:id/submissions`          | Returns all submissions of the student |
 | `/users`                            | Returns all users                     |
 
 ## Endpoints POST

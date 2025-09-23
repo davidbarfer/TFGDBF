@@ -14,6 +14,7 @@ import {
   getSubjectStudents,
   getPractice,
   getStudentGroups,
+  getStudentSubmissions,
 } from './regExpGet.mjs';
 import {
   postPracticeCreate,
@@ -57,6 +58,7 @@ export const processRequest = async (req, res) => {
   let group_id_student_id = false;
   let practice_id = false;
   let student_id_groups = false;
+  let student_id_submissions = false;
   switch (method) {
     case 'GET':
       subject_id = getSubject(url);
@@ -67,6 +69,7 @@ export const processRequest = async (req, res) => {
       group_id_students = getGroupStudents(url);
       practice_id = getPractice(url);
       student_id_groups = getStudentGroups(url);
+      student_id_submissions = getStudentSubmissions(url);
       if (subject_id) {
         try {
           await authenticate(req, res, true);
@@ -244,6 +247,35 @@ export const processRequest = async (req, res) => {
           return res.end(JSON.stringify(groups.results));
         } catch (error) {
           console.error('Database query error on get groups:', error);
+          res.statusCode = 500;
+          return res.end(JSON.stringify({ error: 'Internal server error' }));
+        }
+      } else if (student_id_submissions) {
+        try {
+          await authenticate(req, res, true);
+          const submissions = await query(
+            'SELECT * FROM submissions WHERE user_id = ?',
+            [student_id_submissions]
+          );
+          if (submissions.results.length === 0) {
+            res.statusCode = 404;
+            return res.end(
+              JSON.stringify({ error: 'User submissions not found' })
+            );
+          }
+          await Promise.all(
+            submissions.results.map(async (submission, idx) => {
+              const practice = await query(
+                'SELECT name FROM practice WHERE id = ?',
+                [submission.practice_id]
+              );
+              submission.practice_name = practice.results[0].name;
+              submissions.results[idx] = submission;
+            })
+          );
+          return res.end(JSON.stringify(submissions.results));
+        } catch (error) {
+          console.error('Database query error on get submissions:', error);
           res.statusCode = 500;
           return res.end(JSON.stringify({ error: 'Internal server error' }));
         }

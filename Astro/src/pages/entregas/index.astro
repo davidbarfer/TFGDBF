@@ -1,5 +1,6 @@
 ---
 import Layout from "@/layouts/Layout.astro";
+import StudentSubmissions from "@/components/submissions/studentSubmissions.astro";
 import jwt from 'jsonwebtoken'
 import { parse } from 'cookie';
 import { roles } from "@/consts/users";
@@ -19,12 +20,14 @@ if (token) {
 
 <Layout>
   <section>
-    { (user?.role === roles.student || user?.role === roles.admin || user?.role === roles.professor) ? (
-      <p>TODO: Tabla con las entregas de cada práctica</p>
+    {user?.role === roles.professor || user?.role === roles.admin ? (
+      <p> TODO: Tabla para el profesor con todas las entregas de su asignatura</p>
+    ) : ( user?.role === roles.student ? (
+      <StudentSubmissions userId={user.userId} token={token} />
     ) : (
       <p>No tienes permiso para ver esta página</p>
       <a href="/">Volver al inicio</a>
-    )}
+    ))}
   </section>
 </Layout>
 

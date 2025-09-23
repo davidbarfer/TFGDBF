@@ -1,0 +1,43 @@
+---
+import jwt from 'jsonwebtoken'
+import { getPractice, getStudentSubmissions } from "@/utils/users";
+const secret = import.meta.env.JWT_SECRET;
+const { userId, token } = Astro.props;
+let user = null;
+if (token) {
+  try {
+    user = jwt.verify(token, secret); // same secret as backend
+  } catch (err) {
+    console.warn("Invalid or expired token", err);
+  }
+}
+let submissions = await getStudentSubmissions(token as string, userId as string);
+---
+
+<div>
+  <h1>Entregas del alumno {userId}</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>Entrega</th>
+        <th>Practica</th>
+        <th>Fecha de entrega</th>
+        <th>Nota</th>
+        <th>Estado</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {submissions.map(submission => (
+        <tr>
+          <td>{submission.id}</td>
+          <td>{submission.practice_name}</td>
+          <td>{new Date(submission.delivery_date).toLocaleDateString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit' })}</td>
+          <td>{submission.grade}</td>
+          <td>TODO: Status</td>
+          <td><a href="#">Ver</a> | <a href="#">Descargar</a></td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>

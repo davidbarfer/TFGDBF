@@ -76,7 +76,7 @@ CREATE TABLE IF NOT EXISTS submissions (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     practice_id INT NOT NULL,
-    file_url VARCHAR(255) NOT NULL,
+    file_url VARCHAR(255),
     delivery_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     grade DECIMAL(5,2),
     feedback TEXT,

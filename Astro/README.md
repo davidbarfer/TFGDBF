@@ -12,7 +12,7 @@
 |`/asignaturas/[id]/grupos/create`                               |Crear grupo                   |Professor/Admin           |Professor/Admin|
 |`/asignaturas/[id]/grupos/[idGrupo]`                            |Ver grupo                     |Professor/Admin/Student   |Professor/Admin/Student|
 |`/asignaturas/[id]/practicas/[id]/join`                         |Unirse a un grupo de práctica |Student                   |Student     |
-|`/practicas`                                                    |Ver entregas por prácticas    |Student/Admin             |Student/Admin|
+|`/entregas`                                                     |Ver entregas                  |Todos                     |Todos       |
 
 _Role acceso: Tipo de usuario que puede acceder a la url_
 _Role vista: Tipo de usuario que ven la misma o distinta vista. Si Todos se muestra para todos los roles la misma vista_

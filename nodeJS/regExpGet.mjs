@@ -69,3 +69,11 @@ export function getStudentGroups(url) {
   }
   return false;
 }
+export function getStudentSubmissions(url) {
+  const regex = /^\/student\/\d+\/submissions$/;
+  if (regex.test(url)) {
+    const id = url.split('/')[2];
+    return id;
+  }
+  return false;
+}
