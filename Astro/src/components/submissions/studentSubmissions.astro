@@ -36,7 +36,7 @@ let submissions = await getStudentSubmissions(token as string, userId as string)
           <td>{new Date(submission.delivery_date).toLocaleDateString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit' })}</td>
           <td>{submission.grade}</td>
           <td><p class="status">{submissionStatus(submission.grade, submission.delivery_date)}</p></td>
-          <td><a href="#"><button>Ver</button></a></td>
+          <td><a href={`/asignaturas/${submission.subject_id}/practicas/${submission.practice_id}/entregas/${submission.id}`}><button>Ver</button></a></td>
         </tr>
       ))}
     </tbody>

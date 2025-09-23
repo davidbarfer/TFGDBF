@@ -266,10 +266,11 @@ export const processRequest = async (req, res) => {
           await Promise.all(
             submissions.results.map(async (submission, idx) => {
               const practice = await query(
-                'SELECT name FROM practice WHERE id = ?',
+                'SELECT name, subject_id FROM practice WHERE id = ?',
                 [submission.practice_id]
               );
               submission.practice_name = practice.results[0].name;
+              submission.subject_id = practice.results[0].subject_id;
               submissions.results[idx] = submission;
             })
           );
