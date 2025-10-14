@@ -1,10 +1,13 @@
 ---
 import Layout from "@/layouts/Layout.astro";
+import SubmissionDetails from "@/components/submissions/submissionDetails.astro";
+import SumbissionForm from "@/components/submissions/submissionForm.astro";
+import { getStudentPracticeSubmission } from "@/utils/users";
 import jwt from 'jsonwebtoken'
 import { parse } from 'cookie';
 import { roles } from "@/consts/users";
 
-const practiceId = Astro.params.id;
+const {id:submissionId} = Astro.params;
 const cookies = parse(Astro.request.headers.get('cookie') || '');
 const token = cookies.token;
 const secret = import.meta.env.JWT_SECRET;
@@ -16,13 +19,18 @@ if (token) {
     console.warn("Invalid or expired token", err);
   }
 }
+const submission = await getStudentPracticeSubmission(token as string, user?.userId as string, submissionId as string);
+if (submission === null) {
+  return Astro.redirect('/404');
+}
 ---
 
 <Layout>
   <section>
     { (user?.role === roles.student || user?.role === roles.admin || user?.role === roles.professor) ? (
-      <h1>Entrega de la práctica {practiceId}</h1>
-      <p>TODO: Tabla con toda la info para entregar la práctica</p>
+      <h1>Entrega {submissionId} de la práctica {submission.practice_name}</h1>
+      <SubmissionDetails submission={submission}/>
+      <SumbissionForm submission={submission} />
     ) : (
       <p>No tienes permiso para ver esta página</p>
       <a href="/">Volver al inicio</a>

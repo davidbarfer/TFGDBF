@@ -77,3 +77,12 @@ export function getStudentSubmissions(url) {
   }
   return false;
 }
+export function getStudentPracticeSubmission(url) {
+  const regex = /^\/student\/\d+\/practice\/\d+\/submission$/;
+  if (regex.test(url)) {
+    const student_id = url.split('/')[2];
+    const practice_id = url.split('/')[4];
+    return { student_id, practice_id };
+  }
+  return false;
+}

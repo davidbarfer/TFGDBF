@@ -147,3 +147,19 @@ export async function getStudentSubmissions(token: string, user_id: string) {
     // }
     return response.json();
 }
+export async function getStudentPracticeSubmission(token: string, student_id: string, practice_id: string) {
+    const response = await fetch(`${API_URL}/student/${student_id}/practice/${practice_id}/submission`, 
+        {
+            method: 'GET',
+            headers: {
+                'Authorization': token,
+            },
+        }
+    );
+    if(!response.ok) {
+        return null;
+    //     const errorText = await response.json();
+    //     throw new Error(`Error ${response.status}: ${errorText.error}`);
+    }
+    return response.json();
+}
