@@ -10,6 +10,7 @@ const submission = Astro.props.submission;
         <th>Fecha de entrega</th>
         <th>Nota</th>
         <th>Estado</th>
+        <th>Feedback</th>
       </tr>
     </thead>
     <tbody>
@@ -26,6 +27,9 @@ const submission = Astro.props.submission;
               <p class="status">
                 {submissionStatus(submission.grade, submission.delivery_date)}
               </p>
+            </td>
+            <td>
+              <p>{submission.feedback}</p>
             </td>
           </tr>
     </tbody>

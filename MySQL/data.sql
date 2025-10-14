@@ -38,6 +38,8 @@ INSERT INTO submissions (user_id, practice_id, delivery_date, grade) VALUES
 (4, 2, '2026-01-02', NULL),
 (2, 2, '2023-01-03', NULL);
 
+UPDATE submissions SET feedback = 'Buen trabajo' WHERE id = 1;
+
 
 -- Show tables
 SHOW TABLES;
