@@ -1,5 +1,6 @@
 import * as fs from 'node:fs/promises';
 import { query } from './database.mjs';
+import { get } from 'node:http';
 
 export const getFileSystemBasePath = () => {
   const path = process.env.FILESYSTEM_PATH;
@@ -40,3 +41,14 @@ export const generateFileSystem = async () => {
     console.error('Error generating file system:', error);
   }
 };
+export async function getFileSubmission(url) {
+  const path = getFileSystemBasePath();
+  const filePath = `${path}/${url}`;
+  try {
+    const file = await fs.readFile(filePath);
+    return file;
+  } catch (error) {
+    console.error('Error reading file:', error);
+    return null;
+  }
+}

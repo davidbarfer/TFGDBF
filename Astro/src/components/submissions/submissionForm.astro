@@ -3,6 +3,21 @@ const submission = Astro.props.submission;
 ---
 
 <section>
-  TODO: Formulario para realizar la entrega recuperando template
+  <form id="submission-form">
+    <label for="code">Code</label>
+    <textarea id="code" name="code" required rows="8" cols="50"></textarea>
+  </form>
 </section>
 
+<script></script>
+
+<style>
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  textarea {
+    resize: none;
+  }
+</style>

@@ -163,3 +163,19 @@ export async function getStudentPracticeSubmission(token: string, student_id: st
     }
     return response.json();
 }
+export async function getSubmissionFile(token: string, student_id: string, submission_id: string) {
+    const response = await fetch(`${API_URL}/student/${student_id}/submission/${submission_id}/file`, 
+        {
+            method: 'GET',
+            headers: {
+                'Authorization': token,
+            },
+        }
+    );
+    if(!response.ok) {
+        return null;
+    //     const errorText = await response.json();
+    //     throw new Error(`Error ${response.status}: ${errorText.error}`);
+    }
+    return response.json();
+}
