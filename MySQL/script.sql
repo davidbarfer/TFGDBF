@@ -53,7 +53,8 @@ CREATE TABLE IF NOT EXISTS practice (
   name VARCHAR(100) NOT NULL,
   description TEXT,
   deadline DATE,
-  file_url VARCHAR(255),
+  submissions_template_url VARCHAR(255) DEFAULT NULL,
+  evaluation_template_url VARCHAR(255) DEFAULT NULL,
   FOREIGN KEY (subject_id) REFERENCES subject(id)
 );
 
@@ -75,9 +76,9 @@ CREATE TABLE IF NOT EXISTS submissions (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     practice_id INT NOT NULL,
-    file_url VARCHAR(255) NOT NULL,
+    file_url VARCHAR(255) DEFAULT NULL,
     delivery_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    grade DECIMAL(5,2),
+    grade DECIMAL(5,2) DEFAULT NULL,
     feedback TEXT,
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (practice_id) REFERENCES practice(id)

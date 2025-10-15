@@ -1,5 +1,5 @@
 ---
-import { getPractices, getStudentGroups } from "@/utils/users";
+import { getPractices, getStudentGroups, getStudentSubmissions } from "@/utils/users";
 import jwt from 'jsonwebtoken'
 const secret = import.meta.env.JWT_SECRET;
 const { subject, token } = Astro.props;
@@ -16,6 +16,7 @@ if (practices === null) {
   practices = [];
 }
 const userGroups = await getStudentGroups(token as string, user?.userId as string);
+const userSubmissions = await getStudentSubmissions(token as string, user?.userId as string);
 ---
   <div>
     <section class="subject-info">
@@ -49,7 +50,13 @@ const userGroups = await getStudentGroups(token as string, user?.userId as strin
                 <a href={`/asignaturas/${subject?.id}/practicas/${practice.id}/join`}><button>Inscribirme</button></a>
               )}
               </td>
-              <td>Ver Entrega (TODO)</td>
+              <td>
+                {userSubmissions.find((submission: any) => submission.practice_id === practice.id) === undefined ? (
+                  <p>No hay entrega asignada</p>
+                ) : (
+                  <a href={`/asignaturas/${subject?.id}/practicas/${practice.id}/entregas/${userSubmissions.find((submission: any) => submission.practice_id === practice.id)?.id}`}><button>Ver Entrega</button></a>
+                )}
+              </td>
             </tr>
           ))}
         </tbody>

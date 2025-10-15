@@ -1,0 +1,23 @@
+---
+const submission = Astro.props.submission;
+---
+
+<section>
+  <form id="submission-form">
+    <label for="entrega">Tu entrega</label>
+    <textarea id="entrega" name="entrega" required rows="8" cols="50" data-code={submission.template}>{submission.template}</textarea>
+  </form>
+</section>
+
+<script></script>
+
+<style>
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  textarea {
+    resize: none;
+  }
+</style>

@@ -5,6 +5,7 @@ import {
   authenticate,
   unhandledUserDefinedException,
 } from './database.mjs';
+import { getFileSubmission } from './fileSystem.mjs';
 import {
   getSubject,
   getSubjectPractices,
@@ -14,6 +15,9 @@ import {
   getSubjectStudents,
   getPractice,
   getStudentGroups,
+  getStudentSubmissions,
+  getStudentPracticeSubmission,
+  getStudentSubmissionFile,
 } from './regExpGet.mjs';
 import {
   postPracticeCreate,
@@ -57,6 +61,9 @@ export const processRequest = async (req, res) => {
   let group_id_student_id = false;
   let practice_id = false;
   let student_id_groups = false;
+  let student_id_submissions = false;
+  let student_id_practice_id_submission = false;
+  let student_id_submission_id_file = false;
   switch (method) {
     case 'GET':
       subject_id = getSubject(url);
@@ -67,6 +74,9 @@ export const processRequest = async (req, res) => {
       group_id_students = getGroupStudents(url);
       practice_id = getPractice(url);
       student_id_groups = getStudentGroups(url);
+      student_id_submissions = getStudentSubmissions(url);
+      student_id_practice_id_submission = getStudentPracticeSubmission(url);
+      student_id_submission_id_file = getStudentSubmissionFile(url);
       if (subject_id) {
         try {
           await authenticate(req, res, true);
@@ -244,6 +254,98 @@ export const processRequest = async (req, res) => {
           return res.end(JSON.stringify(groups.results));
         } catch (error) {
           console.error('Database query error on get groups:', error);
+          res.statusCode = 500;
+          return res.end(JSON.stringify({ error: 'Internal server error' }));
+        }
+      } else if (student_id_submissions) {
+        try {
+          await authenticate(req, res, true);
+          const submissions = await query(
+            'SELECT * FROM submissions WHERE user_id = ?',
+            [student_id_submissions]
+          );
+          if (submissions.results.length === 0) {
+            res.statusCode = 404;
+            return res.end(
+              JSON.stringify({ error: 'User submissions not found' })
+            );
+          }
+          await Promise.all(
+            submissions.results.map(async (submission, idx) => {
+              const practice = await query(
+                'SELECT name, subject_id FROM practice WHERE id = ?',
+                [submission.practice_id]
+              );
+              submission.practice_name = practice.results[0].name;
+              submission.subject_id = practice.results[0].subject_id;
+              submissions.results[idx] = submission;
+            })
+          );
+          return res.end(JSON.stringify(submissions.results));
+        } catch (error) {
+          console.error('Database query error on get submissions:', error);
+          res.statusCode = 500;
+          return res.end(JSON.stringify({ error: 'Internal server error' }));
+        }
+      } else if (student_id_practice_id_submission) {
+        try {
+          await authenticate(req, res, true);
+          const submission = await query(
+            'SELECT * FROM submissions WHERE user_id = ? AND practice_id = ?',
+            [
+              student_id_practice_id_submission.student_id,
+              student_id_practice_id_submission.practice_id,
+            ]
+          );
+          if (submission.results.length === 0) {
+            res.statusCode = 404;
+            return res.end(JSON.stringify({ error: 'Submission not found' }));
+          }
+          const practice = await query(
+            'SELECT name, subject_id FROM practice WHERE id = ?',
+            [submission.results[0].practice_id]
+          );
+          submission.results[0].practice_name = practice.results[0].name;
+          submission.results[0].subject_id = practice.results[0].subject_id;
+          return res.end(JSON.stringify(submission.results[0]));
+        } catch (error) {
+          console.error('Database query error on get submission:', error);
+          res.statusCode = 500;
+          return res.end(JSON.stringify({ error: 'Internal server error' }));
+        }
+      } else if (student_id_submission_id_file) {
+        try {
+          await authenticate(req, res, true);
+          const practice_id = await query(
+            'SELECT practice_id FROM submissions WHERE id = ? AND user_id = ?',
+            [
+              student_id_submission_id_file.submission_id,
+              student_id_submission_id_file.student_id,
+            ]
+          );
+          if (practice_id.results[0].length === 0) {
+            res.statusCode = 404;
+            return res.end(JSON.stringify({ error: 'Practice not found' }));
+          }
+          const subject_id = await query(
+            'SELECT subject_id FROM practice WHERE id = ?',
+            [practice_id.results[0].practice_id]
+          );
+          if (subject_id.results.length === 0) {
+            res.statusCode = 404;
+            return res.end(JSON.stringify({ error: 'Subject not found' }));
+          }
+          const url = `${subject_id.results[0].subject_id}/${practice_id.results[0].practice_id}/submissions/template.m`;
+          const submissionFile = await getFileSubmission(url);
+          if (!submissionFile) {
+            res.statusCode = 404;
+            return res.end(
+              JSON.stringify({ error: 'Submission file not found' })
+            );
+          }
+          return res.end(JSON.stringify(submissionFile));
+        } catch (error) {
+          console.error('Database query error on get submission:', error);
           res.statusCode = 500;
           return res.end(JSON.stringify({ error: 'Internal server error' }));
         }

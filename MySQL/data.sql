@@ -11,9 +11,9 @@ INSERT INTO subject (name, course, degree) VALUES
 ('Complentos de Control', 4, 'Grado en Ingeniería de Tecnologías Industriales')
 ON DUPLICATE KEY UPDATE name = name, course = course, degree = degree; 
 
-INSERT INTO practice (subject_id, name, description, deadline, file_url) VALUES
-(1, 'Control PI', 'Diseñe un control PI', '2025-09-18', 'https://example.com/practice1.pdf'),
-(2, 'Control GPC', 'Diseñe un control GPC', '2025-08-18', 'https://example.com/practice2.pdf');
+INSERT INTO practice (subject_id, name, description, deadline) VALUES
+(1, 'Control PI', 'Diseñe un control PI', '2025-09-18'),
+(2, 'Control GPC', 'Diseñe un control GPC', '2025-08-18');
 
 INSERT INTO practice_groups (practice_id, name, max_participants, practice_group_date, start_time, end_time) VALUES
 (1, 1, 10, '2025-09-17', '08:00:00', '10:00:00'),
@@ -32,6 +32,13 @@ INSERT INTO users_subjects (user_id, subject_id) VALUES
 INSERT INTO practice_groups_users (group_id, user_id) VALUES
 (1, 2),
 (2, 4);
+
+INSERT INTO submissions (user_id, practice_id, delivery_date, grade) VALUES
+(2, 1, '2023-01-01', 10),
+(4, 2, '2026-01-02', NULL),
+(2, 2, '2023-01-03', NULL);
+
+UPDATE submissions SET feedback = 'Buen trabajo' WHERE id = 1;
 
 
 -- Show tables

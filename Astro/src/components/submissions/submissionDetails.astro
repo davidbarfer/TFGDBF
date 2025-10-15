@@ -1,0 +1,45 @@
+---
+import { submissionStatus } from "@/consts/submissions";
+const submission = Astro.props.submission;
+---
+
+<section>
+  <table>
+    <thead>
+      <tr>
+        <th>Fecha de entrega</th>
+        <th>Nota</th>
+        <th>Estado</th>
+        <th>Feedback</th>
+      </tr>
+    </thead>
+    <tbody>
+          <tr>
+            <td>
+              {new Date(submission.delivery_date).toLocaleDateString("es-ES", {
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+              })}
+            </td>
+            <td>{submission.grade}</td>
+            <td>
+              <p class="status">
+                {submissionStatus(submission.grade, submission.delivery_date)}
+              </p>
+            </td>
+            <td>
+              <p>{submission.feedback}</p>
+            </td>
+          </tr>
+    </tbody>
+  </table>
+</section>
+
+<style scoped>
+  .status {
+    text-transform: uppercase;
+    font-weight: bold;
+    color: var(--color-tertiary);
+  }
+</style>

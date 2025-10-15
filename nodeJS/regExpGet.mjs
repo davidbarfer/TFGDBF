@@ -69,3 +69,29 @@ export function getStudentGroups(url) {
   }
   return false;
 }
+export function getStudentSubmissions(url) {
+  const regex = /^\/student\/\d+\/submissions$/;
+  if (regex.test(url)) {
+    const id = url.split('/')[2];
+    return id;
+  }
+  return false;
+}
+export function getStudentPracticeSubmission(url) {
+  const regex = /^\/student\/\d+\/practice\/\d+\/submission$/;
+  if (regex.test(url)) {
+    const student_id = url.split('/')[2];
+    const practice_id = url.split('/')[4];
+    return { student_id, practice_id };
+  }
+  return false;
+}
+export function getStudentSubmissionFile(url) {
+  const regex = /^\/student\/\d+\/submission\/\d+\/file$/;
+  if (regex.test(url)) {
+    const student_id = url.split('/')[2];
+    const submission_id = url.split('/')[4];
+    return { student_id, submission_id };
+  }
+  return false;
+}
