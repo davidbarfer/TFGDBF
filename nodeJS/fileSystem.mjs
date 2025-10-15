@@ -45,7 +45,7 @@ export async function getFileSubmission(url) {
   const path = getFileSystemBasePath();
   const filePath = `${path}/${url}`;
   try {
-    const file = await fs.readFile(filePath);
+    const file = await fs.readFile(filePath, 'utf-8');
     return file;
   } catch (error) {
     console.error('Error reading file:', error);

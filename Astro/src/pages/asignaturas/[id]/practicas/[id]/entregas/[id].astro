@@ -25,9 +25,8 @@ if (submission === null) {
 }
 const submissionFile = await getSubmissionFile(token as string, user?.userId as string, submissionId as string);
 if (submissionFile) {
-  submission.code = submissionFile;
+  submission.template = submissionFile;
 }
-console.log(submissionFile);
 ---
 
 <Layout>

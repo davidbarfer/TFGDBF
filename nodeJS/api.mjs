@@ -335,7 +335,7 @@ export const processRequest = async (req, res) => {
             res.statusCode = 404;
             return res.end(JSON.stringify({ error: 'Subject not found' }));
           }
-          const url = `${subject_id.results[0].subject_id}/${practice_id.results[0].practice_id}/submissions/template.txt`;
+          const url = `${subject_id.results[0].subject_id}/${practice_id.results[0].practice_id}/submissions/template.m`;
           const submissionFile = await getFileSubmission(url);
           if (!submissionFile) {
             res.statusCode = 404;

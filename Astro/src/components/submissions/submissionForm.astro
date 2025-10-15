@@ -4,8 +4,8 @@ const submission = Astro.props.submission;
 
 <section>
   <form id="submission-form">
-    <label for="code">Code</label>
-    <textarea id="code" name="code" required rows="8" cols="50"></textarea>
+    <label for="entrega">Tu entrega</label>
+    <textarea id="entrega" name="entrega" required rows="8" cols="50" data-code={submission.template}>{submission.template}</textarea>
   </form>
 </section>
 
