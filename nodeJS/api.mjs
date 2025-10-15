@@ -343,7 +343,6 @@ export const processRequest = async (req, res) => {
               JSON.stringify({ error: 'Submission file not found' })
             );
           }
-          console.log(submissionFile);
           return res.end(JSON.stringify(submissionFile));
         } catch (error) {
           console.error('Database query error on get submission:', error);

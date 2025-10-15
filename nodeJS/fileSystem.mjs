@@ -1,6 +1,5 @@
 import * as fs from 'node:fs/promises';
 import { query } from './database.mjs';
-import { get } from 'node:http';
 
 export const getFileSystemBasePath = () => {
   const path = process.env.FILESYSTEM_PATH;
