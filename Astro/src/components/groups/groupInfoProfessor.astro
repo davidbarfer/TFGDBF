@@ -11,7 +11,7 @@ if (token) {
     console.warn("Invalid or expired token", err);
   }
 }
-const { data: students, error } = await Astro.callAction(actions.user.getGroupStudents, { token: token as string, group_id: group?.id as string });
+const { data: students, error: studentsError } = await Astro.callAction(actions.user.getGroupStudents, { token: token as string, group_id: String(group?.id) });
 ---
 
 <div>
@@ -23,7 +23,7 @@ const { data: students, error } = await Astro.callAction(actions.user.getGroupSt
     <p>Hora de fin: {group?.end_time}</p>
   </section>
   <section class="group-actions">
-    <a href={`/asignaturas/${group?.subject_id}/grupos/${group?.id}/edit`}><button>Editar</button></a>
+    <a href={`/asignaturas/${practice?.subject_id}/grupos/${group?.id}/edit`}><button>Editar</button></a>
     <button id="deleteGroupBtn" data-id={group?.id} data-token={token}>Eliminar</button>
   </section>
   <section>

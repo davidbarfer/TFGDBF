@@ -20,7 +20,7 @@ if (token) {
 }
 
 const { data: group, error: groupError } = await Astro.callAction(actions.user.getGroup, { token: token as string, group_id: id as string });
-const { data: practice, error: practicesError } = await Astro.callAction(actions.user.getPractice, { token: token as string, practice_id: group?.practice_id as string });
+const { data: practice, error: practicesError } = await Astro.callAction(actions.user.getPractice, { token: token as string, practice_id: String(group?.practice_id) as string });
 ---
 
 <Layout>

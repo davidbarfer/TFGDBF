@@ -16,13 +16,13 @@ let students = await getSubjectsStudents(token as string, subject?.id as string)
 if (students === null) {
   students = [];
 }
-let { data: practices, error } = await Astro.callAction(actions.user.getPractices, { token: token as string, subject_id: subject?.id as string });
+let { data: practices, practicesError } = await Astro.callAction(actions.user.getPractices, { token: token as string, subject_id: String(subject?.id) });
 if (practices === null) {
   practices = [];
 }
 // Replace the forEach with Promise.all and map
 practices = await Promise.all(practices.map(async (practice: any) => {
-  const { data: groups, error } = await Astro.callAction(actions.user.getGroups, { token: token as string, subject_id: subject?.id as string, practice_id: practice.id as string });
+  const { data: groups, groupsError } = await Astro.callAction(actions.user.getGroups, { token: token as string, subject_id: String(subject?.id), practice_id: String(practice.id) });
   if(groups && Array.isArray(groups)) {
     return {
       ...practice,
