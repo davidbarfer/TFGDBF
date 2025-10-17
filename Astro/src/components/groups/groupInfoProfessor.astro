@@ -24,7 +24,7 @@ const { data: students, error: studentsError } = await Astro.callAction(actions.
   </section>
   <section class="group-actions">
     <a href={`/asignaturas/${practice?.subject_id}/grupos/${group?.id}/edit`}><button>Editar</button></a>
-    <button id="deleteGroupBtn" data-id={group?.id} data-token={token}>Eliminar</button>
+    <button id="deleteGroupBtn" data-id={group?.id} data-token={token} data-subject_id={practice?.subject_id}>Eliminar</button>
   </section>
   <section>
     <h2>Alumnos</h2>
@@ -68,18 +68,19 @@ const { data: students, error: studentsError } = await Astro.callAction(actions.
   }
 </style>
 <script>
-  import { deleteGroup, deleteStudentGroup } from "@/utils/professor";
+  import { actions } from "astro:actions";
   const deleteGroupBtn = document.getElementById('deleteGroupBtn');
   deleteGroupBtn?.addEventListener('click',async () => {
     const id = deleteGroupBtn?.dataset.id;
     const token = deleteGroupBtn?.dataset.token;
-    const response = await deleteGroup(token, id);
-    if(response.error) {
-      alert(response.error);
+    const { data: response,  error: responseError } = await actions.professor.deleteGroup({ token: token as string, group_id: String(id) });
+    if(responseError) {
+      alert(responseError.message);
     }
     else {
       alert('Grupo eliminado');
-      window.location.href = `/asignaturas/${group?.subject_id}/grupos`;
+      const subject_id = deleteGroupBtn?.dataset.subject_id;
+      window.location.href = `/asignaturas/${subject_id}`;
     }
   });
   const deleteStudentBtn = document.getElementById('deleteStudentBtn');
@@ -87,9 +88,9 @@ const { data: students, error: studentsError } = await Astro.callAction(actions.
     const group_id = deleteStudentBtn?.dataset.group_id;
     const student_id = deleteStudentBtn?.dataset.student_id;
     const token = deleteStudentBtn?.dataset.token;
-    const response = await deleteStudentGroup(token as string, group_id as string, student_id as string);
-    if(response.error) {
-      alert(response.error);
+    const { data: response, error: responseError } = await actions.professor.deleteStudentGroup({ token: token as string, group_id: String(group_id), student_id: String(student_id) });
+    if(responseError) {
+      alert(responseError.message);
     }
     else {
       alert('Alumno eliminado');

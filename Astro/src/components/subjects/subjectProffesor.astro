@@ -1,6 +1,5 @@
 ---
 import { actions } from 'astro:actions';
-import { getSubjectsStudents } from "@/utils/professor";
 import jwt from 'jsonwebtoken'
 const secret = import.meta.env.JWT_SECRET;
 const { subject, token } = Astro.props;
@@ -12,17 +11,17 @@ if (token) {
     console.warn("Invalid or expired token", err);
   }
 }
-let students = await getSubjectsStudents(token as string, subject?.id as string);
+let { data: students, error: studentsError } = await Astro.callAction(actions.professor.getSubjectsStudents, { token: token as string, subject_id: String(subject?.id) });
 if (students === null) {
   students = [];
 }
-let { data: practices, practicesError } = await Astro.callAction(actions.user.getPractices, { token: token as string, subject_id: String(subject?.id) });
+let { data: practices, error: practicesError } = await Astro.callAction(actions.user.getPractices, { token: token as string, subject_id: String(subject?.id) });
 if (practices === null) {
   practices = [];
 }
 // Replace the forEach with Promise.all and map
 practices = await Promise.all(practices.map(async (practice: any) => {
-  const { data: groups, groupsError } = await Astro.callAction(actions.user.getGroups, { token: token as string, subject_id: String(subject?.id), practice_id: String(practice.id) });
+  const { data: groups, error:groupsError } = await Astro.callAction(actions.user.getGroups, { token: token as string, subject_id: String(subject?.id), practice_id: String(practice.id) });
   if(groups && Array.isArray(groups)) {
     return {
       ...practice,
