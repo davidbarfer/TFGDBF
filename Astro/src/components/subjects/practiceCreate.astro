@@ -15,7 +15,7 @@ const { id, token } = Astro.props;
 </section>
 
 <script>
-import { createPractice } from "@/utils/professor";
+import { actions } from "astro:actions";
 const form = document.getElementById('practiceForm');
 if (form) {
   const subject_id = form?.dataset.id;
@@ -23,8 +23,19 @@ if (form) {
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
-    const data = Object.fromEntries(formData.entries());
-    createPractice(token, subject_id, data);
+    const data = {
+      name: formData.get('name') as string,
+      description: formData.get('description') as string,
+      deadline: formData.get('deadline') as string,
+    };
+    const { data: response, error: responseError} = actions.professor.createPractice({ token: token as string, subject_id: String(subject_id), practice_data: data });
+    if(responseError) {
+      alert(responseError.message);
+    }
+    else {
+      alert('Práctica creada exitosamente');
+      window.location.href = `/asignaturas/${subject_id}`;
+    }
   });
 }
 </script>

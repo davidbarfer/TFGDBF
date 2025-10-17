@@ -1,7 +1,7 @@
 ---
-import { getPractices } from "@/utils/users";
+import { actions } from "astro:actions";
 const { id, token, subject } = Astro.props;
-const practices = await getPractices(token as string, id as string);
+const { data: practices, error } = await Astro.callAction(actions.user.getPractices, { token: token as string, subject_id: id as string });
 ---
 <section>
   <h1>Crear grupo</h1>
@@ -22,7 +22,7 @@ const practices = await getPractices(token as string, id as string);
 </section>
 
 <script>
-import { createGroups } from "@/utils/professor";
+import { actions } from "astro:actions";
 const groupsNumber = document.getElementById('groupsNumber');
 
 function renderGroups(count: number) {
@@ -79,12 +79,13 @@ groupsNumber?.addEventListener('input', (e) => {
             start_time: formData.get(`start_time_${i}`)?.toString() || '',
             end_time: formData.get(`end_time_${i}`)?.toString() || ''
           };
-          groupPromises.push(createGroups(token, subject_id, groupData));
+          groupPromises.push(actions.professor.createGroups({ token: token as string, subject_id: String(subject_id), group_data: groupData }));
         }
         
         // Wait for all groups to be created
         await Promise.all(groupPromises);
         alert('Grupos creados exitosamente');
+        window.location.href = `/asignaturas/${subject_id}`;
       } catch (error : any) {
         alert(`Error al crear los grupos: ${error}`);
       }

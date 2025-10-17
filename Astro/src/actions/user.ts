@@ -1,4 +1,4 @@
-import { ActionError, defineAction, getActionContext } from "astro:actions";
+import { ActionError, defineAction } from "astro:actions";
 import { z } from "astro:schema";
 import { API_URL } from "@/utils/enviroment";
 
@@ -123,6 +123,9 @@ export const user = {
           },
         }
       );
+      if (response.status === 404) {
+        return [];
+      }
       if (!response.ok) {
         return new ActionError({
           code: ActionError.statusToCode(response.status),
@@ -195,6 +198,9 @@ export const user = {
           },
         }
       );
+      if(response.status === 404) {
+        return [];
+      }
       if (!response.ok) {
         return new ActionError({
           code: ActionError.statusToCode(response.status),

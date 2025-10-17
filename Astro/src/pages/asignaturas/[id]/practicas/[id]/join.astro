@@ -1,8 +1,8 @@
 ---
+import { actions } from "astro:actions";
 import Layout from "@/layouts/Layout.astro";
 import jwt from 'jsonwebtoken'
 import { parse } from 'cookie';
-import { getPractice, getGroups, getStudentGroups } from "@/utils/users";
 const { id } = Astro.params;
 const cookies = parse(Astro.request.headers.get('cookie') || '');
 const token = cookies.token;
@@ -15,15 +15,15 @@ if (token) {
     console.warn("Invalid or expired token", err);
   }
 }
-let practice = await getPractice(token as string, id as string);
-const groups = await getGroups(token as string, practice.subject_id as string, practice.id as string);
+let { data: practice, error: practiceError } = await Astro.callAction(actions.user.getPractice, { token: token as string, practice_id: id as string });
+const { data: groups, error: groupsError } = await Astro.callAction(actions.user.getGroups, { token: token as string, subject_id: String(practice?.subject_id), practice_id: String(practice?.id) });
 if(groups && Array.isArray(groups)) {
   practice = {
     ...practice,
     groups: groups
   };
 }
-const userGroups = await getStudentGroups(token as string, user?.userId as string);
+const { data: userGroups, error: userGroupsError } = await Astro.callAction(actions.user.getStudentGroups, { token: token as string, user_id: String(user?.userId)});
 // Create a Set of group ids for quick lookup
 const groupIds = new Set(groups.map((g: any) => g.id));
 
@@ -84,16 +84,17 @@ const isEnrolled = matchingIds.length > 0;
 </Layout>
 
 <script>
-import { addStudentToGroup } from "@/utils/users";
+import { actions } from "astro:actions";
 const buttons = document.querySelectorAll('.joinGroupBtn');
 buttons.forEach(button => {
   button.addEventListener('click', async (event) => {
     const groupId = event?.target?.dataset.groupid;
     const token = event?.target?.dataset.token;
     const userId = event?.target?.dataset.userid;
-    const response = await addStudentToGroup(token as string, groupId as string, userId as string);
-    if(response.error) {
-      alert(response.error);
+    const { data: response, error: addStudentError } = await actions.user.addStudentToGroup({ token: token as string, group_id: groupId as string, student_id: userId as string });
+    // const { data: response, error: addStudentError } = await Astro.callAction(actions.user.addStudentToGroup, { token: token as string, group_id: groupId as string, student_id: userId as string });
+    if(addStudentError) {
+      alert(addStudentError.message);
     }
     else {
       alert('Alumno inscrito');

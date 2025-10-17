@@ -1,9 +1,9 @@
 ---
+import { actions } from "astro:actions";
 import Layout from "@/layouts/Layout.astro";
 import GroupEdit from "@/components/groups/groupEdit.astro";
 import jwt from 'jsonwebtoken'
 import { parse } from 'cookie';
-import { getGroup } from "@/utils/users";
 import { roles } from "@/consts/users";
 const { id } = Astro.params;
 const cookies = parse(Astro.request.headers.get('cookie') || '');
@@ -17,7 +17,7 @@ if (token) {
     console.warn("Invalid or expired token", err);
   }
 }
-const group = await getGroup(token as string, id as string);
+const { data: group, error } = await Astro.callAction(actions.user.getGroup, { token: token as string, group_id: id as string });
 ---
 
 <Layout>

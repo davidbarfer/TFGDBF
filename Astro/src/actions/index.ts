@@ -1,7 +1,7 @@
-import { defineAction } from 'astro:actions';
-import { z } from 'astro:schema';
 import { user } from '@/actions/user';
+import { professor } from '@/actions/professor';
 
 export const server = {
   user,
+  professor,
 }
