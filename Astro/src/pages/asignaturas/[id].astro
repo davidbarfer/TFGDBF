@@ -1,8 +1,8 @@
 ---
 import Layout from "@/layouts/Layout.astro";
+import { actions } from "astro:actions";
 import SubjectProffesor from "@/components/subjects/subjectProffesor.astro";
 import SubjectStudent from "@/components/subjects/subjectStudent.astro";
-import { getSubject } from "@/utils/users";
 import { roles } from "@/consts/users";
 import jwt from 'jsonwebtoken'
 import { parse } from 'cookie';
@@ -18,8 +18,9 @@ if (token) {
   }
 }
 const { id } = Astro.params;
-const subject = await getSubject(id as string, token as string);
-if (subject === null) {
+const { data: subject, error } = await Astro.callAction(actions.user.getSubject, { id: id as string, token: token as string });
+
+if (error) {
   return Astro.redirect('/404');
 }
 ---
