@@ -1,4 +1,4 @@
-import { ActionError, defineAction, getActionContext } from "astro:actions";
+import { ActionError, defineAction } from "astro:actions";
 import { z } from "astro:schema";
 import { API_URL } from "@/utils/enviroment";
 
