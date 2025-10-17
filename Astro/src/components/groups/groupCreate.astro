@@ -1,7 +1,7 @@
 ---
-import { getPractices } from "@/utils/users";
+import { actions } from "astro:actions";
 const { id, token, subject } = Astro.props;
-const practices = await getPractices(token as string, id as string);
+const { data: practices, error } = await Astro.callAction(actions.user.getPractices, { token: token as string, subject_id: id as string });
 ---
 <section>
   <h1>Crear grupo</h1>

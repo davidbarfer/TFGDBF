@@ -1,5 +1,5 @@
 ---
-import { getPractices, getStudentGroups, getStudentSubmissions } from "@/utils/users";
+import { actions } from 'astro:actions';
 import jwt from 'jsonwebtoken'
 const secret = import.meta.env.JWT_SECRET;
 const { subject, token } = Astro.props;
@@ -11,12 +11,12 @@ if (token) {
     console.warn("Invalid or expired token", err);
   }
 }
-let practices = await getPractices(token as string, subject?.id as string);
-if (practices === null) {
+let { data: practices, error: practicesError } = await Astro.callAction(actions.user.getPractices, { token: token as string, subject_id: String(subject?.id) });
+if (practicesError) {
   practices = [];
 }
-const userGroups = await getStudentGroups(token as string, user?.userId as string);
-const userSubmissions = await getStudentSubmissions(token as string, user?.userId as string);
+const { data: userGroups, error: userGroupsError } = await Astro.callAction(actions.user.getStudentGroups, { token: token as string, user_id: String(user?.userId) });
+const { data: userSubmissions, error: userSubmissionsError } = await Astro.callAction(actions.user.getStudentSubmissions, { token: token as string, user_id: String(user?.userId) as string });
 ---
   <div>
     <section class="subject-info">

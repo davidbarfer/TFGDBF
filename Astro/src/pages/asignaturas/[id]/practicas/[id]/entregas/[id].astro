@@ -1,8 +1,8 @@
 ---
+import { actions } from "astro:actions";
 import Layout from "@/layouts/Layout.astro";
 import SubmissionDetails from "@/components/submissions/submissionDetails.astro";
 import SumbissionForm from "@/components/submissions/submissionForm.astro";
-import { getStudentPracticeSubmission, getSubmissionFile } from "@/utils/users";
 import jwt from 'jsonwebtoken'
 import { parse } from 'cookie';
 import { roles } from "@/consts/users";
@@ -19,11 +19,11 @@ if (token) {
     console.warn("Invalid or expired token", err);
   }
 }
-const submission = await getStudentPracticeSubmission(token as string, user?.userId as string, submissionId as string);
-if (submission === null) {
+const { data: submission, error: submissionError } = await Astro.callAction(actions.user.getStudentPracticeSubmission, { token: token as string, student_id: String(user?.userId) as string, practice_id: String(submissionId) });
+if (submissionError || !submission) {
   return Astro.redirect('/404');
 }
-const submissionFile = await getSubmissionFile(token as string, user?.userId as string, submissionId as string);
+const { data: submissionFile, error: submissionFileError } = await Astro.callAction(actions.user.getSubmissionFile, { token: token as string, student_id: String(user?.userId), submission_id: String(submissionId)});
 if (submissionFile) {
   submission.template = submissionFile;
 }

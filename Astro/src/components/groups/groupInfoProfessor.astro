@@ -1,6 +1,6 @@
 ---
 import jwt from 'jsonwebtoken'
-import { getGroupStudents } from '@/utils/users';
+import { actions } from 'astro:actions';
 const secret = import.meta.env.JWT_SECRET;
 const { group, practice, token } = Astro.props;
 let user = null;
@@ -11,7 +11,7 @@ if (token) {
     console.warn("Invalid or expired token", err);
   }
 }
-const students = await getGroupStudents(token, group?.id as string);
+const { data: students, error } = await Astro.callAction(actions.user.getGroupStudents, { token: token as string, group_id: group?.id as string });
 ---
 
 <div>
