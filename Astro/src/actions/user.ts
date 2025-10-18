@@ -234,15 +234,15 @@ export const user = {
       return response.json();
     },
   }),
-  getStudentPracticeSubmission: defineAction({
+  getStudentSubmission: defineAction({
     input: z.object({
       token: z.string(),
       student_id: z.string(),
-      practice_id: z.string(),
+      submission_id: z.string(),
     }),
     handler: async (input) => {
       const response = await fetch(
-        `${API_URL}/student/${input.student_id}/practice/${input.practice_id}/submission`,
+        `${API_URL}/student/${input.student_id}/submission/${input.submission_id}`,
         {
           method: "GET",
           headers: {
@@ -251,7 +251,10 @@ export const user = {
         }
       );
       if (!response.ok) {
-        return null;
+        return new ActionError({
+          message: response.statusText,
+          code: ActionError.statusToCode(response.status),
+        });
       }
       return response.json();
     },

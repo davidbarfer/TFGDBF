@@ -16,7 +16,7 @@ import {
   getPractice,
   getStudentGroups,
   getStudentSubmissions,
-  getStudentPracticeSubmission,
+  getStudentSubmission,
   getStudentSubmissionFile,
 } from './regExpGet.mjs';
 import {
@@ -62,7 +62,7 @@ export const processRequest = async (req, res) => {
   let practice_id = false;
   let student_id_groups = false;
   let student_id_submissions = false;
-  let student_id_practice_id_submission = false;
+  let student_id_submission_id = false;
   let student_id_submission_id_file = false;
   switch (method) {
     case 'GET':
@@ -75,7 +75,7 @@ export const processRequest = async (req, res) => {
       practice_id = getPractice(url);
       student_id_groups = getStudentGroups(url);
       student_id_submissions = getStudentSubmissions(url);
-      student_id_practice_id_submission = getStudentPracticeSubmission(url);
+      student_id_submission_id = getStudentSubmission(url);
       student_id_submission_id_file = getStudentSubmissionFile(url);
       if (subject_id) {
         try {
@@ -287,14 +287,14 @@ export const processRequest = async (req, res) => {
           res.statusCode = 500;
           return res.end(JSON.stringify({ error: 'Internal server error' }));
         }
-      } else if (student_id_practice_id_submission) {
+      } else if (student_id_submission_id) {
         try {
           await authenticate(req, res, true);
           const submission = await query(
-            'SELECT * FROM submissions WHERE user_id = ? AND practice_id = ?',
+            'SELECT * FROM submissions WHERE user_id = ? AND id = ?',
             [
-              student_id_practice_id_submission.student_id,
-              student_id_practice_id_submission.practice_id,
+              student_id_submission_id.student_id,
+              student_id_submission_id.submission_id,
             ]
           );
           if (submission.results.length === 0) {

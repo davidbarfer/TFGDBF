@@ -19,8 +19,8 @@ if (token) {
     console.warn("Invalid or expired token", err);
   }
 }
-const { data: submission, error: submissionError } = await Astro.callAction(actions.user.getStudentPracticeSubmission, { token: token as string, student_id: String(user?.userId) as string, practice_id: String(submissionId) });
-if (submissionError || !submission) {
+const { data: submission, error: submissionError } = await Astro.callAction(actions.user.getStudentSubmission, { token: token as string, student_id: String(user?.userId) as string, submission_id: String(submissionId) });
+if (submissionError) {
   return Astro.redirect('/404');
 }
 const { data: submissionFile, error: submissionFileError } = await Astro.callAction(actions.user.getSubmissionFile, { token: token as string, student_id: String(user?.userId), submission_id: String(submissionId)});

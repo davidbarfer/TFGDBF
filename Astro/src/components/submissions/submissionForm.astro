@@ -1,4 +1,5 @@
 ---
+import { submissionStatuses,submissionStatus } from "@/consts/submissions";
 const submission = Astro.props.submission;
 ---
 
@@ -6,6 +7,11 @@ const submission = Astro.props.submission;
   <form id="submission-form">
     <label for="entrega">Tu entrega</label>
     <textarea id="entrega" name="entrega" required rows="8" cols="50" data-code={submission.template}>{submission.template}</textarea>
+    {submissionStatuses.pending === submissionStatus(submission.grade, submission.delivery_date) ? (
+      <button type="submit">Enviar</button>
+    ) : (
+      <button type="submit" disabled>{submissionStatus(submission.grade, submission.delivery_date)}</button>
+    )}
   </form>
 </section>
 
