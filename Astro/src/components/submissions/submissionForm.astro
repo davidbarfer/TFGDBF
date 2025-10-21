@@ -1,12 +1,12 @@
 ---
 import { submissionStatuses,submissionStatus } from "@/consts/submissions";
-const submission = Astro.props.submission;
+const {submission, token} = Astro.props;
 ---
 
 <section>
-  <form id="submission-form">
-    <label for="entrega">Tu entrega</label>
-    <textarea id="entrega" name="entrega" required rows="8" cols="50" data-code={submission.template}>{submission.template}</textarea>
+  <form id="submissionForm" data-submission={JSON.stringify(submission)} data-token={token}>
+    <label for="fileContent">Tu entrega</label>
+    <textarea id="fileContent" name="fileContent" required rows="8" cols="50" data-code={submission.template}>{submission.template}</textarea>
     {submissionStatuses.pending === submissionStatus(submission.grade, submission.delivery_date) ? (
       <button type="submit">Enviar</button>
     ) : (
@@ -15,7 +15,32 @@ const submission = Astro.props.submission;
   </form>
 </section>
 
-<script></script>
+<script>
+  import { actions } from "astro:actions";
+  const form = document.getElementById('submissionForm');
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const submission = JSON.parse(form.dataset.submission || '{}');
+    const token = form.dataset.token;
+    const formData = new FormData(e.target);
+    const data = {
+      token: token as string,
+      file_content: formData.get('fileContent') as string,
+      url_params: {
+        creation_date: new Date().toISOString(),
+        user_id: String(submission?.user_id),
+        subject_id: String(submission?.subject_id),
+        practice_id: String(submission?.practice_id),
+        submission_id: String(submission?.id),
+      },
+    }
+    const response = actions.user.saveSubmissionFile(data);
+      if (response) {
+        alert('Entrega realizada');
+        window.location.href = `/entregas/`;
+      }
+  });
+</script>
 
 <style>
   form {

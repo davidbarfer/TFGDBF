@@ -34,7 +34,7 @@ if (submissionFile) {
     { (user?.role === roles.student || user?.role === roles.admin || user?.role === roles.professor) ? (
       <h1>Entrega {submissionId} de la práctica {submission.practice_name}</h1>
       <SubmissionDetails submission={submission}/>
-      <SumbissionForm submission={submission} />
+      <SumbissionForm submission={submission} token={token as string} />
     ) : (
       <p>No tienes permiso para ver esta página</p>
       <a href="/">Volver al inicio</a>

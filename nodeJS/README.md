@@ -28,6 +28,7 @@
 | `/subject/:id/create`   | Create a practice for the subject     |
 | `/subject/:id/practice/:id/groups/create`       | Create groups for the practice |
 | `/group/:id/student/:id`       | Add a student to a group |
+| `/student/:id/submission/:id/file`          | Submit a file for the student |
 
 ## Endopints DELETE
 

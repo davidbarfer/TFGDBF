@@ -1,8 +1,8 @@
 export const submissionStatuses = {
-  pending: 'pendiente',
+  pending: 'pendiente de entrega',
   pass: 'aprobado',
   fail: 'suspendido',
-  late: 'no entregado',
+  late: 'entrega tardía',
 }
 export function submissionStatus(grade: number | null, due_date: string | null): string {
   if (grade === null && due_date !== null && new Date(due_date).getTime() < new Date().getTime()) {

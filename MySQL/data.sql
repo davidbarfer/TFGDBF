@@ -36,7 +36,8 @@ INSERT INTO practice_groups_users (group_id, user_id) VALUES
 INSERT INTO submissions (user_id, practice_id, delivery_date, grade) VALUES
 (2, 1, '2023-01-01', 10),
 (4, 2, '2026-01-02', NULL),
-(2, 2, '2023-01-03', NULL);
+(2, 2, '2023-01-03', NULL),
+(2, 2, '2026-12-31', NULL);
 
 UPDATE submissions SET feedback = 'Buen trabajo' WHERE id = 1;
 

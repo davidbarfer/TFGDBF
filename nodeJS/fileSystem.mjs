@@ -57,3 +57,27 @@ export async function getFileSubmission(url) {
     return null;
   }
 }
+export async function saveFileSubmission(url, content, submission_id) {
+  const path = getFileSystemBasePath();
+  const filePath = `${path}/${url}`;
+  try {
+    await fs.writeFile(filePath, content, 'utf-8');
+  } catch (error) {
+    console.error('Error writing file:', error);
+    return false;
+  }
+  try {
+    const fileUrlResponse = await query(
+      'UPDATE submissions SET file_url = ? WHERE id = ?',
+      [url, submission_id]
+    );
+    if (fileUrlResponse.results.affectedRows === 0) {
+      console.error('No rows were updated in the database.');
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error('Error updating database:', error);
+    return false;
+  }
+}
