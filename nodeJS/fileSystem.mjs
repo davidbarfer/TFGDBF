@@ -46,14 +46,36 @@ export const generateFileSystem = async () => {
     console.error('Error generating file system:', error);
   }
 };
-export async function getFileSubmission(url) {
+export async function getFileSubmission(url, file_params) {
   const path = getFileSystemBasePath();
-  const filePath = `${path}/${url}`;
   try {
-    const file = await fs.readFile(filePath, 'utf-8');
-    return file;
+    const filePathQuery = await query(
+      'SELECT file_url FROM submissions WHERE id = ?',
+      [file_params.submission_id]
+    );
+    if (
+      filePathQuery.results.length > 0 &&
+      filePathQuery.results[0].file_url !== null
+    ) {
+      const filePath = `${path}/${filePathQuery.results[0].file_url}`;
+      console.log('File path:', filePath);
+      try {
+        const file = await fs.readFile(filePath, 'utf-8');
+        return file;
+      } catch (error) {
+        console.error('Error reading file:', error);
+        return null;
+      }
+    }
   } catch (error) {
-    console.error('Error reading file:', error);
+    console.error('Error querying database for file URL:', error);
+  }
+  const templateFilePath = `${path}/${url}`;
+  try {
+    const templateFile = await fs.readFile(templateFilePath, 'utf-8');
+    return templateFile;
+  } catch (error) {
+    console.error('Error reading template file:', error);
     return null;
   }
 }
