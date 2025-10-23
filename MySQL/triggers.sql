@@ -176,5 +176,39 @@ BEGIN
   END IF;
 END//
 
+CREATE TRIGGER submission_insert
+BEFORE INSERT ON submissions  -- Remove quotes around table name
+FOR EACH ROW
+BEGIN
+  DECLARE practice_deadline DATETIME;
+  SELECT deadline INTO practice_deadline FROM practice WHERE id = NEW.practice_id;
+  
+  IF EXISTS (
+    SELECT 1 
+    FROM submissions 
+    WHERE user_id = NEW.user_id 
+      AND practice_id = NEW.practice_id
+  ) THEN
+    SIGNAL SQLSTATE '45000'
+    SET MESSAGE_TEXT = 'User already has a submission for this practice';
+  ELSEIF (NEW.delivery_date > practice_deadline) THEN
+    SIGNAL SQLSTATE '45000'
+    SET MESSAGE_TEXT = 'Submission after practice deadline not allowed';
+  END IF;
+END//
+
+CREATE TRIGGER submission_update
+BEFORE UPDATE ON submissions  -- Remove quotes around table name
+FOR EACH ROW
+BEGIN
+  DECLARE practice_deadline DATETIME;
+  SELECT deadline INTO practice_deadline FROM practice WHERE id = NEW.practice_id;
+  
+  IF NEW.delivery_date > practice_deadline THEN
+    SIGNAL SQLSTATE '45000'
+    SET MESSAGE_TEXT = 'Submission after practice deadline not allowed';
+  END IF;
+END//
+
 -- Reset delimiter back to default
 DELIMITER ;
