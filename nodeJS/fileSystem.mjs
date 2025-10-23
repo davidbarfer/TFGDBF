@@ -1,6 +1,11 @@
 import * as fs from 'node:fs/promises';
+import util from 'node:util';
 import { query } from './database.mjs';
 
+const ERROR_MAP = util.getSystemErrorMap();
+const ERROR_CODES = {
+  ENOENT: ERROR_MAP.get(-2)[0],
+};
 export const getFileSystemBasePath = () => {
   const path = process.env.FILESYSTEM_PATH;
   if (!path) {
@@ -62,8 +67,15 @@ export async function getFileSubmission(url, file_params) {
         const file = await fs.readFile(filePath, 'utf-8');
         return file;
       } catch (error) {
-        console.error('Error reading submission file:', error);
-        return null;
+        if (error.code === ERROR_CODES.ENOENT) {
+          await query('UPDATE submissions SET file_url = NULL WHERE id = ?', [
+            file_params.submission_id,
+          ]);
+          console.error('File does not exist:', error);
+        } else {
+          console.error('Error reading submission file:', error);
+          return null;
+        }
       }
     }
   } catch (error) {
