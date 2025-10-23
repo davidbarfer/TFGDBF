@@ -25,7 +25,7 @@ const submission = Astro.props.submission;
             <td>{submission.grade}</td>
             <td>
               <p class="status">
-                {submissionStatus(submission.grade, submission.delivery_date)}
+                {submissionStatus(submission.grade, submission.delivery_date, submission.file_url)}
               </p>
             </td>
             <td>

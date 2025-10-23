@@ -25,3 +25,12 @@ export function postGroupStudent(url) {
   }
   return false;
 }
+export function postStudentSubmissionFile(url) {
+  const regex = /^\/student\/\d+\/submission\/\d+\/file$/;
+  if (regex.test(url)) {
+    const student_id = url.split('/')[2];
+    const submission_id = url.split('/')[4];
+    return { student_id, submission_id };
+  }
+  return false;
+}

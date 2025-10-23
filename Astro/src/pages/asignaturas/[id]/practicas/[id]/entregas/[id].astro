@@ -19,13 +19,13 @@ if (token) {
     console.warn("Invalid or expired token", err);
   }
 }
-const { data: submission, error: submissionError } = await Astro.callAction(actions.user.getStudentPracticeSubmission, { token: token as string, student_id: String(user?.userId) as string, practice_id: String(submissionId) });
-if (submissionError || !submission) {
+const { data: submission, error: submissionError } = await Astro.callAction(actions.user.getStudentSubmission, { token: token as string, student_id: String(user?.userId) as string, submission_id: String(submissionId) });
+if (submissionError) {
   return Astro.redirect('/404');
 }
 const { data: submissionFile, error: submissionFileError } = await Astro.callAction(actions.user.getSubmissionFile, { token: token as string, student_id: String(user?.userId), submission_id: String(submissionId)});
 if (submissionFile) {
-  submission.template = submissionFile;
+  submission.file_content = submissionFile;
 }
 ---
 
@@ -34,7 +34,7 @@ if (submissionFile) {
     { (user?.role === roles.student || user?.role === roles.admin || user?.role === roles.professor) ? (
       <h1>Entrega {submissionId} de la práctica {submission.practice_name}</h1>
       <SubmissionDetails submission={submission}/>
-      <SumbissionForm submission={submission} />
+      <SumbissionForm submission={submission} token={token as string} />
     ) : (
       <p>No tienes permiso para ver esta página</p>
       <a href="/">Volver al inicio</a>

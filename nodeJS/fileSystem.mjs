@@ -1,6 +1,11 @@
 import * as fs from 'node:fs/promises';
+import util from 'node:util';
 import { query } from './database.mjs';
 
+const ERROR_MAP = util.getSystemErrorMap();
+const ERROR_CODES = {
+  ENOENT: ERROR_MAP.get(-2)[0],
+};
 export const getFileSystemBasePath = () => {
   const path = process.env.FILESYSTEM_PATH;
   if (!path) {
@@ -34,20 +39,78 @@ export const generateFileSystem = async () => {
         await fs.mkdir(practicePath, { recursive: true });
         await fs.mkdir(`${practicePath}/submissions`, { recursive: true });
         await fs.mkdir(`${practicePath}/evaluations`, { recursive: true });
+        // Create a MATLAB file template for testing
+        await fs.writeFile(
+          `${practicePath}/submissions/template.m`,
+          'A1 = 1;',
+          'utf8'
+        );
       });
     });
   } catch (error) {
     console.error('Error generating file system:', error);
   }
 };
-export async function getFileSubmission(url) {
+export async function getFileSubmission(url, file_params) {
+  const path = getFileSystemBasePath();
+  try {
+    const filePathQuery = await query(
+      'SELECT file_url FROM submissions WHERE id = ?',
+      [file_params.submission_id]
+    );
+    if (
+      filePathQuery.results.length > 0 &&
+      filePathQuery.results[0].file_url !== null
+    ) {
+      const filePath = `${path}/${filePathQuery.results[0].file_url}`;
+      try {
+        const file = await fs.readFile(filePath, 'utf-8');
+        return file;
+      } catch (error) {
+        if (error.code === ERROR_CODES.ENOENT) {
+          await query('UPDATE submissions SET file_url = NULL WHERE id = ?', [
+            file_params.submission_id,
+          ]);
+          console.error('File does not exist:', error);
+        } else {
+          console.error('Error reading submission file:', error);
+          return null;
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error querying database for file URL:', error);
+  }
+  const templateFilePath = `${path}/${url}`;
+  try {
+    const templateFile = await fs.readFile(templateFilePath, 'utf-8');
+    return templateFile;
+  } catch (error) {
+    console.error('Error reading template file:', error);
+    return null;
+  }
+}
+export async function saveFileSubmission(url, content, submission_id) {
   const path = getFileSystemBasePath();
   const filePath = `${path}/${url}`;
   try {
-    const file = await fs.readFile(filePath, 'utf-8');
-    return file;
+    await fs.writeFile(filePath, content, 'utf-8');
   } catch (error) {
-    console.error('Error reading file:', error);
-    return null;
+    console.error('Error writing file:', error);
+    return false;
+  }
+  try {
+    const fileUrlResponse = await query(
+      'UPDATE submissions SET file_url = ? WHERE id = ?',
+      [url, submission_id]
+    );
+    if (fileUrlResponse.results.affectedRows === 0) {
+      console.error('No rows were updated in the database.');
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error('Error updating database:', error);
+    return false;
   }
 }

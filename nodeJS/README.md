@@ -14,7 +14,8 @@
 | `/group/:id/students`               | Returns all students of the group |
 | `/student/:id/groups`               | Returns all groups of the student |
 | `/student/:id/submissions`          | Returns all submissions of the student |
-| `/student/:id/practice/:id/submission`          | Returns the submission of the student for the practice |
+| `/student/:id/submission/:id`          | Returns the submission of the student |
+| `/student/:id/submission/:id/file`          | Returns the file of the submission of the student |
 | `/users`                            | Returns all users                     |
 
 ## Endpoints POST
@@ -27,6 +28,7 @@
 | `/subject/:id/create`   | Create a practice for the subject     |
 | `/subject/:id/practice/:id/groups/create`       | Create groups for the practice |
 | `/group/:id/student/:id`       | Add a student to a group |
+| `/student/:id/submission/:id/file`          | Submit a file for the student |
 
 ## Endopints DELETE
 

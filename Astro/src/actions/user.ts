@@ -234,15 +234,15 @@ export const user = {
       return response.json();
     },
   }),
-  getStudentPracticeSubmission: defineAction({
+  getStudentSubmission: defineAction({
     input: z.object({
       token: z.string(),
       student_id: z.string(),
-      practice_id: z.string(),
+      submission_id: z.string(),
     }),
     handler: async (input) => {
       const response = await fetch(
-        `${API_URL}/student/${input.student_id}/practice/${input.practice_id}/submission`,
+        `${API_URL}/student/${input.student_id}/submission/${input.submission_id}`,
         {
           method: "GET",
           headers: {
@@ -251,7 +251,10 @@ export const user = {
         }
       );
       if (!response.ok) {
-        return null;
+        return new ActionError({
+          message: response.statusText,
+          code: ActionError.statusToCode(response.status),
+        });
       }
       return response.json();
     },
@@ -277,5 +280,41 @@ export const user = {
       }
       return response.json();
     },
+  }),
+  saveSubmissionFile: defineAction({
+    input: z.object({
+      token: z.string(),
+      url_params: z.object({
+        creation_date: z.string(),
+        user_id: z.string(),
+        subject_id: z.string(),
+        practice_id: z.string(),
+        submission_id: z.string(),
+      }),
+      file_content: z.string(),
+    }),
+    handler: async (input) => {
+      const response = await fetch(
+        `${API_URL}/student/${input.url_params.user_id}/submission/${input.url_params.submission_id}/file`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: input.token,
+          },
+          body: JSON.stringify({
+            file_content: input.file_content,
+            url_params: input.url_params
+          }),
+        }
+      );
+      console.log(response)
+      if (!response.ok) {
+        return new ActionError({
+          code: ActionError.statusToCode(response.status),
+          message: response.statusText,
+        });
+      }
+      return response.json();
+    }
   }),
 };

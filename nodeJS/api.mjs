@@ -5,7 +5,7 @@ import {
   authenticate,
   unhandledUserDefinedException,
 } from './database.mjs';
-import { getFileSubmission } from './fileSystem.mjs';
+import { getFileSubmission, saveFileSubmission } from './fileSystem.mjs';
 import {
   getSubject,
   getSubjectPractices,
@@ -16,13 +16,14 @@ import {
   getPractice,
   getStudentGroups,
   getStudentSubmissions,
-  getStudentPracticeSubmission,
+  getStudentSubmission,
   getStudentSubmissionFile,
 } from './regExpGet.mjs';
 import {
   postPracticeCreate,
   postPracticeGroupsCreate,
   postGroupStudent,
+  postStudentSubmissionFile,
 } from './regExpPost.mjs';
 import { deleteGroup, deleteStudentGroup } from './regExpDelete.mjs';
 // CORS headers configuration
@@ -62,7 +63,7 @@ export const processRequest = async (req, res) => {
   let practice_id = false;
   let student_id_groups = false;
   let student_id_submissions = false;
-  let student_id_practice_id_submission = false;
+  let student_id_submission_id = false;
   let student_id_submission_id_file = false;
   switch (method) {
     case 'GET':
@@ -75,7 +76,7 @@ export const processRequest = async (req, res) => {
       practice_id = getPractice(url);
       student_id_groups = getStudentGroups(url);
       student_id_submissions = getStudentSubmissions(url);
-      student_id_practice_id_submission = getStudentPracticeSubmission(url);
+      student_id_submission_id = getStudentSubmission(url);
       student_id_submission_id_file = getStudentSubmissionFile(url);
       if (subject_id) {
         try {
@@ -287,14 +288,14 @@ export const processRequest = async (req, res) => {
           res.statusCode = 500;
           return res.end(JSON.stringify({ error: 'Internal server error' }));
         }
-      } else if (student_id_practice_id_submission) {
+      } else if (student_id_submission_id) {
         try {
           await authenticate(req, res, true);
           const submission = await query(
-            'SELECT * FROM submissions WHERE user_id = ? AND practice_id = ?',
+            'SELECT * FROM submissions WHERE user_id = ? AND id = ?',
             [
-              student_id_practice_id_submission.student_id,
-              student_id_practice_id_submission.practice_id,
+              student_id_submission_id.student_id,
+              student_id_submission_id.submission_id,
             ]
           );
           if (submission.results.length === 0) {
@@ -336,7 +337,10 @@ export const processRequest = async (req, res) => {
             return res.end(JSON.stringify({ error: 'Subject not found' }));
           }
           const url = `${subject_id.results[0].subject_id}/${practice_id.results[0].practice_id}/submissions/template.m`;
-          const submissionFile = await getFileSubmission(url);
+          const submissionFile = await getFileSubmission(
+            url,
+            student_id_submission_id_file
+          );
           if (!submissionFile) {
             res.statusCode = 404;
             return res.end(
@@ -387,6 +391,7 @@ export const processRequest = async (req, res) => {
         }
       }
     case 'POST':
+      student_id_submission_id_file = postStudentSubmissionFile(url);
       subject_id_practices = postPracticeCreate(url);
       subject_id_practices_id_groups = postPracticeGroupsCreate(url);
       group_id_student_id = postGroupStudent(url);
@@ -515,6 +520,65 @@ export const processRequest = async (req, res) => {
               return res.end(JSON.stringify(result.results));
             } catch (error) {
               console.error('Database query error on create group:', error);
+              res.statusCode = 500;
+              return res.end(
+                JSON.stringify({ error: 'Internal server error' })
+              );
+            }
+          });
+        } catch {
+          res.statusCode = 500;
+          return res.end(JSON.stringify({ error: 'Internal server error' }));
+        }
+      } else if (student_id_submission_id_file) {
+        try {
+          await authenticate(req, res, true);
+          let body = '';
+          req.on('data', chunk => {
+            body += chunk.toString();
+          });
+          req.on('end', async () => {
+            try {
+              const data = JSON.parse(body);
+              if (!data.file_content) {
+                res.statusCode = 400;
+                return res.end(
+                  JSON.stringify({
+                    error: 'File content is required',
+                  })
+                );
+              }
+              if (data.file_content.length > 1000000) {
+                res.statusCode = 400;
+                return res.end(
+                  JSON.stringify({
+                    error: 'File size exceeds the limit of 1MB',
+                  })
+                );
+              }
+              if (!data.url_params) {
+                res.statusCode = 500;
+                return res.end(
+                  JSON.stringify({
+                    error: 'File URL constructor error',
+                  })
+                );
+              }
+              const file_Name = `${data.url_params.creation_date}_U${data.url_params.user_id}_S${data.url_params.subject_id}_P${data.url_params.practice_id}_ID${data.url_params.submission_id}.m`;
+              const url = `${data.url_params.subject_id}/${data.url_params.practice_id}/submissions/${file_Name}`;
+              const saveResult = saveFileSubmission(
+                url,
+                data.file_content,
+                data.url_params.submission_id
+              );
+              if (!saveResult) {
+                res.statusCode = 409;
+                return res.end(
+                  JSON.stringify({ error: 'Error saving submission file' })
+                );
+              }
+            } catch (error) {
+              console.error('Database query error on submit file:', error);
               res.statusCode = 500;
               return res.end(
                 JSON.stringify({ error: 'Internal server error' })
