@@ -7,10 +7,10 @@ const {submission, token} = Astro.props;
   <form id="submissionForm" data-submission={JSON.stringify(submission)} data-token={token}>
     <label for="fileContent">Tu entrega</label>
     <textarea id="fileContent" name="fileContent" required rows="8" cols="50" data-code={submission.template}>{submission.template}</textarea>
-    {submissionStatuses.pending === submissionStatus(submission.grade, submission.delivery_date) ? (
+    {submissionStatuses.pending === submissionStatus(submission.grade, submission.delivery_date, submission.file_url) ? (
       <button type="submit">Enviar</button>
     ) : (
-      <button type="submit" disabled>{submissionStatus(submission.grade, submission.delivery_date)}</button>
+      <button type="submit" disabled>{submissionStatus(submission.grade, submission.delivery_date, submission.file_url)}</button>
     )}
   </form>
 </section>
