@@ -137,4 +137,27 @@ export const professor = {
       return response.json();
     },
   }),
+  getPracticeSubmissions: defineAction({
+    input: z.object({
+      token: z.string(),
+      practice_id: z.string(),
+    }),
+    handler: async (input) => {
+      const response = await fetch(
+        `${API_URL}/practice/${input.practice_id}/submissions`,
+        {
+          headers: {
+            Authorization: input.token,
+          },
+        }
+      );
+      if (!response.ok) {
+        return new ActionError({
+          code: ActionError.statusToCode(response.status),
+          message: response.statusText,
+        });
+      }
+      return response.json();
+    },
+  }),
 };

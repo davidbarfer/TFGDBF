@@ -1,0 +1,96 @@
+---
+import { actions } from "astro:actions";
+import Layout from "@/layouts/Layout.astro";
+import jwt from 'jsonwebtoken'
+import { parse } from 'cookie';
+import { roles } from "@/consts/users";
+import { submissionStatus } from "@/consts/submissions";
+
+const {id:practiceId} = Astro.params;
+const cookies = parse(Astro.request.headers.get('cookie') || '');
+const token = cookies.token;
+const secret = import.meta.env.JWT_SECRET;
+let user = null;
+if (token) {
+  try {
+    user = jwt.verify(token, secret); // same secret as backend
+  } catch (err) {
+    console.warn("Invalid or expired token", err);
+  }
+}
+const { data: practice, error: practiceError } = await Astro.callAction(actions.user.getPractice,{token: token as string, practice_id: String(practiceId)});
+if (practiceError) {
+  Astro.redirect('/404');
+}
+const { data: submissions, error: submissionsError } = await Astro.callAction(actions.professor.getPracticeSubmissions,{token: token as string, practice_id: String(practiceId)});
+if (submissionsError) {
+  Astro.redirect('/404');
+}
+console.log(submissions);
+---
+
+<Layout>
+  <section>
+    { (user?.role === roles.admin || user?.role === roles.professor) ? (
+      <p> Práctica: {practice.name} Deadline: {new Date(practice.deadline).toLocaleDateString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit' })}</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Entrega</th></th>
+            <th>Alumno</th>
+            <th>Estado de la entrega</th>
+            <th>Fecha de entrega</th>
+            <th>Nota del evaluador</th>
+            <th>Nota del alumno</th>
+            <th>Feedback al alumno</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+         <tbody>
+          {submissions.map((submission) => (
+            <tr>
+              <td>{submission.id}</td>
+              <td>{submission.user.name} {submission.user.surname}</td>
+              <td>{submissionStatus(submission.grade, submission.due_date, submission.file_url)}</td>
+              <td>{new Date(submission.delivery_date).toLocaleDateString("es-ES", {
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+              })}</td>
+              <td>{submission.evaluator_grade}</td>
+              <td>{submission.grade}</td>
+              <td>{submission.feedback}</td>
+              <td>
+                <button disabled>Graduar</button>
+                <button disabled>Ejecutar evaluador</button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      
+    ) : (
+      <p>No tienes permiso para ver esta página</p>
+      <a href="/">Volver al inicio</a>
+    )}
+  </section>
+</Layout>
+
+<style>
+  section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    gap: 1rem;
+  }
+  a {
+    text-decoration: none;
+    color: var(--color-tertiary);
+    text-transform: uppercase;
+    font-weight: bold;
+    padding: 0.5rem;
+    cursor: pointer;
+  }
+</style>

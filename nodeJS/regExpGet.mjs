@@ -33,6 +33,15 @@ export function getPractice(url) {
   return false;
 }
 
+export function getPracticeSubmissions(url) {
+  const regex = /^\/practice\/\d+\/submissions$/;
+  if (regex.test(url)) {
+    const id = url.split('/')[2];
+    return id;
+  }
+  return false;
+}
+
 export function getSubjectPracticesGroups(url) {
   const regex = /^\/subject\/\d+\/practice\/\d+\/groups$/;
   if (regex.test(url)) {

@@ -10,6 +10,7 @@
 | `/subject/:id/practices`            | Returns all practices of the subject     |
 | `/subject/:id/practice/:id/groups`  | Return all groups of the practice |
 | `/practice/:id`                     | Returns a practice |
+| `/practice/:id/submissions`         | Returns all submissions of the practice |
 | `/group/:id`                        | Returns a group |
 | `/group/:id/students`               | Returns all students of the group |
 | `/student/:id/groups`               | Returns all groups of the student |
