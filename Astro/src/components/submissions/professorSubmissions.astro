@@ -1,0 +1,58 @@
+---
+import jwt from 'jsonwebtoken'
+import {submissionStatus } from "@/consts/submissions";
+const secret = import.meta.env.JWT_SECRET;
+const { token, submissions } = Astro.props;
+let user = null;
+if (token) {
+  try {
+    user = jwt.verify(token, secret); // same secret as backend
+  } catch (err) {
+    console.warn("Invalid or expired token", err);
+  }
+}
+---
+
+<table>
+  <thead>
+    <tr>
+      <th>Entrega</th></th>
+      <th>Alumno</th>
+      <th>Estado de la entrega</th>
+      <th>Fecha de entrega</th>
+      <th>Nota del evaluador</th>
+      <th>Nota del alumno</th>
+      <th>Feedback al alumno</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+   <tbody>
+    {submissions.map((submission) => (
+      <tr>
+        <td>{submission.id}</td>
+        <td>{submission.user.name} {submission.user.surname}</td>
+        <td>{submissionStatus(submission.grade, submission.due_date, submission.file_url)}</td>
+        <td>{new Date(submission.delivery_date).toLocaleDateString("es-ES", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        })}</td>
+        <td>{submission.evaluator_grade}</td>
+        <td>{submission.grade}</td>
+        <td>{submission.feedback}</td>
+        <td>
+          <button disabled>Graduar</button>
+          <button disabled>Ejecutar evaluador</button>
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
+
+<style scoped>
+.status {
+  text-transform: uppercase;
+  font-weight: bold;
+  color: var(--color-tertiary);
+}
+</style>
