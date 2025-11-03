@@ -3,6 +3,7 @@ import Layout from "@/layouts/Layout.astro";
 import { actions } from 'astro:actions';
 import StudentSubmissions from "@/components/submissions/studentSubmissions.astro";
 import ProfessorSubmissions from "@/components/submissions/professorSubmissions.astro";
+import PracticeInfo from "@/components/submissions/practiceInfo.astro";
 import jwt from 'jsonwebtoken'
 import { parse } from 'cookie';
 import { roles } from "@/consts/users";
@@ -41,14 +42,14 @@ if (user?.role === roles.professor || user?.role === roles.admin) {
         if (submissions.status === 404) {
           return(
             <>
-              <h1>Prácticas: {practice.name}</h1>
+              <PracticeInfo token={token} practice={practice} />
               <p>No hay entregas para esta práctica</p>
-            </>
+            </P>
           )
         }
         return (
           <>
-            <h1>Prácticas: {practice.name}</h1>
+            <PracticeInfo token={token} practice={practice} />
             <ProfessorSubmissions token={token} submissions={submissions} />
           </>
         );

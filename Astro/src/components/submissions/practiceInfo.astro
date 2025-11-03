@@ -1,0 +1,29 @@
+---
+import jwt from 'jsonwebtoken'
+
+const secret = import.meta.env.JWT_SECRET;
+const { token , practice } = Astro.props;
+let user = null;
+if (token) {
+  try {
+    user = jwt.verify(token, secret); // same secret as backend
+  } catch (err) {
+    console.warn("Invalid or expired token", err);
+  }
+}
+---
+
+<section>
+  <h1>Práctica {practice.name}</h1>
+  <p>Fecha de entrega: {new Date(practice.deadline).toLocaleDateString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit' })}</p>
+</section>
+
+<style scoped>
+  section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+  }
+</style>

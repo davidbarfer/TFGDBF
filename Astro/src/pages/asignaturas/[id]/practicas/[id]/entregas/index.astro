@@ -2,6 +2,7 @@
 import { actions } from "astro:actions";
 import Layout from "@/layouts/Layout.astro";
 import ProfessorSubmissions from "@/components/submissions/professorSubmissions.astro";
+import PracticeInfo from "@/components/submissions/practiceInfo.astro";
 import jwt from 'jsonwebtoken'
 import { parse } from 'cookie';
 import { roles } from "@/consts/users";
@@ -31,7 +32,7 @@ if (submissionsError) {
 <Layout>
   <section>
     { (user?.role === roles.admin || user?.role === roles.professor) ? (
-      <p> Práctica: {practice.name} Deadline: {new Date(practice.deadline).toLocaleDateString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit' })}</p>
+      <PracticeInfo token={token} practice={practice} />
       <ProfessorSubmissions token={token} submissions={submissions} />
       
     ) : (
