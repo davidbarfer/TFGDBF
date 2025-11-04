@@ -33,8 +33,7 @@ if (submissionsError) {
   <section>
     { (user?.role === roles.admin || user?.role === roles.professor) ? (
       <PracticeInfo token={token} practice={practice} />
-      <ProfessorSubmissions token={token} submissions={submissions} />
-      
+      <ProfessorSubmissions token={token} submissions={submissions} subjectId={practice.subject_id} />
     ) : (
       <p>No tienes permiso para ver esta página</p>
       <a href="/">Volver al inicio</a>

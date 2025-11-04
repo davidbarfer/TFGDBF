@@ -32,7 +32,7 @@ if (user?.role === roles.professor || user?.role === roles.admin) {
 ---
 
 <Layout>
-  <section>
+  <article>
     {user?.role === roles.professor || user?.role === roles.admin ? (
       practices.map(async (practice) => {
         const { data: submissions, error: submissionsError } = await Astro.callAction(actions.professor.getPracticeSubmissions, {
@@ -50,7 +50,7 @@ if (user?.role === roles.professor || user?.role === roles.admin) {
         return (
           <>
             <PracticeInfo token={token} practice={practice} />
-            <ProfessorSubmissions token={token} submissions={submissions} />
+            <ProfessorSubmissions token={token} submissions={submissions} subjectId={practice.subject_id} />
           </>
         );
       })
@@ -62,7 +62,7 @@ if (user?.role === roles.professor || user?.role === roles.admin) {
         <a href="/">Volver al inicio</a>
       </>
     )}
-  </section>
+  </article>
 </Layout>
 
 <style>
