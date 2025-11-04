@@ -5,7 +5,7 @@ import jwt from 'jsonwebtoken'
 import { parse } from 'cookie';
 import { roles } from "@/consts/users";
 
-const { id:submissionId } = Astro.params;
+const { entregaId: submissionId } = Astro.params;
 const cookies = parse(Astro.request.headers.get('cookie') || '');
 const token = cookies.token;
 const secret = import.meta.env.JWT_SECRET;
@@ -21,8 +21,10 @@ if (token) {
 
 <Layout>
   {(user?.role === roles.admin || user?.role === roles.professor) ? (
+    <section>
     <h1>Editar entrega {submissionId}</h1>
     <p>Esta página está en construcción</p>
+    </section>
   ) : (
     <p>No tienes permiso para ver esta página</p>
     <a href="/">Volver al inicio</a>
