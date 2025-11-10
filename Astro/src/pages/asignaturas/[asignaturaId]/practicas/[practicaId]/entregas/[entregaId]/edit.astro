@@ -12,7 +12,7 @@ const secret = import.meta.env.JWT_SECRET;
 let user = null;
 if (token) {
   try {
-    user = jwt.verify(token, secret); // same secret as backend
+    user = jwt.verify(token, secret);
   } catch (err) {
     console.warn("Invalid or expired token", err);
   }
@@ -21,33 +21,62 @@ const { data: submission, error: submissionError } = await Astro.callAction(acti
 ---
 
 <Layout>
-  {(user?.role === roles.admin || user?.role === roles.professor) ? (
-    <section>
-    <h1>Editar entrega {submission.id}</h1>
-    <form id="submission-form" data-token={token} data-submission={submission}>
-      <label for="delivery_date">Fecha de entrega</label>
-      <input type="date" id="delivery_date" name="delivery_date" required value={submission.delivery_date ? new Date(submission.delivery_date).toISOString().split('T')[0] : ''}>
-      <label for="evaluator_grade">
-        <p>Nota del evaluador</p>
-        <div id="evaluator-grade-section">
-          <p>La nota del evaluador no puede ser editada</p>
-          <button type="button" disabled>Ejecutar evaluador</button>
-        </div>
-      </label>
-      <input type="number" id="evaluator_grade" name="evaluator_grade" value={submission.evaluator_grade} max="10" min="0" step="0.1" disabled>
-      <label for="grade">Nota del alumno</label>
-      <input type="number" id="grade" name="grade" required value={submission.grade} max="10" min="0" step="0.1">
-      <label for="feedback">Comentarios</label>
-      <textarea id="feedback" name="feedback" required placeholder="Escribe tus comentarios aquí">{submission.feedback}</textarea>
-      <button type="submit">Editar</button>
-    </form>
-    </section>
-  ) : (
-    <section>
-      <p>No tienes permiso para ver esta página</p>
-      <a href="/">Volver al inicio</a>
-    </section>
-  )}
+  {
+    user?.role === roles.admin || user?.role === roles.professor ? (
+      <section>
+        <h1>Editar entrega {submission.id}</h1>
+        <form id="submission-form" data-token={token} data-submission={JSON.stringify(submission)}>
+          <label for="delivery_date">Fecha de entrega</label>
+          <input 
+            type="date" 
+            id="delivery_date" 
+            name="delivery_date" 
+            value={submission.delivery_date ? new Date(submission.delivery_date).toISOString().split('T')[0] : ''} 
+            required
+          />
+          <label for="evaluator_grade">Nota del evaluador</label>
+          <div id="evaluator-grade-section">
+            <p>La nota del evaluador no puede ser editada</p>
+            <button type="button" disabled>Ejecutar evaluador</button>
+          </div>
+          <input 
+            type="number" 
+            id="evaluator_grade" 
+            name="evaluator_grade" 
+            value={submission.evaluator_grade} 
+            max="10" 
+            min="0" 
+            step="0.1" 
+            disabled
+          />
+          <label for="grade">Nota del alumno</label>
+          <input 
+            type="number" 
+            id="grade" 
+            name="grade" 
+            value={submission.grade} 
+            max="10" 
+            min="0" 
+            step="0.1"
+            required
+          />
+          <label for="feedback">Comentarios</label>
+          <textarea 
+            id="feedback" 
+            name="feedback" 
+            required
+            placeholder="Escribe tus comentarios aquí"
+          >{submission.feedback}</textarea>
+          <button type="submit">Editar</button>
+        </form>
+      </section>
+    ) : (
+      <section>
+        <p>No tienes permiso para ver esta página</p>
+        <a href="/">Volver al inicio</a>
+      </section>
+    )
+  }
 </Layout>
 
 <style>
