@@ -160,4 +160,27 @@ export const professor = {
       return response.json();
     },
   }),
+  getSubmission: defineAction({
+    input: z.object({
+      token: z.string(),
+      submission_id: z.string(),
+    }),
+    handler: async (input) => {
+      const response = await fetch(
+        `${API_URL}/submission/${input.submission_id}`,
+        {
+          headers: {
+            Authorization: input.token,
+          },
+        }
+      );
+      if (!response.ok) {
+        return new ActionError({
+          code: ActionError.statusToCode(response.status),
+          message: response.statusText,
+        });
+      }
+      return response.json();
+    },
+  }),
 };

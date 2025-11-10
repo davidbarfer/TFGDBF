@@ -17,6 +17,7 @@
 | `/student/:id/submissions`          | Returns all submissions of the student |
 | `/student/:id/submission/:id`          | Returns the submission of the student |
 | `/student/:id/submission/:id/file`          | Returns the file of the submission of the student |
+| `/submission/:id`          | Returns the submission |
 | `/users`                            | Returns all users                     |
 
 ## Endpoints POST

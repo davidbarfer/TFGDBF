@@ -104,3 +104,11 @@ export function getStudentSubmissionFile(url) {
   }
   return false;
 }
+export function getSubmission(url) {
+  const regex = /^\/submission\/\d+$/;
+  if (regex.test(url)) {
+    const id = url.split('/').pop();
+    return id;
+  }
+  return false;
+}

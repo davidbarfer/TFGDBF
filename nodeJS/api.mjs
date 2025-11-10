@@ -19,6 +19,7 @@ import {
   getStudentSubmissions,
   getStudentSubmission,
   getStudentSubmissionFile,
+  getSubmission,
 } from './regExpGet.mjs';
 import {
   postPracticeCreate,
@@ -67,6 +68,7 @@ export const processRequest = async (req, res) => {
   let student_id_submissions = false;
   let student_id_submission_id = false;
   let student_id_submission_id_file = false;
+  let submission_id = false;
   switch (method) {
     case 'GET':
       subject_id = getSubject(url);
@@ -81,6 +83,7 @@ export const processRequest = async (req, res) => {
       student_id_submissions = getStudentSubmissions(url);
       student_id_submission_id = getStudentSubmission(url);
       student_id_submission_id_file = getStudentSubmissionFile(url);
+      submission_id = getSubmission(url);
       if (subject_id) {
         try {
           await authenticate(req, res, true);
@@ -381,6 +384,23 @@ export const processRequest = async (req, res) => {
             );
           }
           return res.end(JSON.stringify(submissionFile));
+        } catch (error) {
+          console.error('Database query error on get submission:', error);
+          res.statusCode = 500;
+          return res.end(JSON.stringify({ error: 'Internal server error' }));
+        }
+      } else if (submission_id) {
+        try {
+          await authenticate(req, res, false);
+          const submission = await query(
+            'SELECT * FROM submissions WHERE id = ?',
+            [submission_id]
+          );
+          if (submission.results.length === 0) {
+            res.statusCode = 404;
+            return res.end(JSON.stringify({ error: 'Submission not found' }));
+          }
+          return res.end(JSON.stringify(submission.results[0]));
         } catch (error) {
           console.error('Database query error on get submission:', error);
           res.statusCode = 500;
