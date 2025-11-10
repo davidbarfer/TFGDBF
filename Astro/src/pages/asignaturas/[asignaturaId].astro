@@ -17,7 +17,7 @@ if (token) {
     console.warn("Invalid or expired token", err);
   }
 }
-const { id } = Astro.params;
+const { asignaturaId: id } = Astro.params;
 const { data: subject, error } = await Astro.callAction(actions.user.getSubject, { id: id as string, token: token as string });
 
 if (error) {

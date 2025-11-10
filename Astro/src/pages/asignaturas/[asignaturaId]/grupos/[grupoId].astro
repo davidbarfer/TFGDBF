@@ -6,7 +6,7 @@ import GroupInfoStudent from "@/components/groups/groupInfoStudent.astro";
 import { parse } from 'cookie';
 import jwt from 'jsonwebtoken'
 import { roles } from "@/consts/users";
-const { id } = Astro.params;
+const { grupoId:id } = Astro.params;
 const cookies = parse(Astro.request.headers.get('cookie') || '');
 const token = cookies.token;
 const secret = import.meta.env.JWT_SECRET;

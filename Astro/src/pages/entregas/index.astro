@@ -1,9 +1,13 @@
 ---
 import Layout from "@/layouts/Layout.astro";
+import { actions } from 'astro:actions';
 import StudentSubmissions from "@/components/submissions/studentSubmissions.astro";
+import ProfessorSubmissions from "@/components/submissions/professorSubmissions.astro";
+import PracticeInfo from "@/components/submissions/practiceInfo.astro";
 import jwt from 'jsonwebtoken'
 import { parse } from 'cookie';
 import { roles } from "@/consts/users";
+import PracticeActions from "@/components/submissions/practiceActions.astro";
 
 const cookies = parse(Astro.request.headers.get('cookie') || '');
 const token = cookies.token;
@@ -16,19 +20,52 @@ if (token) {
     console.warn("Invalid or expired token", err);
   }
 }
+let practices: object[] = [];
+if (user?.role === roles.professor || user?.role === roles.admin) {
+  const { data: subjects, error: subjectsError } = await Astro.callAction(actions.user.getSubjects, { token: token as string });
+  await Promise.all(
+    subjects.map(async (subject) => {
+      const { data: practicesSubject, error: practicesSubjectError } = await Astro.callAction(actions.user.getPractices, { token: token as string, subject_id: String(subject.id) });
+      practices.push(practicesSubject[0]);
+    })
+  );
+}
 ---
 
 <Layout>
-  <section>
+  <article>
     {user?.role === roles.professor || user?.role === roles.admin ? (
-      <p> TODO: Tabla para el profesor con todas las entregas de su asignatura</p>
-    ) : ( user?.role === roles.student ? (
+      practices.map(async (practice) => {
+        const { data: submissions, error: submissionsError } = await Astro.callAction(actions.professor.getPracticeSubmissions, {
+          token: token as string,
+          practice_id: String(practice.id),
+        });
+        if (submissions.status === 404) {
+          return(
+            <>
+              <PracticeInfo token={token} practice={practice} />
+              <PracticeActions token={token} practice={practice} />
+              <p>No hay entregas para esta práctica</p>
+            </P>
+          )
+        }
+        return (
+          <>
+            <PracticeInfo token={token} practice={practice} />
+            <PracticeActions token={token} practice={practice} />
+            <ProfessorSubmissions token={token} submissions={submissions} subjectId={practice.subject_id} />
+          </>
+        );
+      })
+    ) : user?.role === roles.student ? (
       <StudentSubmissions userId={user.userId} token={token} />
     ) : (
-      <p>No tienes permiso para ver esta página</p>
-      <a href="/">Volver al inicio</a>
-    ))}
-  </section>
+      <>
+        <p>No tienes permiso para ver esta página</p>
+        <a href="/">Volver al inicio</a>
+      </>
+    )}
+  </article>
 </Layout>
 
 <style>

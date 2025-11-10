@@ -79,13 +79,14 @@ CREATE TABLE IF NOT EXISTS submissions (
     file_url VARCHAR(255) DEFAULT NULL,
     delivery_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     grade DECIMAL(5,2) DEFAULT NULL,
+    evaluator_grade DECIMAL(5,2) DEFAULT NULL,
     feedback TEXT,
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (practice_id) REFERENCES practice(id)
 );
 
 
--- Tabla Relaciones: Usuarios-Asignaturas
+-- Tabla Relaciones: Usuarios-Asignaturas 
 CREATE TABLE IF NOT EXISTS users_subjects (
   user_id INT NOT NULL,
   subject_id INT NOT NULL,

@@ -1,0 +1,73 @@
+---
+import { actions } from "astro:actions";
+import Layout from "@/layouts/Layout.astro";
+import ProfessorSubmissions from "@/components/submissions/professorSubmissions.astro";
+import PracticeInfo from "@/components/submissions/practiceInfo.astro";
+import PracticeActions from "@/components/submissions/practiceActions.astro";
+import jwt from 'jsonwebtoken'
+import { parse } from 'cookie';
+import { roles } from "@/consts/users";
+
+const {practicaId: practiceId} = Astro.params;
+const cookies = parse(Astro.request.headers.get('cookie') || '');
+const token = cookies.token;
+const secret = import.meta.env.JWT_SECRET;
+let user = null;
+if (token) {
+  try {
+    user = jwt.verify(token, secret); // same secret as backend
+  } catch (err) {
+    console.warn("Invalid or expired token", err);
+  }
+}
+const { data: practice, error: practiceError } = await Astro.callAction(actions.user.getPractice,{token: token as string, practice_id: String(practiceId)});
+if (practiceError) {
+  Astro.redirect('/404');
+}
+const { data: submissions, error: submissionsError } = await Astro.callAction(actions.professor.getPracticeSubmissions,{token: token as string, practice_id: String(practiceId)});
+if (submissionsError) {
+  Astro.redirect('/404');
+}
+---
+
+<Layout>
+  <section>
+    { (user?.role === roles.admin || user?.role === roles.professor) ? (
+      submissions?.status === 404 ? (
+        <>
+          <PracticeInfo token={token} practice={practice} />
+          <PracticeActions token={token} practice={practice} />
+          <p>No hay entregas para esta práctica</p>
+        </>
+      ) : (
+        <>
+          <PracticeInfo token={token} practice={practice} />
+          <PracticeActions token={token} practice={practice} />
+          <ProfessorSubmissions token={token} submissions={submissions} subjectId={practice.subject_id} />
+        </>
+      )
+    ) : (
+      <p>No tienes permiso para ver esta página</p>
+      <a href="/">Volver al inicio</a>
+    )}
+  </section>
+</Layout>
+
+<style>
+  section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    gap: 1rem;
+  }
+  a {
+    text-decoration: none;
+    color: var(--color-tertiary);
+    text-transform: uppercase;
+    font-weight: bold;
+    padding: 0.5rem;
+    cursor: pointer;
+  }
+</style>

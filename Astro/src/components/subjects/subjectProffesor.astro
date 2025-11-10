@@ -69,7 +69,7 @@ practices = await Promise.all(practices.map(async (practice: any) => {
               <td>{practice.description}</td>
               <td>{new Date(practice.deadline).toLocaleDateString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit' })}</td>
               <td><div class="groups-table">{practice.groups.map((group: any) => <a href={`/asignaturas/${subject?.id}/grupos/${group.id}`}>{group.name}</a>)}</div></td>
-              <td><a href={`/asignaturas/${subject?.id}/practicas/${practice.id}/entregas`}>Ver</a></td>
+              <td><a href={`/asignaturas/${subject?.id}/practicas/${practice.id}/entregas`}><button>Ver</button></a></td>
             </tr>
           ))}
         </tbody>
