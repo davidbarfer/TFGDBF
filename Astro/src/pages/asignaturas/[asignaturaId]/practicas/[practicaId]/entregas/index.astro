@@ -3,6 +3,7 @@ import { actions } from "astro:actions";
 import Layout from "@/layouts/Layout.astro";
 import ProfessorSubmissions from "@/components/submissions/professorSubmissions.astro";
 import PracticeInfo from "@/components/submissions/practiceInfo.astro";
+import PracticeActions from "@/components/submissions/practiceActions.astro";
 import jwt from 'jsonwebtoken'
 import { parse } from 'cookie';
 import { roles } from "@/consts/users";
@@ -32,8 +33,19 @@ if (submissionsError) {
 <Layout>
   <section>
     { (user?.role === roles.admin || user?.role === roles.professor) ? (
-      <PracticeInfo token={token} practice={practice} />
-      <ProfessorSubmissions token={token} submissions={submissions} subjectId={practice.subject_id} />
+      submissions?.status === 404 ? (
+        <>
+          <PracticeInfo token={token} practice={practice} />
+          <PracticeActions token={token} practice={practice} />
+          <p>No hay entregas para esta práctica</p>
+        </>
+      ) : (
+        <>
+          <PracticeInfo token={token} practice={practice} />
+          <PracticeActions token={token} practice={practice} />
+          <ProfessorSubmissions token={token} submissions={submissions} subjectId={practice.subject_id} />
+        </>
+      )
     ) : (
       <p>No tienes permiso para ver esta página</p>
       <a href="/">Volver al inicio</a>

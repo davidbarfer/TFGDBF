@@ -1,0 +1,30 @@
+---
+import jwt from 'jsonwebtoken'
+
+const secret = import.meta.env.JWT_SECRET;
+const { token , practice } = Astro.props;
+let user = null;
+if (token) {
+  try {
+    user = jwt.verify(token, secret); // same secret as backend
+  } catch (err) {
+    console.warn("Invalid or expired token", err);
+  }
+}
+---
+
+<section>
+  <button disabled>Crear Entregas</button>
+  <button disabled>Ejecutar evaluador</button>
+</section>
+
+<style scoped>
+  section {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    justify-content: center;
+    align-items: center;
+    padding-block: 1rem;
+  }
+</style>

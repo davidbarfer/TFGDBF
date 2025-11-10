@@ -67,7 +67,7 @@ const { data: submission, error: submissionError } = await Astro.callAction(acti
             required
             placeholder="Escribe tus comentarios aquí"
           >{submission.feedback}</textarea>
-          <button type="submit">Editar</button>
+          <button type="submit" disabled>Editar</button>
         </form>
       </section>
     ) : (

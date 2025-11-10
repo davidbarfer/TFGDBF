@@ -25,6 +25,7 @@ const { data: students, error: studentsError } = await Astro.callAction(actions.
   <section class="group-actions">
     <a href={`/asignaturas/${practice?.subject_id}/grupos/${group?.id}/edit`}><button>Editar</button></a>
     <button id="deleteGroupBtn" data-id={group?.id} data-token={token} data-subject_id={practice?.subject_id}>Eliminar</button>
+    <button id="createSubmissionsBtn" data-id={group?.id} data-token={token} data-subject_id={practice?.subject_id} disabled>Crear Entregas</button>
   </section>
   <section>
     <h2>Alumnos</h2>
