@@ -1,6 +1,7 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import jwt from 'jsonwebtoken'
+import Modal from "@/components/Modal.astro";
+import jwt from 'jsonwebtoken';
 import { parse } from 'cookie';
 import { roles } from "@/consts/users";
 
@@ -25,6 +26,14 @@ if (token) {
   ) : user?.role === roles.student ? (
     <p>Has iniciado sesión como {user?.role}</p>
   ) : (
-    <p>Doctus Lite</p>
+    <section>
+      <p>Doctus Lite</p>
+      <Modal id="InfoModal" btnText="Open Modal">
+        <main slot="mainModal">
+          <p>Welcome to Doctus Lite!</p>
+        </main>
+        <button slot="closeModal">Cerrar</button>
+      </Modal>
+    </section>
   )}
 </Layout>
