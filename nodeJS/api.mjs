@@ -29,6 +29,7 @@ import {
   postPracticeSubmissions,
 } from './regExpPost.mjs';
 import { deleteGroup, deleteStudentGroup } from './regExpDelete.mjs';
+import { add7days } from './utils.mjs';
 // CORS headers configuration
 const corsHeaders = {
   'Access-Control-Allow-Origin': `${process.env.FRONTEND_URL}`, // Your frontend URL
@@ -688,11 +689,9 @@ export const processRequest = async (req, res) => {
               const submissionsData = user_ids.results.map(user_id => ({
                 user_id: user_id.user_id,
                 practice_id: data.practice_id,
-                delivery_date: new Date(
+                delivery_date: add7days(
                   practice_groups.results[0].practice_group_date
-                )
-                  .toISOString()
-                  .split('T')[0],
+                ),
                 feedback: '',
                 grade: null,
                 evaluator_grade: null,
