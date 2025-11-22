@@ -1,0 +1,47 @@
+---
+const { id, btnText } = Astro.props;
+// How to use this component when importing it:
+// <Modal id='dialog' open='Open modal'>
+//   <main slot='mainModal'>
+//     Your content here
+//   </main>
+//   <button slot='closeModal'>Close modal</button>
+// </Modal>
+---
+
+<button onclick={`window.${id}.showModal()`}>{btnText}</button>
+
+<dialog id={id}>
+  <slot name="mainModal" />
+  <form method="dialog">
+    <slot name="closeModal" />
+  </form>
+</dialog>
+
+<style>
+  dialog {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background-color: var(--color-background-modal);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    color: var(--color-tertiary);
+    padding: 1.5rem;
+    max-width: 90%;
+    width: fit-content;
+    z-index: 1000;
+  }
+
+  dialog::backdrop {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+  }
+</style>
