@@ -34,3 +34,11 @@ export function postStudentSubmissionFile(url) {
   }
   return false;
 }
+export function postPracticeSubmissions(url) {
+  const regex = /^\/practice\/\d+\/submissions$/;
+  if (regex.test(url)) {
+    const practice_id = url.split('/')[2];
+    return practice_id;
+  }
+  return false;
+}
