@@ -1,11 +1,11 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import Modal from "@/components/Modal.astro";
-import jwt from 'jsonwebtoken';
-import { parse } from 'cookie';
+import jwt from "jsonwebtoken";
+import { parse } from "cookie";
 import { roles } from "@/consts/users";
 
-const cookies = parse(Astro.request.headers.get('cookie') || '');
+const cookies = parse(Astro.request.headers.get("cookie") || "");
 const token = cookies.token;
 const secret = import.meta.env.JWT_SECRET;
 let user = null;
@@ -19,15 +19,20 @@ if (token) {
 ---
 
 <Layout>
-  {user?.role === roles.admin ? (
-    <p>Has iniciado sesión como {user?.role}</p>
-  ) : user?.role === roles.professor ? (
-    <p>Has iniciado sesión como {user?.role}</p>
-  ) : user?.role === roles.student ? (
-    <p>Has iniciado sesión como {user?.role}</p>
-  ) : (
+  <main>
+    {
+      user?.role === roles.admin ? (
+        <p>Has iniciado sesión como {user?.role}</p>
+      ) : user?.role === roles.professor ? (
+        <p>Has iniciado sesión como {user?.role}</p>
+      ) : user?.role === roles.student ? (
+        <p>Has iniciado sesión como {user?.role}</p>
+      ) : (
+        <p>Doctus Lite</p>
+      )
+    }
     <section>
-      <p>Doctus Lite</p>
+      <h1>Doctus Lite Modal:</h1>
       <Modal id="InfoModal" btnText="Open Modal">
         <main slot="mainModal">
           <p>Welcome to Doctus Lite!</p>
@@ -35,5 +40,23 @@ if (token) {
         <button slot="closeModal">Cerrar</button>
       </Modal>
     </section>
-  )}
+  </main>
 </Layout>
+
+<style>
+  main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;  
+    width: 100%;
+    height: 100%;
+  }
+  section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+  }
+</style>
