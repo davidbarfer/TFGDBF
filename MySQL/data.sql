@@ -13,13 +13,15 @@ ON DUPLICATE KEY UPDATE name = name, course = course, degree = degree;
 
 INSERT INTO practice (subject_id, name, description, deadline) VALUES
 (1, 'Control PI', 'Diseñe un control PI', '2025-12-31'),
-(2, 'Control GPC', 'Diseñe un control GPC', '2028-12-31');
+(2, 'Control GPC', 'Diseñe un control GPC', '2028-12-31'),
+(1, 'Control Test', 'Diseñe un control Test', '2028-12-31');
 
 INSERT INTO practice_groups (practice_id, name, max_participants, practice_group_date, start_time, end_time) VALUES
 (1, 1, 10, '2025-09-17', '08:00:00', '10:00:00'),
 (1, 2, 15, '2025-09-17', '10:00:00', '12:00:00'),
 (1, 3, 20, '2025-09-17', '12:00:00', '14:00:00'),
-(2, 1, 20, '2025-08-17', '08:00:00', '10:00:00');
+(2, 1, 20, '2025-08-17', '08:00:00', '10:00:00'),
+(3, 1, 20, '2026-01-01', '10:00:00', '12:00:00');
 
 INSERT INTO users_subjects (user_id, subject_id) VALUES
 (2, 1),
@@ -31,7 +33,9 @@ INSERT INTO users_subjects (user_id, subject_id) VALUES
 
 INSERT INTO practice_groups_users (group_id, user_id) VALUES
 (1, 2),
-(2, 4);
+(2, 4),
+(5, 2),
+(5, 4);
 
 INSERT INTO submissions (user_id, practice_id, delivery_date, grade) VALUES
 (2, 1, '2023-01-01', 10),

@@ -34,3 +34,20 @@ export function postStudentSubmissionFile(url) {
   }
   return false;
 }
+export function postPracticeSubmissions(url) {
+  const regex = /^\/practice\/\d+\/submissions$/;
+  if (regex.test(url)) {
+    const practice_id = url.split('/')[2];
+    return practice_id;
+  }
+  return false;
+}
+export function postPracticeGroupSubmissions(url) {
+  const regex = /^\/practice\/\d+\/group\/\d+\/submissions$/;
+  if (regex.test(url)) {
+    const practice_id = url.split('/')[2];
+    const group_id = url.split('/')[4];
+    return { practice_id, group_id };
+  }
+  return false;
+}

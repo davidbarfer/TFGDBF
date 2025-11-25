@@ -26,8 +26,11 @@ import {
   postPracticeGroupsCreate,
   postGroupStudent,
   postStudentSubmissionFile,
+  postPracticeSubmissions,
+  postPracticeGroupSubmissions,
 } from './regExpPost.mjs';
 import { deleteGroup, deleteStudentGroup } from './regExpDelete.mjs';
+import { add7days } from './utils.mjs';
 // CORS headers configuration
 const corsHeaders = {
   'Access-Control-Allow-Origin': `${process.env.FRONTEND_URL}`, // Your frontend URL
@@ -64,6 +67,7 @@ export const processRequest = async (req, res) => {
   let group_id_student_id = false;
   let practice_id = false;
   let practice_id_submissions = false;
+  let practice_id_group_id_submissions = false;
   let student_id_groups = false;
   let student_id_submissions = false;
   let student_id_submission_id = false;
@@ -366,7 +370,7 @@ export const processRequest = async (req, res) => {
           }
           const subject_id = await query(
             'SELECT subject_id FROM practice WHERE id = ?',
-            [practice_id.results[0].practice_id]
+            (10.0)[practice_id.results[0].practice_id]
           );
           if (subject_id.results.length === 0) {
             res.statusCode = 404;
@@ -448,6 +452,8 @@ export const processRequest = async (req, res) => {
       subject_id_practices = postPracticeCreate(url);
       subject_id_practices_id_groups = postPracticeGroupsCreate(url);
       group_id_student_id = postGroupStudent(url);
+      practice_id_submissions = postPracticeSubmissions(url);
+      practice_id_group_id_submissions = postPracticeGroupSubmissions(url);
       if (subject_id_practices) {
         try {
           await authenticate(req, res);
@@ -469,7 +475,6 @@ export const processRequest = async (req, res) => {
                   JSON.stringify({ error: 'Name and description are required' })
                 );
               }
-
               const practice = await query(
                 'INSERT INTO practice (subject_id, name, description, deadline) VALUES (?, ?, ?, ?)',
                 [
@@ -639,6 +644,204 @@ export const processRequest = async (req, res) => {
             }
           });
         } catch {
+          res.statusCode = 500;
+          return res.end(JSON.stringify({ error: 'Internal server error' }));
+        }
+      } else if (practice_id_submissions) {
+        try {
+          await authenticate(req, res);
+          let body = '';
+          req.on('data', chunk => {
+            body += chunk.toString();
+          });
+          req.on('end', async () => {
+            try {
+              const data = JSON.parse(body);
+              if (!data.practice_id) {
+                res.statusCode = 400;
+                return res.end(
+                  JSON.stringify({
+                    error: 'Practice ID is required',
+                  })
+                );
+              }
+              const practice_groups = await query(
+                'SELECT id, practice_group_date FROM practice_groups WHERE practice_id = ?',
+                [data.practice_id]
+              );
+              if (practice_groups.results.length === 0) {
+                res.statusCode = 400;
+                return res.end(
+                  JSON.stringify({
+                    error: 'Practice does not have any groups',
+                  })
+                );
+              }
+              const user_ids = await query(
+                'SELECT user_id FROM practice_groups_users WHERE group_id IN (?)',
+                [practice_groups.results.map(group => group.id).flat()]
+              );
+              if (user_ids.results.length === 0) {
+                res.statusCode = 400;
+                return res.end(
+                  JSON.stringify({
+                    error: 'No students have been assigned to the practice',
+                  })
+                );
+              }
+              const submissionsData = user_ids.results.map(user_id => ({
+                user_id: user_id.user_id,
+                practice_id: data.practice_id,
+                delivery_date: add7days(
+                  practice_groups.results[0].practice_group_date
+                ),
+                feedback: '',
+                grade: null,
+                evaluator_grade: null,
+              }));
+              const result = [];
+              await Promise.all(
+                submissionsData.map(async (submission, idx) => {
+                  const resultSubmission = await query(
+                    'INSERT INTO submissions (user_id, practice_id, delivery_date, feedback, grade, evaluator_grade) VALUES (?, ?, ?, ?, ?, ?)',
+                    [
+                      submission.user_id,
+                      submission.practice_id,
+                      submission.delivery_date,
+                      submission.feedback,
+                      submission.grade,
+                      submission.evaluator_grade,
+                    ]
+                  );
+                  if (resultSubmission.results.affectedRows === 0) {
+                    res.statusCode = 400;
+                    return res.end(
+                      JSON.stringify({
+                        error: `No submissions were created for user ${submissionsData[idx].user_id}`,
+                      })
+                    );
+                  }
+                  result[idx] = resultSubmission.results;
+                })
+              );
+              res.statusCode = 201;
+              return res.end(JSON.stringify(result));
+            } catch (error) {
+              console.error(
+                'Database query error on create submissions:',
+                error
+              );
+              res.statusCode = 500;
+              return res.end(
+                JSON.stringify({ error: 'Internal server error' })
+              );
+            }
+          });
+        } catch {
+          res.statusCode = 500;
+          return res.end(JSON.stringify({ error: 'Internal server error' }));
+        }
+      } else if (practice_id_group_id_submissions) {
+        try {
+          await authenticate(req, res);
+          let body = '';
+          req.on('data', chunk => {
+            body += chunk.toString();
+          });
+          req.on('end', async () => {
+            try {
+              const data = JSON.parse(body);
+              if (!data.practice_id || !data.group_id) {
+                res.statusCode = 400;
+                return res.end(
+                  JSON.stringify({
+                    error: 'Practice ID and group ID are required',
+                  })
+                );
+              }
+              const group = await query(
+                'SELECT id, practice_id, practice_group_date FROM practice_groups WHERE id = ?',
+                [data.group_id]
+              );
+              if (group.results.length === 0) {
+                res.statusCode = 400;
+                return res.end(
+                  JSON.stringify({
+                    error: 'Group not found',
+                  })
+                );
+              }
+              if (
+                Number(group.results[0].practice_id) !==
+                Number(data.practice_id)
+              ) {
+                res.statusCode = 400;
+                return res.end(
+                  JSON.stringify({
+                    error: 'Group does not belong to the practice',
+                  })
+                );
+              }
+              const user_ids = await query(
+                'SELECT user_id FROM practice_groups_users WHERE group_id = ?',
+                [data.group_id]
+              );
+              if (user_ids.results.length === 0) {
+                res.statusCode = 400;
+                return res.end(
+                  JSON.stringify({
+                    error: 'No students have been assigned to the group',
+                  })
+                );
+              }
+              const submissionsData = user_ids.results.map(user_id => ({
+                user_id: user_id.user_id,
+                practice_id: data.practice_id,
+                delivery_date: add7days(group.results[0].practice_group_date),
+                feedback: '',
+                grade: null,
+                evaluator_grade: null,
+              }));
+              const result = [];
+              await Promise.all(
+                submissionsData.map(async (submission, idx) => {
+                  const resultSubmission = await query(
+                    'INSERT INTO submissions (user_id, practice_id, delivery_date, feedback, grade, evaluator_grade) VALUES (?, ?, ?, ?, ?, ?)',
+                    [
+                      submission.user_id,
+                      submission.practice_id,
+                      submission.delivery_date,
+                      submission.feedback,
+                      submission.grade,
+                      submission.evaluator_grade,
+                    ]
+                  );
+                  if (resultSubmission.results.affectedRows === 0) {
+                    res.statusCode = 400;
+                    return res.end(
+                      JSON.stringify({
+                        error: `No submissions were created for user ${submissionsData[idx].user_id}`,
+                      })
+                    );
+                  }
+                  result[idx] = resultSubmission.results;
+                })
+              );
+              res.statusCode = 201;
+              return res.end(JSON.stringify(result));
+            } catch (error) {
+              console.error(
+                'Database query error on create submissions:',
+                error
+              );
+              res.statusCode = 500;
+              return res.end(
+                JSON.stringify({ error: 'Internal server error' })
+              );
+            }
+          });
+        } catch (error) {
+          console.error('Database query error on get submissions:', error);
           res.statusCode = 500;
           return res.end(JSON.stringify({ error: 'Internal server error' }));
         }

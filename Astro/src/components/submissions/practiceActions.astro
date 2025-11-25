@@ -1,5 +1,6 @@
 ---
 import jwt from 'jsonwebtoken'
+import Modal from '@/components/Modal.astro';
 
 const secret = import.meta.env.JWT_SECRET;
 const { token , practice } = Astro.props;
@@ -14,7 +15,16 @@ if (token) {
 ---
 
 <section>
-  <button disabled>Crear Entregas</button>
+  <Modal id="createSubmissionsModal" btnText="Crear Entregas">
+    <main slot="mainModal">
+      <h1>Crear Entregas</h1>
+      <h2>Práctica {practice.name}</h2>
+      <p>Va a crear una entrega por cada alumno que tenga asignado un grupo</p>
+      <p>La fecha de entrega será la fecha del grupo + 7 días naturales</p>
+      <button id="createSubmissionsBtn" data-token={token} data-practice_id={practice.id}>Aceptar</button>
+    </main>
+    <button slot="closeModal">Cancelar</button>
+  </Modal>
   <button disabled>Ejecutar evaluador</button>
 </section>
 
@@ -28,3 +38,20 @@ if (token) {
     padding-block: 1rem;
   }
 </style>
+
+<script>
+  import { actions } from "astro:actions";
+  const createSubmissionsBtn = document.getElementById('createSubmissionsBtn');
+  createSubmissionsBtn?.addEventListener('click',async () => {
+    const token = createSubmissionsBtn?.dataset.token;
+    const practice_id = createSubmissionsBtn?.dataset.practice_id;
+    const { data: response, error: responseError } = await actions.professor.createSubmissions({ token: token as string, practice_id: String(practice_id) });
+    if(responseError) {
+      alert(responseError.message);
+    }
+    else {
+      alert('Entregas creadas');
+      window.location.reload();
+    }
+  });
+</script>
