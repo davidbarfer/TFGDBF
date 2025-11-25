@@ -42,3 +42,12 @@ export function postPracticeSubmissions(url) {
   }
   return false;
 }
+export function postPracticeGroupSubmissions(url) {
+  const regex = /^\/practice\/\d+\/group\/\d+\/submissions$/;
+  if (regex.test(url)) {
+    const practice_id = url.split('/')[2];
+    const group_id = url.split('/')[4];
+    return { practice_id, group_id };
+  }
+  return false;
+}

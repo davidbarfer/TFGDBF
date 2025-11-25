@@ -197,7 +197,36 @@ export const professor = {
             Authorization: input.token,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({practice_id: input.practice_id}),
+          body: JSON.stringify({ practice_id: input.practice_id }),
+        }
+      );
+      if (!response.ok) {
+        return new ActionError({
+          code: ActionError.statusToCode(response.status),
+          message: response.statusText,
+        });
+      }
+      return response.json();
+    },
+  }),
+  createSubmissionsGroup: defineAction({
+    input: z.object({
+      token: z.string(),
+      url_data: z.object({
+        practice_id: z.string(),
+        group_id: z.string(),
+      }),
+    }),
+    handler: async (input) => {
+      const response = await fetch(
+        `${API_URL}/practice/${input.url_data.practice_id}/group/${input.url_data.group_id}/submissions`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: input.token,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(input.url_data),
         }
       );
       if (!response.ok) {

@@ -1,6 +1,6 @@
 ---
-import jwt from 'jsonwebtoken'
-import { actions } from 'astro:actions';
+import jwt from "jsonwebtoken";
+import { actions } from "astro:actions";
 const secret = import.meta.env.JWT_SECRET;
 const { group, practice, token } = Astro.props;
 let user = null;
@@ -11,21 +11,46 @@ if (token) {
     console.warn("Invalid or expired token", err);
   }
 }
-const { data: students, error: studentsError } = await Astro.callAction(actions.user.getGroupStudents, { token: token as string, group_id: String(group?.id) });
+const { data: students, error: studentsError } = await Astro.callAction(
+  actions.user.getGroupStudents,
+  { token: token as string, group_id: String(group?.id) }
+);
 ---
 
 <div>
   <h1>Grupo {group?.name} - {practice?.name}</h1>
   <section class="group-info">
-    <p>Participantes: {group?.current_participants} / {group?.max_participants}</p>
-    <p>Fecha: {new Date(group?.practice_group_date).toLocaleDateString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit' })}</p>
+    <p>
+      Participantes: {group?.current_participants} / {group?.max_participants}
+    </p>
+    <p>
+      Fecha: {
+        new Date(group?.practice_group_date).toLocaleDateString("es-ES", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        })
+      }
+    </p>
     <p>Hora de inicio: {group?.start_time}</p>
     <p>Hora de fin: {group?.end_time}</p>
   </section>
   <section class="group-actions">
-    <a href={`/asignaturas/${practice?.subject_id}/grupos/${group?.id}/edit`}><button>Editar</button></a>
-    <button id="deleteGroupBtn" data-id={group?.id} data-token={token} data-subject_id={practice?.subject_id}>Eliminar</button>
-    <button id="createSubmissionsBtn" data-id={group?.id} data-token={token} data-subject_id={practice?.subject_id} disabled>Crear Entregas</button>
+    <a href={`/asignaturas/${practice?.subject_id}/grupos/${group?.id}/edit`}
+      ><button>Editar</button></a
+    >
+    <button
+      id="deleteGroupBtn"
+      data-id={group?.id}
+      data-token={token}
+      data-subject_id={practice?.subject_id}>Eliminar</button
+    >
+    <button
+      id="createSubmissionsBtn"
+      data-id={group?.id}
+      data-token={token}
+      data-practice_id={practice?.id}>Crear Entregas</button
+    >
   </section>
   <section>
     <h2>Alumnos</h2>
@@ -39,16 +64,25 @@ const { data: students, error: studentsError } = await Astro.callAction(actions.
         </tr>
       </thead>
       <tbody>
-        {students.map((student: any) => (
-          <tr>
-            <td>{student.username}</td>
-            <td>{student.name}</td>
-            <td>{student.surname}</td>
-            <td>
-              <button id="deleteStudentBtn" data-group_id={group?.id} data-student_id={student.id} data-token={token}>Eliminar</button>
-            </td>
-          </tr>
-        ))}
+        {
+          students.map((student: any) => (
+            <tr>
+              <td>{student.username}</td>
+              <td>{student.name}</td>
+              <td>{student.surname}</td>
+              <td>
+                <button
+                  id="deleteStudentBtn"
+                  data-group_id={group?.id}
+                  data-student_id={student.id}
+                  data-token={token}
+                >
+                  Eliminar
+                </button>
+              </td>
+            </tr>
+          ))
+        }
       </tbody>
     </table>
   </section>
@@ -59,7 +93,8 @@ const { data: students, error: studentsError } = await Astro.callAction(actions.
     text-decoration: none;
     color: inherit;
   }
-  .group-info, .group-actions {
+  .group-info,
+  .group-actions {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -70,31 +105,58 @@ const { data: students, error: studentsError } = await Astro.callAction(actions.
 </style>
 <script>
   import { actions } from "astro:actions";
-  const deleteGroupBtn = document.getElementById('deleteGroupBtn');
-  deleteGroupBtn?.addEventListener('click',async () => {
+  const deleteGroupBtn = document.getElementById("deleteGroupBtn");
+  const createSubmissionsBtn = document.getElementById("createSubmissionsBtn");
+  const deleteStudentBtn = document.getElementById("deleteStudentBtn");
+  deleteGroupBtn?.addEventListener("click", async () => {
     const id = deleteGroupBtn?.dataset.id;
     const token = deleteGroupBtn?.dataset.token;
-    const { data: response,  error: responseError } = await actions.professor.deleteGroup({ token: token as string, group_id: String(id) });
-    if(responseError) {
+    const { data: response, error: responseError } =
+      await actions.professor.deleteGroup({
+        token: token as string,
+        group_id: String(id),
+      });
+    if (responseError) {
       alert(responseError.message);
-    }
-    else {
-      alert('Grupo eliminado');
+    } else {
+      alert("Grupo eliminado");
       const subject_id = deleteGroupBtn?.dataset.subject_id;
       window.location.href = `/asignaturas/${subject_id}`;
     }
   });
-  const deleteStudentBtn = document.getElementById('deleteStudentBtn');
-  deleteStudentBtn?.addEventListener('click',async () => {
+  deleteStudentBtn?.addEventListener("click", async () => {
     const group_id = deleteStudentBtn?.dataset.group_id;
     const student_id = deleteStudentBtn?.dataset.student_id;
     const token = deleteStudentBtn?.dataset.token;
-    const { data: response, error: responseError } = await actions.professor.deleteStudentGroup({ token: token as string, group_id: String(group_id), student_id: String(student_id) });
-    if(responseError) {
+    const { data: response, error: responseError } =
+      await actions.professor.deleteStudentGroup({
+        token: token as string,
+        group_id: String(group_id),
+        student_id: String(student_id),
+      });
+    if (responseError) {
       alert(responseError.message);
+    } else {
+      alert("Alumno eliminado");
+      window.location.reload();
     }
-    else {
-      alert('Alumno eliminado');
+  });
+  createSubmissionsBtn?.addEventListener("click", async () => {
+    const group_id = createSubmissionsBtn?.dataset.id;
+    const practice_id = createSubmissionsBtn?.dataset.practice_id;
+    const token = createSubmissionsBtn?.dataset.token;
+    const { data: response, error: responseError } =
+      await actions.professor.createSubmissionsGroup({
+        token: token as string,
+        url_data: {
+          group_id: String(group_id),
+          practice_id: String(practice_id),
+        },
+      });
+    if (responseError) {
+      alert(responseError.message);
+    } else {
+      alert("Entregas creadas");
       window.location.reload();
     }
   });
