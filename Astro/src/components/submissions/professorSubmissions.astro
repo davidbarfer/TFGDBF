@@ -1,6 +1,7 @@
 ---
 import jwt from 'jsonwebtoken'
 import {submissionStatus } from "@/consts/submissions";
+import SubmissionActions from '@/components/submissions/submissionActions.astro'
 const secret = import.meta.env.JWT_SECRET;
 const { token, submissions, subjectId } = Astro.props;
 let user = null;
@@ -27,7 +28,7 @@ if (token) {
     </tr>
   </thead>
    <tbody>
-    {submissions.map((submission) => (
+    {submissions.map((submission : any) => (
       <tr>
         <td>{submission.id}</td>
         <td>{submission.user.name} {submission.user.surname}</td>
@@ -40,10 +41,8 @@ if (token) {
         <td>{submission.evaluator_grade}</td>
         <td>{submission.grade}</td>
         <td>{submission.feedback}</td>
-        <td class="actionsSubmition">
-          <button disabled>Graduar</button>
-          <button disabled>Ejecutar evaluador</button>
-          <a href={`/asignaturas/${subjectId}/practicas/${submission.practice_id}/entregas/${submission.id}/edit`}><button>Editar</button></a>
+        <td>
+          <SubmissionActions submission={submission} subjectId={subjectId}/>
         </td>
       </tr>
     ))}
@@ -55,11 +54,5 @@ if (token) {
   text-transform: uppercase;
   font-weight: bold;
   color: var(--color-tertiary);
-}
-.actionsSubmition {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: 0.25rem;
 }
 </style>

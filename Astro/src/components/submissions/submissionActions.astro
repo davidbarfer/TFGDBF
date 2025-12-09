@@ -1,0 +1,25 @@
+---
+import  Modal  from '@/components/Modal.astro';
+const { subjectId, submission } = Astro.props;
+---
+<section class="actionsSubmision">
+  <Modal id="graduateModal" btnText="Graduar">
+    <main slot="mainModal">
+      <p>Está acción va a copiar la nota del evaluador en la nota del alumno y la hará pública para el alumno.</p>
+      <p>Si quiere editar manualmente la nota del alumno haga click en el botón de editar</p>
+      <button id="graduateBtn" data-submission_id={submission.id}>Aceptar</button>
+    </main>
+    <button slot="closeModal">Cancelar</button>
+  </Modal>
+  <button disabled>Ejecutar evaluador</button>
+  <a href={`/asignaturas/${subjectId}/practicas/${submission.practice_id}/entregas/${submission.id}/edit`}><button>Editar</button></a>
+</section>
+
+<style scoped>
+  .actionsSubmision {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+  </style>
