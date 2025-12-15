@@ -29,6 +29,10 @@ import {
   postPracticeSubmissions,
   postPracticeGroupSubmissions,
 } from './regExpPost.mjs';
+import {
+  postStudentSubmissionGrade,
+  postPracticeSubmissionsGrade,
+} from './regExpPut.mjs';
 import { deleteGroup, deleteStudentGroup } from './regExpDelete.mjs';
 import { add7days } from './utils.mjs';
 // CORS headers configuration
@@ -67,11 +71,13 @@ export const processRequest = async (req, res) => {
   let group_id_student_id = false;
   let practice_id = false;
   let practice_id_submissions = false;
+  let practice_id_submssions_grade = false;
   let practice_id_group_id_submissions = false;
   let student_id_groups = false;
   let student_id_submissions = false;
   let student_id_submission_id = false;
   let student_id_submission_id_file = false;
+  let student_id_submission_id_grade = false;
   let submission_id = false;
   switch (method) {
     case 'GET':
@@ -1053,6 +1059,74 @@ export const processRequest = async (req, res) => {
             return res.end('Not found');
         }
         break;
+      }
+      break;
+    case 'PUT':
+      student_id_submission_id_grade = postStudentSubmissionGrade(url);
+      practice_id_submssions_grade = postPracticeSubmissionsGrade(url);
+      if (student_id_submission_id_grade) {
+        try {
+          await authenticate(req, res);
+          let body = '';
+          req.on('data', chunk => {
+            body += chunk.toString();
+          });
+          req.on('end', async () => {
+            try {
+              const data = JSON.parse(body);
+              if (
+                !data.submission_id ||
+                !data.evaluator_grade ||
+                !data.user_id
+              ) {
+                res.statusCode = 400;
+                return res.end(
+                  JSON.stringify({
+                    error:
+                      'Submission ID or evaluator grade or user ID is missing',
+                  })
+                );
+              }
+              if (
+                Number(data.submissions_id) !==
+                Number(student_id_submission_id_grade.submission_id)
+              ) {
+                res.statusCode = 500;
+                return res.end(
+                  JSON.stringify({ error: 'Internal server error' })
+                );
+              }
+              const result = await query(
+                'UPDATE submissions set grade = ? WHERE id = ? AND user_id = ?',
+                [data.evaluator_grade, data.submission_id, data.user_id]
+              );
+              console.log(result);
+              res.statusCode = 204;
+              return res.end(JSON.stringify(result));
+            } catch (error) {
+              console.error(
+                'Database query error on create submissions:',
+                error
+              );
+              res.statusCode = 500;
+              return res.end(
+                JSON.stringify({ error: 'Internal server error' })
+              );
+            }
+          });
+        } catch (error) {
+          console.error('Database query error on update grade:', error);
+          res.statusCode = 500;
+          return res.end(JSON.stringify({ error: 'Internal server error' }));
+        }
+      } else if (practice_id_submssions_grade) {
+        try {
+          await authenticate(req, res);
+        } catch (error) {
+          console.error('Database query error on update grade:', error);
+          res.statusCode = 500;
+          return res.end(JSON.stringify({ error: 'Internal server error' }));
+        }
       }
       break;
     case 'DELETE':
