@@ -1,19 +1,47 @@
 ---
 import  Modal  from '@/components/Modal.astro';
-const { subjectId, submission } = Astro.props;
+const { subjectId, submission, token } = Astro.props;
+console.log('SUBMISSION', submission);
 ---
 <section class="actionsSubmision">
-  <Modal id="graduateModal" btnText="Graduar">
+  <Modal id="gradeModal" btnText="Calificar">
     <main slot="mainModal">
       <p>Está acción va a copiar la nota del evaluador en la nota del alumno y la hará pública para el alumno.</p>
       <p>Si quiere editar manualmente la nota del alumno haga click en el botón de editar</p>
-      <button id="graduateBtn" data-submission_id={submission.id}>Aceptar</button>
+      <button 
+        id="gradeBtn" 
+        data-submission_id={submission.id} 
+        data-user_id={submission.user_id} 
+        data-token={token} 
+        data-evaluator_grade={submission.evaluator_grade}
+      >
+        Aceptar
+      </button>
     </main>
     <button slot="closeModal">Cancelar</button>
   </Modal>
   <button disabled>Ejecutar evaluador</button>
   <a href={`/asignaturas/${subjectId}/practicas/${submission.practice_id}/entregas/${submission.id}/edit`}><button>Editar</button></a>
 </section>
+
+<script>
+  import { actions } from 'astro:actions';
+  const gradeBtn = document.getElementById('gradeBtn')
+  gradeBtn?.addEventListener('click', async () => {
+    const token = gradeBtn?.dataset.token;
+    const url_data = {
+      user_id: gradeBtn?.dataset.user_id as string,
+      submission_id: gradeBtn?.dataset.submission_id as string,
+      evaluator_grade: gradeBtn?.dataset.evaluator_grade as string,
+    }
+    console.log('URLDATA', url_data);
+    const { data: response, error: responseError } = await actions.professor.gradeSubmissionStudent({
+      token: token as string,
+      url_data: url_data
+    })
+    console.log(response)
+  })
+</script>
 
 <style scoped>
   .actionsSubmision {

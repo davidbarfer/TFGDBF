@@ -42,7 +42,7 @@ if (token) {
         <td>{submission.grade}</td>
         <td>{submission.feedback}</td>
         <td>
-          <SubmissionActions submission={submission} subjectId={subjectId}/>
+          <SubmissionActions submission={submission} subjectId={subjectId} token={token} />
         </td>
       </tr>
     ))}
