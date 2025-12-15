@@ -1088,7 +1088,7 @@ export const processRequest = async (req, res) => {
                 );
               }
               if (
-                Number(data.submissions_id) !==
+                Number(data.submission_id) !==
                 Number(student_id_submission_id_grade.submission_id)
               ) {
                 res.statusCode = 500;
