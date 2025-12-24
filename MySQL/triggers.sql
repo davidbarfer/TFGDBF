@@ -204,9 +204,14 @@ BEGIN
   DECLARE practice_deadline DATETIME;
   SELECT deadline INTO practice_deadline FROM practice WHERE id = NEW.practice_id;
   
-  IF NEW.delivery_date > practice_deadline THEN
+  IF (NEW.delivery_date > practice_deadline) THEN
     SIGNAL SQLSTATE '45000'
     SET MESSAGE_TEXT = 'Submission after practice deadline not allowed';
+  END IF;
+
+  IF(NEW.grade IS NULL) THEN
+    SIGNAL SQLSTATE '45000'
+    SET MESSAGE_TEXT = 'Submission grade cannot be NULL when Update statement';
   END IF;
 END//
 
