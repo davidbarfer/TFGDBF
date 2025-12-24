@@ -259,14 +259,13 @@ export const professor = {
           body: JSON.stringify(input.url_data),
         }
       );
-      console.log(response)
       if (!response.ok) {
         return new ActionError({
           code: ActionError.statusToCode(response.status),
           message: response.statusText,
         });
       }
-      return response.json();
+      return true;
     },
   }),
 };
