@@ -1129,6 +1129,7 @@ export const processRequest = async (req, res) => {
       } else if (practice_id_submssions_grade) {
         try {
           await authenticate(req, res);
+          throw new Error('API ENDPOINT PENDING TO BE DEVELOPED');
         } catch (error) {
           console.error('Database query error on update grade:', error);
           res.statusCode = 500;
