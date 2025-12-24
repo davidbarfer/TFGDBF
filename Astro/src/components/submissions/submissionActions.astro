@@ -1,7 +1,6 @@
 ---
 import  Modal  from '@/components/Modal.astro';
 const { subjectId, submission, token } = Astro.props;
-console.log('SUBMISSION', submission);
 ---
 <section class="actionsSubmision">
   <Modal id="gradeModal" btnText="Calificar">
@@ -34,7 +33,6 @@ console.log('SUBMISSION', submission);
       submission_id: gradeBtn?.dataset.submission_id as string,
       evaluator_grade: gradeBtn?.dataset.evaluator_grade as string,
     }
-    console.log('URLDATA', url_data);
     const { data: response, error: responseError } = await actions.professor.gradeSubmissionStudent({
       token: token as string,
       url_data: url_data
