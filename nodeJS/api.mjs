@@ -1100,9 +1100,16 @@ export const processRequest = async (req, res) => {
                 'UPDATE submissions set grade = ? WHERE id = ? AND user_id = ?',
                 [data.evaluator_grade, data.submission_id, data.user_id]
               );
-              console.log(result);
+              if (result.results.affectedRows === 0) {
+                res.statusCode = 404;
+                return res.end(
+                  JSON.stringify({ error: 'No submissions affected' })
+                );
+              }
               res.statusCode = 204;
-              return res.end(JSON.stringify(result));
+              return res.end(
+                JSON.stringify({ message: 'Submission updated successfully' })
+              );
             } catch (error) {
               console.error(
                 'Database query error on create submissions:',
