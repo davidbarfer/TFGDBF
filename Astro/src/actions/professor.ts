@@ -238,4 +238,34 @@ export const professor = {
       return response.json();
     },
   }),
+  gradeSubmissionStudent: defineAction({
+    input: z.object({
+      token: z.string(),
+      url_data: z.object({
+        submission_id: z.string(),
+        user_id: z.string(),
+        evaluator_grade: z.string({message: 'Nota del evaluador requerida'}),
+      }),
+    }),
+    handler: async(input) => {
+      const response = await fetch(        
+        `${API_URL}/student/${input.url_data.user_id}/submission/${input.url_data.submission_id}/grade`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: input.token,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(input.url_data),
+        }
+      );
+      if (!response.ok) {
+        return new ActionError({
+          code: ActionError.statusToCode(response.status),
+          message: response.statusText,
+        });
+      }
+      return true;
+    },
+  }),
 };

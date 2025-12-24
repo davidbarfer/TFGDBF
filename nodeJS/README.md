@@ -34,7 +34,14 @@
 | `/practice/:id/group/:id/submissions`     | Create submissions for the practice group |
 | `/student/:id/submission/:id/file`        | Submit a file for the student             |
 
-## Endopints DELETE
+## Endpoints PUT
+
+| URL                                       | Description                               |
+| :---------------------------------------- | :---------------------------------------- |
+| `/student/:id/submission/:id/grade`       | Grade a student submission             |
+| `/practice/:id/submissions/grade`         | Grade all submisions for the practice  |
+
+## Endpoints DELETE
 
 | URL                      | Description                   |
 | :----------------------- | :---------------------------- |
