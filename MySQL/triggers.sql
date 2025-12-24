@@ -208,11 +208,6 @@ BEGIN
     SIGNAL SQLSTATE '45000'
     SET MESSAGE_TEXT = 'Submission after practice deadline not allowed';
   END IF;
-
-  IF (OLD.evaluator_grade IS NULL AND NEW.grade IS NULL AND NEW.evaluator_grade IS NULL) THEN
-    SIGNAL SQLSTATE '45000'
-    SET MESSAGE_TEXT = 'Submission grade cannot be updated from not grade evaluator';
-  END IF;
 END//
 
 -- Reset delimiter back to default
