@@ -244,7 +244,7 @@ export const professor = {
       url_data: z.object({
         submission_id: z.string(),
         user_id: z.string(),
-        evaluator_grade: z.string(),
+        evaluator_grade: z.string({message: 'Nota del evaluador requerida'}),
       }),
     }),
     handler: async(input) => {
