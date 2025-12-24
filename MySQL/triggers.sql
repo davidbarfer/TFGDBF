@@ -209,9 +209,9 @@ BEGIN
     SET MESSAGE_TEXT = 'Submission after practice deadline not allowed';
   END IF;
 
-  IF(NEW.grade IS NULL) THEN
+  IF (OLD.evaluator_grade IS NULL AND NEW.grade IS NULL AND NEW.evaluator_grade IS NULL) THEN
     SIGNAL SQLSTATE '45000'
-    SET MESSAGE_TEXT = 'Submission grade cannot be NULL when Update statement';
+    SET MESSAGE_TEXT = 'Submission grade cannot be updated from not grade evaluator';
   END IF;
 END//
 
