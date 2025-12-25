@@ -97,6 +97,7 @@ const { data: submission, error: submissionError } = await Astro.callAction(acti
       const {data: response, error: responseError} = await actions.professor.editSubmissionStudent({ token: token as string, url_data: urlData, submissionData: data });
       if (responseError) {
         alert(responseError.message);
+        window.location.reload();
       } else {
         alert('Entrega editada exitosamente');
         history.back();
