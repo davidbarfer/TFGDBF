@@ -28,6 +28,7 @@ import {
   postStudentSubmissionFile,
   postPracticeSubmissions,
   postPracticeGroupSubmissions,
+  postPracticeSubmissionEdit,
 } from './regExpPost.mjs';
 import {
   postStudentSubmissionGrade,
@@ -447,6 +448,7 @@ export const processRequest = async (req, res) => {
         group_id_student_id: postGroupStudent(url),
         practice_id_submissions: postPracticeSubmissions(url),
         practice_id_group_id_submissions: postPracticeGroupSubmissions(url),
+        practice_id_submission_id_edit: postPracticeSubmissionEdit(url),
       };
       if (postRoutes.subject_id_practices) {
         try {
@@ -836,6 +838,71 @@ export const processRequest = async (req, res) => {
           });
         } catch (error) {
           console.error('Database query error on get submissions:', error);
+          res.statusCode = 500;
+          return res.end(JSON.stringify({ error: 'Internal server error' }));
+        }
+      } else if (postRoutes.practice_id_submission_id_edit) {
+        try {
+          await authenticate(req, res);
+          let body = '';
+          req.on('data', chunk => {
+            body += chunk.toString();
+          });
+          req.on('end', async () => {
+            try {
+              const data = JSON.parse(body);
+              if (!data) {
+                res.statusCode = 400;
+                return res.end(
+                  JSON.stringify({ error: 'Data required missing' })
+                );
+              }
+              const isSubmission = await query(
+                'SELECT id FROM submissions WHERE id = ? AND practice_id = ?',
+                [
+                  postRoutes.practice_id_submission_id_edit.submission_id,
+                  postRoutes.practice_id_submission_id_edit.practice_id,
+                ]
+              );
+
+              if (isSubmission.results.length === 0) {
+                res.statusCode = 400;
+                return res.end(
+                  JSON.stringify({ error: 'Submission NOT FOUND' })
+                );
+              }
+
+              const result = await query(
+                'UPDATE submissions SET delivery_date = ?, evaluator_grade = ?, grade = ?, feedback = ? WHERE id = ? AND practice_id = ?',
+                [
+                  data.delivery_date,
+                  data.evaluator_grade,
+                  data.grade,
+                  data.feedback,
+                  postRoutes.practice_id_submission_id_edit.submission_id,
+                  postRoutes.practice_id_submission_id_edit.practice_id,
+                ]
+              );
+              if (result.results.affectedRows === 0) {
+                res.statusCode = 404;
+                return res.end(
+                  JSON.stringify({ error: 'No submissions affected' })
+                );
+              }
+              res.statusCode = 204;
+              return res.end(
+                JSON.stringify({ message: 'Submission updated successfully' })
+              );
+            } catch (error) {
+              console.error('Database query error on edit submissions:', error);
+              res.statusCode = 500;
+              return res.end(
+                JSON.stringify({ error: 'Internal server error' })
+              );
+            }
+          });
+        } catch (error) {
+          console.error('Database query error on edit the submission', error);
           res.statusCode = 500;
           return res.end(JSON.stringify({ error: 'Internal server error' }));
         }

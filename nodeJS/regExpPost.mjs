@@ -51,3 +51,12 @@ export function postPracticeGroupSubmissions(url) {
   }
   return false;
 }
+export function postPracticeSubmissionEdit(url) {
+  const regex = /^\/practice\/\d+\/submission\/\d+\/edit$/;
+  if (regex.test(url)) {
+    const practice_id = url.split('/')[2];
+    const submission_id = url.split('/')[4];
+    return { practice_id, submission_id };
+  }
+  return false;
+}

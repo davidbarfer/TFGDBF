@@ -25,7 +25,7 @@ const { data: submission, error: submissionError } = await Astro.callAction(acti
     user?.role === roles.admin || user?.role === roles.professor ? (
       <section>
         <h1>Editar entrega {submission.id}</h1>
-        <form id="submission-form" data-token={token} data-submission={JSON.stringify(submission)}>
+        <form id="submissionForm" data-token={token} data-submissionid={submission.id} data-practiceid={submission.practice_id}>
           <label for="delivery_date">Fecha de entrega</label>
           <input 
             type="date" 
@@ -57,17 +57,15 @@ const { data: submission, error: submissionError } = await Astro.callAction(acti
             value={submission.grade} 
             max="10" 
             min="0" 
-            step="0.1"
-            required
+            step="0.01"
           />
           <label for="feedback">Comentarios</label>
           <textarea 
             id="feedback" 
             name="feedback" 
-            required
             placeholder="Escribe tus comentarios aquí"
           >{submission.feedback}</textarea>
-          <button type="submit" disabled>Editar</button>
+          <button type="submit">Editar</button>
         </form>
       </section>
     ) : (
@@ -78,6 +76,34 @@ const { data: submission, error: submissionError } = await Astro.callAction(acti
     )
   }
 </Layout>
+
+<script>
+  import { actions } from "astro:actions";
+  const submissionForm = document.getElementById('submissionForm');
+  if(submissionForm) {
+    const token = submissionForm?.dataset.token;
+    const submission_id = submissionForm?.dataset.submissionid;
+    const practice_id = submissionForm?.dataset.practiceid;
+    const urlData = { practice_id: practice_id, submission_id: submission_id }
+    submissionForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const data = {
+        delivery_date: formData.get('delivery_date') as string,
+        evaluator_grade: formData.get('evaluator_grade') as string,
+        grade: formData.get('grade') as string,
+        feedback: formData.get('feedback') as string,
+      };
+      const {data: response, error: responseError} = await actions.professor.editSubmissionStudent({ token: token as string, url_data: urlData, submissionData: data });
+      if (responseError) {
+        alert(responseError.message);
+      } else {
+        alert('Entrega editada exitosamente');
+        history.back();
+      }
+    });
+  }
+</script>
 
 <style>
   form {
