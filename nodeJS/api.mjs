@@ -63,21 +63,21 @@ export const processRequest = async (req, res) => {
   // Set respose
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   switch (method) {
-    case 'GET':
+    case 'GET': {
       const getRoutes = {
-        subject_id : getSubject(url),
-        subject_id_practices : getSubjectPractices(url),
-        subject_id_practices_id_groups : getSubjectPracticesGroups(url),
-        group_id : getGroup(url),
-        subject_id_students : getSubjectStudents(url),
-        group_id_students : getGroupStudents(url),
-        practice_id : getPractice(url),
-        practice_id_submissions : getPracticeSubmissions(url),
-        student_id_groups : getStudentGroups(url),
-        student_id_submissions : getStudentSubmissions(url),
-        student_id_submission_id : getStudentSubmission(url),
-        student_id_submission_id_file : getStudentSubmissionFile(url),
-        submission_id : getSubmission(url),
+        subject_id: getSubject(url),
+        subject_id_practices: getSubjectPractices(url),
+        subject_id_practices_id_groups: getSubjectPracticesGroups(url),
+        group_id: getGroup(url),
+        subject_id_students: getSubjectStudents(url),
+        group_id_students: getGroupStudents(url),
+        practice_id: getPractice(url),
+        practice_id_submissions: getPracticeSubmissions(url),
+        student_id_groups: getStudentGroups(url),
+        student_id_submissions: getStudentSubmissions(url),
+        student_id_submission_id: getStudentSubmission(url),
+        student_id_submission_id_file: getStudentSubmissionFile(url),
+        submission_id: getSubmission(url),
       };
       if (getRoutes.subject_id) {
         try {
@@ -438,7 +438,8 @@ export const processRequest = async (req, res) => {
             return res.end(JSON.stringify({ error: 'Not found' }));
         }
       }
-    case 'POST':
+    }
+    case 'POST': {
       const postRoutes = {
         student_id_submission_id_file: postStudentSubmissionFile(url),
         subject_id_practices: postPracticeCreate(url),
@@ -1048,11 +1049,12 @@ export const processRequest = async (req, res) => {
         break;
       }
       break;
-    case 'PUT':
+    }
+    case 'PUT': {
       const putRoutes = {
         student_id_submission_id_grade: postStudentSubmissionGrade(url),
         practice_id_submssions_grade: postPracticeSubmissionsGrade(url),
-      }
+      };
       if (putRoutes.student_id_submission_id_grade) {
         try {
           await authenticate(req, res);
@@ -1126,11 +1128,12 @@ export const processRequest = async (req, res) => {
         }
       }
       break;
-    case 'DELETE':
+    }
+    case 'DELETE': {
       const deleteRoutes = {
         group_id: deleteGroup(url),
         group_id_student_id: deleteStudentGroup(url),
-      }
+      };
       if (deleteRoutes.group_id) {
         try {
           await authenticate(req, res);
@@ -1183,5 +1186,6 @@ export const processRequest = async (req, res) => {
       }
       res.statusCode = 404;
       return res.end(JSON.stringify({ error: 'Not found' }));
+    }
   }
 };
