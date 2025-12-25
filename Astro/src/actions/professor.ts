@@ -268,4 +268,39 @@ export const professor = {
       return true;
     },
   }),
+  editSubmissionStudent: defineAction({
+    input: z.object({
+      token: z.string(),
+      url_data: z.object({
+        practice_id: z.string(),
+        submission_id: z.string(),
+      }),
+      submissionData: z.object({
+        delivery_date: z.string(),
+        evaluator_grade: z.string().nullable(),
+        grade: z.string().nullable(),
+        feedback: z.string(), 
+      })
+    }),
+    handler: async(input) => {
+      const response = await fetch(        
+        `${API_URL}/practice/${input.url_data.practice_id}/submission/${input.url_data.submission_id}/edit`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: input.token,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(input.submissionData),
+        }
+      );
+      if (!response.ok) {
+        return new ActionError({
+          code: ActionError.statusToCode(response.status),
+          message: response.statusText,
+        });
+      }
+      return true;
+    },
+  }),
 };

@@ -31,6 +31,7 @@
 | `/subject/:id/practice/:id/groups/create` | Create groups for the practice            |
 | `/group/:id/student/:id`                  | Add a student to a group                  |
 | `/practice/:id/submissions`               | Create submissions for the practice       |
+| `/practice/:id/submission/:id/edit`       | Edit a submission                         |
 | `/practice/:id/group/:id/submissions`     | Create submissions for the practice group |
 | `/student/:id/submission/:id/file`        | Submit a file for the student             |
 
