@@ -62,43 +62,28 @@ export const processRequest = async (req, res) => {
   });
   // Set respose
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
-  let subject_id = false;
-  let subject_id_practices = false;
-  let subject_id_practices_id_groups = false;
-  let group_id = false;
-  let subject_id_students = false;
-  let group_id_students = false;
-  let group_id_student_id = false;
-  let practice_id = false;
-  let practice_id_submissions = false;
-  let practice_id_submssions_grade = false;
-  let practice_id_group_id_submissions = false;
-  let student_id_groups = false;
-  let student_id_submissions = false;
-  let student_id_submission_id = false;
-  let student_id_submission_id_file = false;
-  let student_id_submission_id_grade = false;
-  let submission_id = false;
   switch (method) {
     case 'GET':
-      subject_id = getSubject(url);
-      subject_id_practices = getSubjectPractices(url);
-      subject_id_practices_id_groups = getSubjectPracticesGroups(url);
-      group_id = getGroup(url);
-      subject_id_students = getSubjectStudents(url);
-      group_id_students = getGroupStudents(url);
-      practice_id = getPractice(url);
-      practice_id_submissions = getPracticeSubmissions(url);
-      student_id_groups = getStudentGroups(url);
-      student_id_submissions = getStudentSubmissions(url);
-      student_id_submission_id = getStudentSubmission(url);
-      student_id_submission_id_file = getStudentSubmissionFile(url);
-      submission_id = getSubmission(url);
-      if (subject_id) {
+      const getRoutes = {
+        subject_id : getSubject(url),
+        subject_id_practices : getSubjectPractices(url),
+        subject_id_practices_id_groups : getSubjectPracticesGroups(url),
+        group_id : getGroup(url),
+        subject_id_students : getSubjectStudents(url),
+        group_id_students : getGroupStudents(url),
+        practice_id : getPractice(url),
+        practice_id_submissions : getPracticeSubmissions(url),
+        student_id_groups : getStudentGroups(url),
+        student_id_submissions : getStudentSubmissions(url),
+        student_id_submission_id : getStudentSubmission(url),
+        student_id_submission_id_file : getStudentSubmissionFile(url),
+        submission_id : getSubmission(url),
+      };
+      if (getRoutes.subject_id) {
         try {
           await authenticate(req, res, true);
           const subject = await query('SELECT * FROM subject WHERE id = ?', [
-            subject_id,
+            getRoutes.subject_id,
           ]);
           if (subject.results.length === 0) {
             res.statusCode = 404;
@@ -110,12 +95,12 @@ export const processRequest = async (req, res) => {
           res.statusCode = 500;
           return res.end(JSON.stringify({ error: 'Internal server error' }));
         }
-      } else if (subject_id_practices) {
+      } else if (getRoutes.subject_id_practices) {
         try {
           await authenticate(req, res, true);
           const practices = await query(
             'SELECT * FROM practice WHERE subject_id = ?',
-            [subject_id_practices]
+            [getRoutes.subject_id_practices]
           );
           if (practices.results.length === 0) {
             res.statusCode = 404;
@@ -127,14 +112,14 @@ export const processRequest = async (req, res) => {
           res.statusCode = 500;
           return res.end(JSON.stringify({ error: 'Internal server error' }));
         }
-      } else if (subject_id_practices_id_groups) {
+      } else if (getRoutes.subject_id_practices_id_groups) {
         try {
           await authenticate(req, res, true);
           const groups = await query(
             'SELECT pg.* FROM practice_groups pg JOIN practice p ON pg.practice_id = p.id WHERE pg.practice_id = ? AND p.subject_id = ?',
             [
-              subject_id_practices_id_groups.practice_id,
-              subject_id_practices_id_groups.subject_id,
+              getRoutes.subject_id_practices_id_groups.practice_id,
+              getRoutes.subject_id_practices_id_groups.subject_id,
             ]
           );
           if (groups.results.length === 0) {
@@ -147,12 +132,12 @@ export const processRequest = async (req, res) => {
           res.statusCode = 500;
           return res.end(JSON.stringify({ error: 'Internal server error' }));
         }
-      } else if (group_id) {
+      } else if (getRoutes.group_id) {
         try {
           await authenticate(req, res, true);
           const group = await query(
             'SELECT * FROM practice_groups WHERE id = ?',
-            [group_id]
+            [getRoutes.group_id]
           );
           if (group.results.length === 0) {
             res.statusCode = 404;
@@ -164,12 +149,12 @@ export const processRequest = async (req, res) => {
           res.statusCode = 500;
           return res.end(JSON.stringify({ error: 'Internal server error' }));
         }
-      } else if (subject_id_students) {
+      } else if (getRoutes.subject_id_students) {
         try {
           await authenticate(req, res);
           const users_ids = await query(
             'SELECT user_id FROM users_subjects WHERE subject_id = ?',
-            [subject_id_students]
+            [getRoutes.subject_id_students]
           );
           if (users_ids.results.length === 0) {
             res.statusCode = 404;
@@ -205,12 +190,12 @@ export const processRequest = async (req, res) => {
           res.statusCode = 500;
           return res.end(JSON.stringify({ error: 'Internal server error' }));
         }
-      } else if (group_id_students) {
+      } else if (getRoutes.group_id_students) {
         try {
           await authenticate(req, res, true);
           const users_ids = await query(
             'SELECT user_id FROM practice_groups_users WHERE group_id = ?',
-            [group_id_students]
+            [getRoutes.group_id_students]
           );
           if (users_ids.results.length === 0) {
             res.statusCode = 404;
@@ -233,11 +218,11 @@ export const processRequest = async (req, res) => {
           res.statusCode = 500;
           return res.end(JSON.stringify({ error: 'Internal server error' }));
         }
-      } else if (practice_id) {
+      } else if (getRoutes.practice_id) {
         try {
           await authenticate(req, res, true);
           const practice = await query('SELECT * FROM practice WHERE id = ?', [
-            practice_id,
+            getRoutes.practice_id,
           ]);
           if (practice.results.length === 0) {
             res.statusCode = 404;
@@ -249,12 +234,12 @@ export const processRequest = async (req, res) => {
           res.statusCode = 500;
           return res.end(JSON.stringify({ error: 'Internal server error' }));
         }
-      } else if (practice_id_submissions) {
+      } else if (getRoutes.practice_id_submissions) {
         try {
           await authenticate(req, res);
           const submissions = await query(
             'SELECT id, user_id, practice_id, file_url, delivery_date, feedback, grade, evaluator_grade FROM submissions WHERE practice_id = ?',
-            [practice_id_submissions]
+            [getRoutes.practice_id_submissions]
           );
           if (submissions.results.length === 0) {
             res.statusCode = 404;
@@ -279,12 +264,12 @@ export const processRequest = async (req, res) => {
           res.statusCode = 500;
           return res.end(JSON.stringify({ error: 'Internal Server Error' }));
         }
-      } else if (student_id_groups) {
+      } else if (getRoutes.student_id_groups) {
         try {
           await authenticate(req, res, true);
           const groups_ids = await query(
             'SELECT group_id FROM practice_groups_users WHERE user_id = ?',
-            [student_id_groups]
+            [getRoutes.student_id_groups]
           );
           if (groups_ids.results.length === 0) {
             res.statusCode = 404;
@@ -304,12 +289,12 @@ export const processRequest = async (req, res) => {
           res.statusCode = 500;
           return res.end(JSON.stringify({ error: 'Internal server error' }));
         }
-      } else if (student_id_submissions) {
+      } else if (getRoutes.student_id_submissions) {
         try {
           await authenticate(req, res, true);
           const submissions = await query(
             'SELECT * FROM submissions WHERE user_id = ?',
-            [student_id_submissions]
+            [getRoutes.student_id_submissions]
           );
           if (submissions.results.length === 0) {
             res.statusCode = 404;
@@ -334,14 +319,14 @@ export const processRequest = async (req, res) => {
           res.statusCode = 500;
           return res.end(JSON.stringify({ error: 'Internal server error' }));
         }
-      } else if (student_id_submission_id) {
+      } else if (getRoutes.student_id_submission_id) {
         try {
           await authenticate(req, res, true);
           const submission = await query(
             'SELECT * FROM submissions WHERE user_id = ? AND id = ?',
             [
-              student_id_submission_id.student_id,
-              student_id_submission_id.submission_id,
+              getRoutes.student_id_submission_id.student_id,
+              getRoutes.student_id_submission_id.submission_id,
             ]
           );
           if (submission.results.length === 0) {
@@ -360,14 +345,14 @@ export const processRequest = async (req, res) => {
           res.statusCode = 500;
           return res.end(JSON.stringify({ error: 'Internal server error' }));
         }
-      } else if (student_id_submission_id_file) {
+      } else if (getRoutes.student_id_submission_id_file) {
         try {
           await authenticate(req, res, true);
           const practice_id = await query(
             'SELECT practice_id FROM submissions WHERE id = ? AND user_id = ?',
             [
-              student_id_submission_id_file.submission_id,
-              student_id_submission_id_file.student_id,
+              getRoutes.student_id_submission_id_file.submission_id,
+              getRoutes.student_id_submission_id_file.student_id,
             ]
           );
           if (practice_id.results[0].length === 0) {
@@ -385,7 +370,7 @@ export const processRequest = async (req, res) => {
           const url = `${subject_id.results[0].subject_id}/${practice_id.results[0].practice_id}/submissions/template.m`;
           const submissionFile = await getFileSubmission(
             url,
-            student_id_submission_id_file
+            getRoutes.student_id_submission_id_file
           );
           if (!submissionFile) {
             res.statusCode = 404;
@@ -399,12 +384,12 @@ export const processRequest = async (req, res) => {
           res.statusCode = 500;
           return res.end(JSON.stringify({ error: 'Internal server error' }));
         }
-      } else if (submission_id) {
+      } else if (getRoutes.submission_id) {
         try {
           await authenticate(req, res, false);
           const submission = await query(
             'SELECT * FROM submissions WHERE id = ?',
-            [submission_id]
+            [getRoutes.submission_id]
           );
           if (submission.results.length === 0) {
             res.statusCode = 404;
@@ -454,13 +439,15 @@ export const processRequest = async (req, res) => {
         }
       }
     case 'POST':
-      student_id_submission_id_file = postStudentSubmissionFile(url);
-      subject_id_practices = postPracticeCreate(url);
-      subject_id_practices_id_groups = postPracticeGroupsCreate(url);
-      group_id_student_id = postGroupStudent(url);
-      practice_id_submissions = postPracticeSubmissions(url);
-      practice_id_group_id_submissions = postPracticeGroupSubmissions(url);
-      if (subject_id_practices) {
+      const postRoutes = {
+        student_id_submission_id_file: postStudentSubmissionFile(url),
+        subject_id_practices: postPracticeCreate(url),
+        subject_id_practices_id_groups: postPracticeGroupsCreate(url),
+        group_id_student_id: postGroupStudent(url),
+        practice_id_submissions: postPracticeSubmissions(url),
+        practice_id_group_id_submissions: postPracticeGroupSubmissions(url),
+      };
+      if (postRoutes.subject_id_practices) {
         try {
           await authenticate(req, res);
           let body = '';
@@ -484,7 +471,7 @@ export const processRequest = async (req, res) => {
               const practice = await query(
                 'INSERT INTO practice (subject_id, name, description, deadline) VALUES (?, ?, ?, ?)',
                 [
-                  subject_id_practices,
+                  postRoutes.subject_id_practices,
                   data.name,
                   data.description,
                   data.deadline,
@@ -504,7 +491,7 @@ export const processRequest = async (req, res) => {
           res.statusCode = 500;
           return res.end(JSON.stringify({ error: 'Internal server error' }));
         }
-      } else if (subject_id_practices_id_groups) {
+      } else if (postRoutes.subject_id_practices_id_groups) {
         try {
           await authenticate(req, res);
           let body = '';
@@ -558,7 +545,7 @@ export const processRequest = async (req, res) => {
           res.statusCode = 500;
           return res.end(JSON.stringify({ error: 'Internal server error' }));
         }
-      } else if (group_id_student_id) {
+      } else if (postRoutes.group_id_student_id) {
         try {
           await authenticate(req, res, true);
           let body = '';
@@ -594,7 +581,7 @@ export const processRequest = async (req, res) => {
           res.statusCode = 500;
           return res.end(JSON.stringify({ error: 'Internal server error' }));
         }
-      } else if (student_id_submission_id_file) {
+      } else if (postRoutes.student_id_submission_id_file) {
         try {
           await authenticate(req, res, true);
           let body = '';
@@ -653,7 +640,7 @@ export const processRequest = async (req, res) => {
           res.statusCode = 500;
           return res.end(JSON.stringify({ error: 'Internal server error' }));
         }
-      } else if (practice_id_submissions) {
+      } else if (postRoutes.practice_id_submissions) {
         try {
           await authenticate(req, res);
           let body = '';
@@ -747,7 +734,7 @@ export const processRequest = async (req, res) => {
           res.statusCode = 500;
           return res.end(JSON.stringify({ error: 'Internal server error' }));
         }
-      } else if (practice_id_group_id_submissions) {
+      } else if (postRoutes.practice_id_group_id_submissions) {
         try {
           await authenticate(req, res);
           let body = '';
@@ -1062,9 +1049,11 @@ export const processRequest = async (req, res) => {
       }
       break;
     case 'PUT':
-      student_id_submission_id_grade = postStudentSubmissionGrade(url);
-      practice_id_submssions_grade = postPracticeSubmissionsGrade(url);
-      if (student_id_submission_id_grade) {
+      const putRoutes = {
+        student_id_submission_id_grade: postStudentSubmissionGrade(url),
+        practice_id_submssions_grade: postPracticeSubmissionsGrade(url),
+      }
+      if (putRoutes.student_id_submission_id_grade) {
         try {
           await authenticate(req, res);
           let body = '';
@@ -1089,7 +1078,7 @@ export const processRequest = async (req, res) => {
               }
               if (
                 Number(data.submission_id) !==
-                Number(student_id_submission_id_grade.submission_id)
+                Number(putRoutes.student_id_submission_id_grade.submission_id)
               ) {
                 res.statusCode = 500;
                 return res.end(
@@ -1126,7 +1115,7 @@ export const processRequest = async (req, res) => {
           res.statusCode = 500;
           return res.end(JSON.stringify({ error: 'Internal server error' }));
         }
-      } else if (practice_id_submssions_grade) {
+      } else if (putRoutes.practice_id_submssions_grade) {
         try {
           await authenticate(req, res);
           throw new Error('API ENDPOINT PENDING TO BE DEVELOPED');
@@ -1138,14 +1127,16 @@ export const processRequest = async (req, res) => {
       }
       break;
     case 'DELETE':
-      group_id = deleteGroup(url);
-      group_id_student_id = deleteStudentGroup(url);
-      if (group_id) {
+      const deleteRoutes = {
+        group_id: deleteGroup(url),
+        group_id_student_id: deleteStudentGroup(url),
+      }
+      if (deleteRoutes.group_id) {
         try {
           await authenticate(req, res);
           const result = await query(
             'DELETE FROM practice_groups WHERE id = ?',
-            [group_id]
+            [deleteRoutes.group_id]
           );
           if (result.results.affectedRows > 0) {
             res.statusCode = 200;
@@ -1161,12 +1152,15 @@ export const processRequest = async (req, res) => {
           res.statusCode = 500;
           return res.end(JSON.stringify({ error: 'Internal server error' }));
         }
-      } else if (group_id_student_id) {
+      } else if (deleteRoutes.group_id_student_id) {
         try {
           await authenticate(req, res);
           const result = await query(
             'DELETE FROM practice_groups_users WHERE group_id = ? AND user_id = ?',
-            [group_id_student_id.group_id, group_id_student_id.student_id]
+            [
+              deleteRoutes.group_id_student_id.group_id,
+              deleteRoutes.group_id_student_id.student_id,
+            ]
           );
           if (result.results.affectedRows > 0) {
             res.statusCode = 200;
