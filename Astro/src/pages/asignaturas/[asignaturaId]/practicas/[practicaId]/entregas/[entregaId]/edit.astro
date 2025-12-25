@@ -47,7 +47,7 @@ const { data: submission, error: submissionError } = await Astro.callAction(acti
             max="10" 
             min="0" 
             step="0.1" 
-            disabled
+            readonly
           />
           <label for="grade">Nota del alumno</label>
           <input 
@@ -94,6 +94,8 @@ const { data: submission, error: submissionError } = await Astro.callAction(acti
         grade: formData.get('grade') as string,
         feedback: formData.get('feedback') as string,
       };
+      if(data.evaluator_grade === "") data.evaluator_grade = null;
+      if(data.grade === "") data.grade = null;
       const {data: response, error: responseError} = await actions.professor.editSubmissionStudent({ token: token as string, url_data: urlData, submissionData: data });
       if (responseError) {
         alert(responseError.message);
