@@ -3,3 +3,8 @@ export function add7days(date) {
   dateObject.setDate(dateObject.getDate() + 7);
   return dateObject.toISOString().split('T')[0];
 }
+
+export function parseDateMatlab(date) {
+  const dateObject = new Date(date);
+  return dateObject.toISOString().replace(/[-:.]/g, '_');
+}
