@@ -1,6 +1,7 @@
 import * as fs from 'node:fs/promises';
 import util from 'node:util';
 import { query } from './database.mjs';
+import { executeStudentSubmision } from './matlabFunctions.mjs';
 
 const ERROR_MAP = util.getSystemErrorMap();
 const ERROR_CODES = {
@@ -97,6 +98,12 @@ export async function saveFileSubmission(url, content, submission_id) {
     await fs.writeFile(filePath, content, 'utf-8');
   } catch (error) {
     console.error('Error writing file:', error);
+    return false;
+  }
+  try {
+    executeStudentSubmision(filePath);
+  } catch (error) {
+    console.error('Error executing student submision:', error);
     return false;
   }
   try {

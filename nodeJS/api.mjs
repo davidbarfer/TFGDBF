@@ -35,7 +35,7 @@ import {
   postPracticeSubmissionsGrade,
 } from './regExpPut.mjs';
 import { deleteGroup, deleteStudentGroup } from './regExpDelete.mjs';
-import { add7days } from './utils.mjs';
+import { add7days, parseDateMatlab } from './utils.mjs';
 // CORS headers configuration
 const corsHeaders = {
   'Access-Control-Allow-Origin': `${process.env.FRONTEND_URL}`, // Your frontend URL
@@ -618,7 +618,10 @@ export const processRequest = async (req, res) => {
                   })
                 );
               }
-              const file_Name = `${data.url_params.creation_date}_U${data.url_params.user_id}_S${data.url_params.subject_id}_P${data.url_params.practice_id}_ID${data.url_params.submission_id}.m`;
+              data.url_params.creation_date = parseDateMatlab(
+                data.url_params.creation_date
+              );
+              const file_Name = `U${data.url_params.user_id}_S${data.url_params.subject_id}_P${data.url_params.practice_id}_ID${data.url_params.submission_id}_${data.url_params.creation_date}.m`;
               const url = `${data.url_params.subject_id}/${data.url_params.practice_id}/submissions/${file_Name}`;
               const saveResult = saveFileSubmission(
                 url,
