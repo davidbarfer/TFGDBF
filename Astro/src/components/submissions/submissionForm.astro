@@ -34,8 +34,11 @@ const {submission, token} = Astro.props;
         submission_id: String(submission?.id),
       },
     }
-    const response = actions.user.saveSubmissionFile(data);
-      if (response) {
+    const response = await actions.user.saveSubmissionFile(data);
+      if(response.error) {
+        alert(`Error al realizar la entrega: ${response.error}`)
+      }
+      if (response.data) {
         alert('Entrega realizada');
         window.location.href = `/entregas/`;
       }
