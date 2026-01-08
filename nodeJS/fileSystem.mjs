@@ -43,7 +43,7 @@ export const generateFileSystem = async () => {
         // Create a MATLAB file template for testing
         await fs.writeFile(
           `${practicePath}/submissions/template.m`,
-          'A1 = 1;',
+          '% PLANTILLA \nA1 = 1;',
           'utf8'
         );
       });
