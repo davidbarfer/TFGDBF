@@ -623,16 +623,34 @@ export const processRequest = async (req, res) => {
               );
               const file_Name = `U${data.url_params.user_id}_S${data.url_params.subject_id}_P${data.url_params.practice_id}_ID${data.url_params.submission_id}_${data.url_params.creation_date}.m`;
               const url = `${data.url_params.subject_id}/${data.url_params.practice_id}/submissions/${file_Name}`;
-              const saveResult = saveFileSubmission(
+              const saveResult = await saveFileSubmission(
                 url,
                 data.file_content,
                 data.url_params.submission_id
               );
-              if (!saveResult) {
-                res.statusCode = 409;
-                return res.end(
-                  JSON.stringify({ error: 'Error saving submission file' })
-                );
+              switch (saveResult) {
+                case 500: {
+                  res.statusCode = 500;
+                  return res.end(
+                    JSON.stringify({
+                      error: 'Internal Server Error on saving submission',
+                    })
+                  );
+                }
+                case 400: {
+                  res.statusCode = 400;
+                  return res.end(
+                    JSON.stringify({
+                      error: 'Error executing submission file. Syntax Error',
+                    })
+                  );
+                }
+                case 201: {
+                  res.statusCode = 201;
+                  return res.end(
+                    JSON.stringify({ message: 'Submission saved successfully' })
+                  );
+                }
               }
             } catch (error) {
               console.error('Database query error on submit file:', error);
