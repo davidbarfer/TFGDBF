@@ -7,10 +7,8 @@ import { generateFileSystem } from './fileSystem.mjs';
 
 const server = http.createServer(processRequest);
 
-server.listen(Number(process.env.BACKEND_PORT), () => {
-  console.log(
-    `API server listening on: http://localhost:${process.env.BACKEND_PORT}`
-  );
+server.listen(Number(process.env.BACKEND_PORT), '192.168.1.187', () => {
+  console.log(`API server listening on: ${process.env.BACKEND_URL}`);
 });
 
 const matlabServer = net.createServer(processMatlabRequest);

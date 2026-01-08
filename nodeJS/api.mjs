@@ -1008,7 +1008,7 @@ export const processRequest = async (req, res) => {
                 // Set response headers
                 const headers = {
                   'Content-Type': 'application/json',
-                  'Set-Cookie': `token=${token}; HttpOnly; Secure; SameSite=None; Max-Age=3600; Path=/`,
+                  'Set-Cookie': `token=${token}; HttpOnly; Max-Age=3600; Path=/`,
                   'Access-Control-Allow-Origin': `${process.env.FRONTEND_URL}`,
                   'Access-Control-Allow-Credentials': 'true',
                 };
