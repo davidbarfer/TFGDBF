@@ -362,7 +362,7 @@ export const processRequest = async (req, res) => {
           }
           const subject_id = await query(
             'SELECT subject_id FROM practice WHERE id = ?',
-            (10.0)[practice_id.results[0].practice_id]
+            [practice_id.results[0].practice_id]
           );
           if (subject_id.results.length === 0) {
             res.statusCode = 404;
