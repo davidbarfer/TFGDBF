@@ -38,24 +38,21 @@ export const launchMatlabClient = () => {
   });
 };
 
-export async function executeStudentSubmision(filePath) {
+export function executeStudentSubmision(filePath) {
   return new Promise((resolve, reject) => {
-    const matlab = exec(
+    exec(
       `${matlabPath} -batch "run('${filePath}')"`,
       // `${matlabPath} -batch "${content}"`,
-      (error, stdout, stderr) => {
+      // eslint-disable-next-line no-unused-vars
+      (error, stdout, _stderr) => {
+        // error: exec error containig matlab error
+        // stdout: matlab output
+        // stderr: matlab error
         if (error) {
-          console.error('MATLAB EXEC error:', error);
-          console.error('MATLAB stderr', stderr);
           reject(error);
-          return stderr;
         }
-        console.log('MATLAB output:', stdout);
-        if (stderr) console.error('MATLAB errors:', stderr);
+        resolve(stdout);
       }
     );
-
-    // Give MATLAB time to start up and connect
-    setTimeout(() => resolve(matlab), 5000);
   });
 }
