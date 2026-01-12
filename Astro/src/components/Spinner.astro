@@ -1,13 +1,18 @@
 ---
-// No props required, but you could add size/color if you want
-// const { size = 40, color = "#3b82f6" } = Astro.props;
 ---
-
-<div class="spinner" role="status" aria-live="polite" aria-label="Loading">
-  <span class="sr-only">Loading…</span>
+<div class="spinner-container">
+  <div class="spinner" role="status" aria-live="polite" aria-label="Loading">
+    <span class="sr-only">Loading…</span>
+  </div>
 </div>
 
 <style>
+  .spinner-container {
+    display: none;
+  }
+  .toggleVisiblity {
+    display: inline-block !important;
+  }
   .spinner {
     width: 40px;
     height: 40px;
