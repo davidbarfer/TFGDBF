@@ -35,7 +35,7 @@ import {
   postPracticeSubmissionsGrade,
 } from './regExpPut.mjs';
 import { deleteGroup, deleteStudentGroup } from './regExpDelete.mjs';
-import { add7days } from './utils.mjs';
+import { add7days, parseDateMatlab } from './utils.mjs';
 // CORS headers configuration
 const corsHeaders = {
   'Access-Control-Allow-Origin': `${process.env.FRONTEND_URL}`, // Your frontend URL
@@ -362,7 +362,7 @@ export const processRequest = async (req, res) => {
           }
           const subject_id = await query(
             'SELECT subject_id FROM practice WHERE id = ?',
-            (10.0)[practice_id.results[0].practice_id]
+            [practice_id.results[0].practice_id]
           );
           if (subject_id.results.length === 0) {
             res.statusCode = 404;
@@ -618,18 +618,39 @@ export const processRequest = async (req, res) => {
                   })
                 );
               }
-              const file_Name = `${data.url_params.creation_date}_U${data.url_params.user_id}_S${data.url_params.subject_id}_P${data.url_params.practice_id}_ID${data.url_params.submission_id}.m`;
+              data.url_params.creation_date = parseDateMatlab(
+                data.url_params.creation_date
+              );
+              const file_Name = `U${data.url_params.user_id}_S${data.url_params.subject_id}_P${data.url_params.practice_id}_ID${data.url_params.submission_id}_${data.url_params.creation_date}.m`;
               const url = `${data.url_params.subject_id}/${data.url_params.practice_id}/submissions/${file_Name}`;
-              const saveResult = saveFileSubmission(
+              const saveResult = await saveFileSubmission(
                 url,
                 data.file_content,
                 data.url_params.submission_id
               );
-              if (!saveResult) {
-                res.statusCode = 409;
-                return res.end(
-                  JSON.stringify({ error: 'Error saving submission file' })
-                );
+              switch (saveResult) {
+                case 500: {
+                  res.statusCode = 500;
+                  return res.end(
+                    JSON.stringify({
+                      error: 'Internal Server Error on saving submission',
+                    })
+                  );
+                }
+                case 400: {
+                  res.statusCode = 400;
+                  return res.end(
+                    JSON.stringify({
+                      error: 'Error executing submission file. Syntax Error',
+                    })
+                  );
+                }
+                case 201: {
+                  res.statusCode = 201;
+                  return res.end(
+                    JSON.stringify({ message: 'Submission saved successfully' })
+                  );
+                }
               }
             } catch (error) {
               console.error('Database query error on submit file:', error);
@@ -987,7 +1008,7 @@ export const processRequest = async (req, res) => {
                 // Set response headers
                 const headers = {
                   'Content-Type': 'application/json',
-                  'Set-Cookie': `token=${token}; HttpOnly; Secure; SameSite=None; Max-Age=3600; Path=/`,
+                  'Set-Cookie': `token=${token}; HttpOnly; Max-Age=3600; Path=/`,
                   'Access-Control-Allow-Origin': `${process.env.FRONTEND_URL}`,
                   'Access-Control-Allow-Credentials': 'true',
                 };
@@ -1030,7 +1051,7 @@ export const processRequest = async (req, res) => {
             res.writeHead(200, {
               ...corsHeaders,
               'Content-Type': 'application/json',
-              'Set-Cookie': `token=; HttpOnly; Secure; SameSite=None; Max-Age=0; Path=/`,
+              'Set-Cookie': `token=; HttpOnly; Max-Age=0; Path=/`,
             });
             return res.end(JSON.stringify({ message: 'Logout successful' }));
           }

@@ -1,4 +1,5 @@
 ---
+import Spinner from "@/components/Spinner.astro";
 import { submissionStatuses,submissionStatus } from "@/consts/submissions";
 const {submission, token} = Astro.props;
 ---
@@ -8,7 +9,10 @@ const {submission, token} = Astro.props;
     <label for="fileContent">Tu entrega</label>
     <textarea id="fileContent" name="fileContent" required rows="8" cols="50" data-code={submission.file_content}>{submission.file_content}</textarea>
     {submissionStatuses.pending === submissionStatus(submission.grade, submission.delivery_date, submission.file_url) ? (
-      <button type="submit">Enviar</button>
+      <section class="submitForm">
+        <button type="submit" id="submitSubmissionFormBtn">Enviar</button>
+        <Spinner/>
+      </section>
     ) : (
       <button type="submit" disabled>{submissionStatus(submission.grade, submission.delivery_date, submission.file_url)}</button>
     )}
@@ -18,8 +22,12 @@ const {submission, token} = Astro.props;
 <script>
   import { actions } from "astro:actions";
   const form = document.getElementById('submissionForm');
+  const spinner = document.querySelector('.spinner-container') as HTMLElement;
   form?.addEventListener('submit', async (e) => {
     e.preventDefault();
+    const submitBtn = document.getElementById('submitSubmissionFormBtn');
+    submitBtn?.classList.toggle('toggleSendBtn')
+    spinner?.classList.toggle('toggleVisiblity')
     const submission = JSON.parse(form.dataset.submission || '{}');
     const token = form.dataset.token;
     const formData = new FormData(e.target);
@@ -34,11 +42,19 @@ const {submission, token} = Astro.props;
         submission_id: String(submission?.id),
       },
     }
-    const response = actions.user.saveSubmissionFile(data);
-      if (response) {
+    const response = await actions.user.saveSubmissionFile(data);
+    try{
+      if(response.error) {
+        alert(`Error al realizar la entrega: ${response.error}`)
+      }
+      if (response.data) {
         alert('Entrega realizada');
         window.location.href = `/entregas/`;
       }
+    } finally {
+      submitBtn?.classList.toggle('toggleSendBtn')
+      spinner?.classList.toggle('toggleVisiblity')
+    }
   });
 </script>
 
@@ -50,5 +66,14 @@ const {submission, token} = Astro.props;
   }
   textarea {
     resize: none;
+  }
+  .submitForm {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  .toggleSendBtn {
+    display: none !important;
   }
 </style>

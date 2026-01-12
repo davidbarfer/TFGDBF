@@ -1,6 +1,7 @@
 import * as fs from 'node:fs/promises';
 import util from 'node:util';
 import { query } from './database.mjs';
+import { executeStudentSubmision } from './matlabFunctions.mjs';
 
 const ERROR_MAP = util.getSystemErrorMap();
 const ERROR_CODES = {
@@ -42,7 +43,7 @@ export const generateFileSystem = async () => {
         // Create a MATLAB file template for testing
         await fs.writeFile(
           `${practicePath}/submissions/template.m`,
-          'A1 = 1;',
+          '% PLANTILLA \nA1 = 1;',
           'utf8'
         );
       });
@@ -97,7 +98,13 @@ export async function saveFileSubmission(url, content, submission_id) {
     await fs.writeFile(filePath, content, 'utf-8');
   } catch (error) {
     console.error('Error writing file:', error);
-    return false;
+    return 500;
+  }
+  try {
+    await executeStudentSubmision(filePath);
+  } catch (error) {
+    console.error('Error executing student submision:', error);
+    return 400;
   }
   try {
     const fileUrlResponse = await query(
@@ -106,11 +113,11 @@ export async function saveFileSubmission(url, content, submission_id) {
     );
     if (fileUrlResponse.results.affectedRows === 0) {
       console.error('No rows were updated in the database.');
-      return false;
+      return 500;
     }
-    return true;
+    return 201;
   } catch (error) {
     console.error('Error updating database:', error);
-    return false;
+    return 500;
   }
 }

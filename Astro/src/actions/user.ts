@@ -307,7 +307,6 @@ export const user = {
           }),
         }
       );
-      console.log(response)
       if (!response.ok) {
         return new ActionError({
           code: ActionError.statusToCode(response.status),
