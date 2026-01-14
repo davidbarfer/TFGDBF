@@ -104,6 +104,7 @@ export async function saveFileSubmission(url, content, submission_id) {
     await executeStudentSubmision(filePath);
   } catch (error) {
     console.error('Error executing student submision:', error);
+    fs.unlink(filePath);
     return 400;
   }
   try {
@@ -113,11 +114,13 @@ export async function saveFileSubmission(url, content, submission_id) {
     );
     if (fileUrlResponse.results.affectedRows === 0) {
       console.error('No rows were updated in the database.');
+      fs.unlink(filePath);
       return 500;
     }
     return 201;
   } catch (error) {
     console.error('Error updating database:', error);
+    fs.unlink(filePath);
     return 500;
   }
 }
