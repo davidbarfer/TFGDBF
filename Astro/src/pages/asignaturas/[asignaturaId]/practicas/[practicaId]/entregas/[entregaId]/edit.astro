@@ -18,6 +18,12 @@ if (token) {
   }
 }
 const { data: submission, error: submissionError } = await Astro.callAction(actions.professor.getSubmission, { token: token as string, submission_id: String(submissionId) });
+if(submission.file_url) {
+  const { data: submissionFile, error: submissionFileError } = await Astro.callAction(actions.user.getSubmissionFile, { token: token as string, student_id: String(submission.user_id), submission_id: String(submissionId)});
+  if (submissionFile) {
+    submission.file_content = submissionFile;
+  }
+}
 ---
 
 <Layout>
@@ -67,6 +73,10 @@ const { data: submission, error: submissionError } = await Astro.callAction(acti
           >{submission.feedback}</textarea>
           <button type="submit">Editar</button>
         </form>
+      <section>
+        <h1>Entrega del alumno (Archivo)</h1>
+        <textarea readonly class="SubmissionDetails">{submission.file_content}</textarea>
+      </section>
       </section>
     ) : (
       <section>
@@ -123,5 +133,12 @@ const { data: submission, error: submissionError } = await Astro.callAction(acti
     display: flex;
     flex-direction: row;
     gap: 1rem;
+  }
+  .SubmissionDetails { 
+    min-height: 60px;
+    border: 2px var(--color-border) solid;
+    padding: 1rem;
+    resize: none;
+    outline: none;
   }
 </style>
