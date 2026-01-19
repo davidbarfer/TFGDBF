@@ -25,6 +25,9 @@ if (token) {
     </main>
     <button slot="closeModal">Cancelar</button>
   </Modal>
+  <button>
+    <a href={`/asignaturas/${practice.subject_id}/practicas/${practice.id}/evauladores/crear`}>Crear evaulador</a>
+  </button>
   <button disabled>Ejecutar evaluador</button>
   <button disabled>Calificar</button>
 </section>
@@ -37,6 +40,10 @@ if (token) {
     justify-content: center;
     align-items: center;
     padding-block: 1rem;
+  }
+  a {
+    text-decoration: none;
+    color: inherit;
   }
 </style>
 

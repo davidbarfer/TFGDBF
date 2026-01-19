@@ -1,0 +1,81 @@
+---
+import { actions } from "astro:actions";
+import Layout from "@/layouts/Layout.astro";
+import PracticeInfo from "@/components/submissions/practiceInfo.astro";
+import StudentTemplateExample from '@/components/submissions/studentTemplateExample.astro';
+import jwt from 'jsonwebtoken'
+import { parse } from 'cookie';
+const { practicaId: id } = Astro.params;
+const cookies = parse(Astro.request.headers.get('cookie') || '');
+const token = cookies.token;
+const secret = import.meta.env.JWT_SECRET;
+let user = null;
+if (token) {
+  try {
+    user = jwt.verify(token, secret); // same secret as backend
+  } catch (err) {
+    console.warn("Invalid or expired token", err);
+  }
+}
+const { data: practice, error: practicesError } = await Astro.callAction(actions.user.getPractice, { token: token as string, practice_id: String(id) as string });
+---
+
+<Layout>
+  <article>
+    <PracticeInfo practice={practice } />
+    <form id="evaluatorForm">
+      <label for="templateStudent">
+        <h2>Plantilla del alumno</h2>
+        <StudentTemplateExample />
+      </label>
+      <textarea id="templateStudent" name="templateStudent" required rows="8" cols="50" />
+      <div>
+        <h2>Archivos del Evaluador</h2>
+        <p>Adjuntar un .zip que contenta el archivo evaluador.m así como todos los ficheros auxliares necesarios</p>
+        <label for="evaluatorFiles" id="evaluatorFilesLabel">Selecciona el archivo .zip</label>
+        <input type="file" id="evaluatorFiles" name="evaluatorFiles" accept=".zip" />
+      </div>
+    </form>
+  </article>
+</Layout>
+
+<style>
+  article {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    justify-content: center;
+    align-items: center;
+    padding-block: 1rem;
+  }
+  form {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    padding-inline: 1rem;Create a Create a ff
+    align-items: center;
+  }
+  p {
+    max-width: fit-content;
+  }
+  textarea {
+    resize: none;
+  }
+  #evaluatorFilesLabel {
+    background-color: var(--color-primary);
+    color: var(--color-tertiary);
+    font-weight: bold;
+    text-transform: uppercase;
+    padding: 5px 10px;
+    border-radius: 5px;
+    height: auto;
+  }
+  #evaluatorFilesLabel:hover {
+    background-color: var(--color-tertiary);
+    color: var(--color-primary);
+    transition: all 0.2 ease;
+  }
+  #evaluatorFiles {
+    opacity: 0;
+  }
+</style>
