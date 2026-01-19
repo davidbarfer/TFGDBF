@@ -38,7 +38,7 @@ const { data: practice, error: practicesError } = await Astro.callAction(actions
           <p>No hay ningún archivo selecionado</p>
         </div>
       </div>
-      <button type="submit">Subir Evaluador</button>
+      <button type="submit" id="evaluatorFormBtn">Subir Evaluador</button>
     </form>
   </article>
 </Layout>
@@ -46,7 +46,16 @@ const { data: practice, error: practicesError } = await Astro.callAction(actions
 <script>
 const inputFile = document.getElementById("evaluatorFiles");
 const preview = document.querySelector(".preview");
+const evaluatorFormButton = document.getElementById("evaluatorFormBtn");
+const fileTypes = [ "application/zip",];
 inputFile?.addEventListener("change", updateFileDisplay);
+evaluatorFormButton?.addEventListener("click", (e) => {
+  e.preventDefault();
+  const para = document.createElement("p");
+  para.append("Archivo subido con éxito!");
+  preview?.replaceChildren(para);
+});
+
 function updateFileDisplay() {
   while (preview?.firstChild) {
     preview.removeChild(preview.firstChild);
@@ -78,7 +87,6 @@ function updateFileDisplay() {
     }
   }
 }
-const fileTypes = [ "application/zip",];
 
 function validFileType(file : any) {
   return fileTypes.includes(file.type);
@@ -91,14 +99,6 @@ function returnFileSize(number: any) {
   }
   return `${(number / 1e6).toFixed(1)} MB`;
 }
-const button = document.querySelector("form button");
-button?.addEventListener("click", (e) => {
-  e.preventDefault();
-  const para = document.createElement("p");
-  para.append("Archivo subido con éxito!");
-  preview?.replaceChildren(para);
-});
-
 </script>
 
 <style>
