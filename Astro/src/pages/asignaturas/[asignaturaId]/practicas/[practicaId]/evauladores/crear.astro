@@ -33,11 +33,73 @@ const { data: practice, error: practicesError } = await Astro.callAction(actions
         <h2>Archivos del Evaluador</h2>
         <p>Adjuntar un .zip que contenta el archivo evaluador.m así como todos los ficheros auxliares necesarios</p>
         <label for="evaluatorFiles" id="evaluatorFilesLabel">Selecciona el archivo .zip</label>
-        <input type="file" id="evaluatorFiles" name="evaluatorFiles" accept=".zip" />
+        <input type="file" id="evaluatorFiles" name="evaluatorFiles" accept="application/zip" required />
+        <div class="preview">
+          <p>No hay ningún archivo selecionado</p>
+        </div>
       </div>
+      <button type="submit">Subir Evaluador</button>
     </form>
   </article>
 </Layout>
+
+<script>
+const inputFile = document.getElementById("evaluatorFiles");
+const preview = document.querySelector(".preview");
+inputFile?.addEventListener("change", updateFileDisplay);
+function updateFileDisplay() {
+  while (preview?.firstChild) {
+    preview.removeChild(preview.firstChild);
+  }
+
+  const curFiles = inputFile?.files;
+  if (curFiles.length === 0) {
+    const para = document.createElement("p");
+    para.textContent = "Ningun archivo selecionado actualmente";
+    preview?.appendChild(para);
+  } else {
+    const list = document.createElement("ol");
+    preview?.appendChild(list);
+
+    for (const file of curFiles) {
+      const listItem = document.createElement("li");
+      const para = document.createElement("p");
+      if (validFileType(file)) {
+        para.textContent = `File name ${file.name}, file size ${returnFileSize(
+          file.size,
+        )}.`;
+        listItem.appendChild(para);
+      } else {
+        para.textContent = `File name ${file.name}: Not a valid file type. Update your selection.`;
+        listItem.appendChild(para);
+      }
+
+      list.appendChild(listItem);
+    }
+  }
+}
+const fileTypes = [ "application/zip",];
+
+function validFileType(file : any) {
+  return fileTypes.includes(file.type);
+}
+function returnFileSize(number: any) {
+  if (number < 1e3) {
+    return `${number} bytes`;
+  } else if (number >= 1e3 && number < 1e6) {
+    return `${(number / 1e3).toFixed(1)} KB`;
+  }
+  return `${(number / 1e6).toFixed(1)} MB`;
+}
+const button = document.querySelector("form button");
+button?.addEventListener("click", (e) => {
+  e.preventDefault();
+  const para = document.createElement("p");
+  para.append("File uploaded!");
+  preview?.replaceChildren(para);
+});
+
+</script>
 
 <style>
   article {
@@ -51,6 +113,7 @@ const { data: practice, error: practicesError } = await Astro.callAction(actions
   form {
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
     gap: 1rem;
     padding-inline: 1rem;Create a Create a ff
     align-items: center;
@@ -66,8 +129,8 @@ const { data: practice, error: practicesError } = await Astro.callAction(actions
     color: var(--color-tertiary);
     font-weight: bold;
     text-transform: uppercase;
-    padding: 5px 10px;
-    border-radius: 5px;
+    padding: 4px 8px;
+    border-radius: 4px;
     height: auto;
   }
   #evaluatorFilesLabel:hover {
@@ -77,5 +140,11 @@ const { data: practice, error: practicesError } = await Astro.callAction(actions
   }
   #evaluatorFiles {
     opacity: 0;
+  }
+  .preview {
+    padding: 4px;
+    margin-block: 12px;
+    background-color: var(--color-background-modal);
+    border: 1px solid var(--color-border);
   }
 </style>
