@@ -55,7 +55,7 @@ function updateFileDisplay() {
   const curFiles = inputFile?.files;
   if (curFiles.length === 0) {
     const para = document.createElement("p");
-    para.textContent = "Ningun archivo selecionado actualmente";
+    para.textContent = "Ningún archivo selecionado actualmente";
     preview?.appendChild(para);
   } else {
     const list = document.createElement("ol");
@@ -65,12 +65,12 @@ function updateFileDisplay() {
       const listItem = document.createElement("li");
       const para = document.createElement("p");
       if (validFileType(file)) {
-        para.textContent = `File name ${file.name}, file size ${returnFileSize(
+        para.textContent = `Nombre archivo: ${file.name}, Tamaño archivo: ${returnFileSize(
           file.size,
         )}.`;
         listItem.appendChild(para);
       } else {
-        para.textContent = `File name ${file.name}: Not a valid file type. Update your selection.`;
+        para.textContent = `Nombre archivo: ${file.name} -> No es un tipo de archivo valido. Actualiza la selección de archivo.`;
         listItem.appendChild(para);
       }
 
@@ -95,7 +95,7 @@ const button = document.querySelector("form button");
 button?.addEventListener("click", (e) => {
   e.preventDefault();
   const para = document.createElement("p");
-  para.append("File uploaded!");
+  para.append("Archivo subido con éxito!");
   preview?.replaceChildren(para);
 });
 
