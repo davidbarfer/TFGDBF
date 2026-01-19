@@ -36,9 +36,11 @@ import {
 } from './regExpPut.mjs';
 import { deleteGroup, deleteStudentGroup } from './regExpDelete.mjs';
 import { add7days, parseDateMatlab } from './utils.mjs';
+const FRONTEND_URL = `http://${process.env.BASE_IP}:${process.env.FRONTEND_PORT}`;
+const BACKEND_URL = `http://${process.env.BASE_IP}:${process.env.BACKEND_PORT}`;
 // CORS headers configuration
 const corsHeaders = {
-  'Access-Control-Allow-Origin': `${process.env.FRONTEND_URL}`, // Your frontend URL
+  'Access-Control-Allow-Origin': `${FRONTEND_URL}`, // Your frontend URL
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
   'Access-Control-Allow-Credentials': 'true', // Crucial for cookies
@@ -1001,7 +1003,7 @@ export const processRequest = async (req, res) => {
                   process.env.JWT_SECRET,
                   {
                     expiresIn: '1h',
-                    issuer: `${process.env.BACKEND_URL}`,
+                    issuer: `${BACKEND_URL}`,
                   }
                 );
 
@@ -1009,7 +1011,7 @@ export const processRequest = async (req, res) => {
                 const headers = {
                   'Content-Type': 'application/json',
                   'Set-Cookie': `token=${token}; HttpOnly; Max-Age=3600; Path=/`,
-                  'Access-Control-Allow-Origin': `${process.env.FRONTEND_URL}`,
+                  'Access-Control-Allow-Origin': `${FRONTEND_URL}`,
                   'Access-Control-Allow-Credentials': 'true',
                 };
 
