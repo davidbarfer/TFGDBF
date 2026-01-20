@@ -23,12 +23,12 @@ const { data: practice, error: practicesError } = await Astro.callAction(actions
 <Layout>
   <article>
     <PracticeInfo practice={practice } />
-    <form id="evaluatorForm">
-      <label for="templateStudent">
+    <form id="evaluatorForm" data-practiceid={id} data-token={token}>
+      <label for="studentTemplate">
         <h2>Plantilla del alumno</h2>
         <StudentTemplateExample />
       </label>
-      <textarea id="templateStudent" name="templateStudent" required rows="8" cols="50" />
+      <textarea id="studentTemplate" name="studentTemplate" required rows="8" cols="50" />
       <div>
         <h2>Archivos del Evaluador</h2>
         <p>Adjuntar un .zip que contenta el archivo evaluador.m así como todos los ficheros auxliares necesarios</p>
@@ -44,16 +44,38 @@ const { data: practice, error: practicesError } = await Astro.callAction(actions
 </Layout>
 
 <script>
+import { actions } from "astro:actions";
 const inputFile = document.getElementById("evaluatorFiles");
 const preview = document.querySelector(".preview");
-const evaluatorFormButton = document.getElementById("evaluatorFormBtn");
+const form = document.getElementById('evaluatorForm');
 const fileTypes = [ "application/zip",];
 inputFile?.addEventListener("change", updateFileDisplay);
-evaluatorFormButton?.addEventListener("click", (e) => {
+form?.addEventListener("submit", async (e) => {
   e.preventDefault();
-  const para = document.createElement("p");
-  para.append("Archivo subido con éxito!");
-  preview?.replaceChildren(para);
+  const formData = new FormData(e.target);
+  try {
+    await formData.append('practice_id', form.dataset.practiceid);
+    await formData.append('token', form.dataset.token)
+  } catch (err) {
+    console.error(err)
+  }
+  console.log(formData)
+
+  
+  try {
+    const { data, error } = await actions.professor.createEvaulatorPractice(formData);
+    
+    if (error) {
+      alert(`Error al subir el archivo: ${error}`)
+      return;
+    }
+    
+    const para = document.createElement("p");
+    para.append("Archivo subido con éxito!");
+    preview?.replaceChildren(para);
+  } catch (err) {
+    alert(`Error al subir el archivo: ${err}`)
+  }
 });
 
 function updateFileDisplay() {
