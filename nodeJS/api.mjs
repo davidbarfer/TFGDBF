@@ -1,5 +1,7 @@
 import jwt from 'jsonwebtoken';
 import formidable from 'formidable';
+import fs from 'node:fs/promises';
+import path from 'node:path';
 import { query, hashPassword, verifyPassword } from './database.mjs';
 import {
   authProviders,
@@ -936,21 +938,40 @@ export const processRequest = async (req, res) => {
         try {
           await authenticate(req, res);
           try {
+            const uploadSubmisisonDir =
+              '/home/davidbarfer/Dev/DoctusLite/MATLAB/templates';
+
             const form = formidable({
-              uploadDir: '/home/davidbarfer/Dev/DoctusLite/MATLAB/templates',
+              uploadDir: uploadSubmisisonDir,
               keepExtensions: true,
               maxFileSize: 50 * 1024 * 1024, // 50MB
             });
             const [fields, files] = await form.parse(req);
-            console.log('fields:', fields);
-            console.log('files:', files);
+            // 1. Extract data (Note: Formidable v3 uses arrays for fields)
+            const practiceId = fields.practice_id?.[0] || 'unknown';
+            const uploadedFile = files.evaluatorFiles?.[0]; // This is the file object
 
+            if (uploadedFile) {
+              // 2. Define your new name
+              // Example: "practice_123_evaluator.zip"
+              const newFileName = `practice_${practiceId}_evaluator${path.extname(uploadedFile.originalFilename || '.zip')}`;
+              const newPath = path.join(uploadSubmisisonDir, newFileName);
+
+              try {
+                // 3. Rename/Move the file from the temp name to your specific name
+                await fs.rename(uploadedFile.filepath, newPath);
+                console.log(`Saved as: ${newFileName}`);
+              } catch (renameError) {
+                console.error('Error renaming file:', renameError);
+                // Fallback: if rename fails, we still have the temp file
+              }
+            }
             // 4. Send response
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(
               JSON.stringify({
                 success: true,
-                message: 'File uploaded successfully',
+                fileName: uploadedFile?.originalFilename,
               })
             );
           } catch (error) {
