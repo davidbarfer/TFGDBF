@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import formidable from 'formidable';
 import { query, hashPassword, verifyPassword } from './database.mjs';
 import {
   authProviders,
@@ -29,6 +30,7 @@ import {
   postPracticeSubmissions,
   postPracticeGroupSubmissions,
   postPracticeSubmissionEdit,
+  postPracticeEvaluatorCreate,
 } from './regExpPost.mjs';
 import {
   postStudentSubmissionGrade,
@@ -451,6 +453,7 @@ export const processRequest = async (req, res) => {
         practice_id_submissions: postPracticeSubmissions(url),
         practice_id_group_id_submissions: postPracticeGroupSubmissions(url),
         practice_id_submission_id_edit: postPracticeSubmissionEdit(url),
+        practice_id_evaluator_create: postPracticeEvaluatorCreate(url),
       };
       if (postRoutes.subject_id_practices) {
         try {
@@ -924,6 +927,37 @@ export const processRequest = async (req, res) => {
               );
             }
           });
+        } catch (error) {
+          console.error('Database query error on edit the submission', error);
+          res.statusCode = 500;
+          return res.end(JSON.stringify({ error: 'Internal server error' }));
+        }
+      } else if (postRoutes.practice_id_evaluator_create) {
+        try {
+          await authenticate(req, res);
+          try {
+            const form = formidable({
+              uploadDir: '/home/davidbarfer/Dev/DoctusLite/MATLAB/templates',
+              keepExtensions: true,
+              maxFileSize: 50 * 1024 * 1024, // 50MB
+            });
+            const [fields, files] = await form.parse(req);
+            console.log('fields:', fields);
+            console.log('files:', files);
+
+            // 4. Send response
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(
+              JSON.stringify({
+                success: true,
+                message: 'File uploaded successfully',
+              })
+            );
+          } catch (error) {
+            console.error('Database query error on edit submissions:', error);
+            res.statusCode = 500;
+            return res.end(JSON.stringify({ error: 'Internal server error' }));
+          }
         } catch (error) {
           console.error('Database query error on edit the submission', error);
           res.statusCode = 500;

@@ -329,7 +329,7 @@ export const professor = {
       // Option 1: Send as multipart/form-data to backend
       const formData = new FormData();
       formData.append('studentTemplate', input.studentTemplate);
-      formData.append('evaluatorFiles', new Blob([fileBuffer]), input.evaluatorFiles.name);
+      formData.append('evaluatorFiles', input.evaluatorFiles);
       formData.append('practice_id', input.practice_id);
       const response = await fetch(
         `${API_URL}/practice/${input.practice_id}/evaluator/create`,
