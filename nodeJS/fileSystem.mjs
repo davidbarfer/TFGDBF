@@ -27,6 +27,7 @@ export const generateFileSystem = async () => {
     console.error('Error creating base directory:', err);
   });
   try {
+    await fs.mkdir(`${path}/temp`, { recursive: true });
     const subjects = await query('SELECT id FROM subject');
     subjects.results.forEach(async subject => {
       const practices = await query(
@@ -39,7 +40,7 @@ export const generateFileSystem = async () => {
         const practicePath = `${subjectPath}/${practice.id}`;
         await fs.mkdir(practicePath, { recursive: true });
         await fs.mkdir(`${practicePath}/submissions`, { recursive: true });
-        await fs.mkdir(`${practicePath}/evaluations`, { recursive: true });
+        await fs.mkdir(`${practicePath}/evaluator`, { recursive: true });
         // Create a MATLAB file template for testing
         await fs.writeFile(
           `${practicePath}/submissions/template.m`,

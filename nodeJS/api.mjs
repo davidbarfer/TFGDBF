@@ -8,7 +8,11 @@ import {
   authenticate,
   unhandledUserDefinedException,
 } from './database.mjs';
-import { getFileSubmission, saveFileSubmission } from './fileSystem.mjs';
+import {
+  getFileSystemBasePath,
+  getFileSubmission,
+  saveFileSubmission,
+} from './fileSystem.mjs';
 import {
   getSubject,
   getSubjectPractices,
@@ -42,6 +46,7 @@ import { deleteGroup, deleteStudentGroup } from './regExpDelete.mjs';
 import { add7days, parseDateMatlab } from './utils.mjs';
 const FRONTEND_URL = `http://${process.env.BASE_IP}:${process.env.FRONTEND_PORT}`;
 const BACKEND_URL = `http://${process.env.BASE_IP}:${process.env.BACKEND_PORT}`;
+const FILESYSTEM_PATH = getFileSystemBasePath();
 // CORS headers configuration
 const corsHeaders = {
   'Access-Control-Allow-Origin': `${FRONTEND_URL}`, // Your frontend URL
@@ -938,8 +943,7 @@ export const processRequest = async (req, res) => {
         try {
           await authenticate(req, res);
           try {
-            const uploadSubmisisonDir =
-              '/home/davidbarfer/Dev/DoctusLite/MATLAB/templates';
+            const uploadSubmisisonDir = `${FILESYSTEM_PATH}/temp`;
 
             const form = formidable({
               uploadDir: uploadSubmisisonDir,
@@ -950,12 +954,22 @@ export const processRequest = async (req, res) => {
             // 1. Extract data (Note: Formidable v3 uses arrays for fields)
             const practiceId = fields.practice_id?.[0] || 'unknown';
             const uploadedFile = files.evaluatorFiles?.[0]; // This is the file object
-
             if (uploadedFile) {
+              const result = await query(
+                'SELECT subject_id FROM practice where id = ?',
+                [practiceId]
+              );
+              if (result.results.length === 0) {
+                res.statusCode = 500;
+                return res.end(
+                  JSON.stringify({ error: 'Internal server error' })
+                );
+              }
+              const subject_id = result.results[0].subject_id;
               // 2. Define your new name
               // Example: "practice_123_evaluator.zip"
               const newFileName = `practice_${practiceId}_evaluator${path.extname(uploadedFile.originalFilename || '.zip')}`;
-              const newPath = path.join(uploadSubmisisonDir, newFileName);
+              const newPath = `${FILESYSTEM_PATH}/${subject_id}/${practiceId}/evaluator/${newFileName}`;
 
               try {
                 // 3. Rename/Move the file from the temp name to your specific name
