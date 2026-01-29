@@ -970,7 +970,7 @@ export const processRequest = async (req, res) => {
               const subject_id = result.results[0].subject_id;
               // 2. Define your new name
               // Example: "practice_123_evaluator.zip"
-              const newFileName = `practice_${practiceId}_evaluator${path.extname(uploadedFile.originalFilename || '.zip')}`;
+              const newFileName = `evaluator_S${subject_id}_P${practiceId}${path.extname(uploadedFile.originalFilename || '.zip')}`;
               const newPath = `${subject_id}/${practiceId}/evaluator/${newFileName}`;
 
               try {
@@ -979,10 +979,34 @@ export const processRequest = async (req, res) => {
                   uploadedFile.filepath,
                   `${FILESYSTEM_PATH}/${newPath}`
                 );
-                console.log(`Saved as: ${newFileName}`);
               } catch (renameError) {
                 console.error('Error renaming file:', renameError);
                 // Fallback: if rename fails, we still have the temp file
+              }
+              try {
+                const fileUrlResponse = await query(
+                  'UPDATE practice SET evaluator_template_url = ? WHERE id = ?',
+                  [newPath, practiceId]
+                );
+                if (fileUrlResponse.results.affectedRows === 0) {
+                  console.error('No rows were updated in the database.');
+                  res.statusCode = 500;
+                  return res.end(
+                    JSON.stringify({
+                      error:
+                        'Internal Server Error on saving submission template',
+                    })
+                  );
+                }
+              } catch (error) {
+                console.error('Error updating database:', error);
+                res.statusCode = 500;
+                return res.end(
+                  JSON.stringify({
+                    error:
+                      'Internal Server Error on saving submission template',
+                  })
+                );
               }
               const submissionTemplatePath = `${subject_id}/${practiceId}/submissions/template.m`;
               const saveResult = await saveFileSubmissionTemplate(
