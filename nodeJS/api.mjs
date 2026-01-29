@@ -12,6 +12,7 @@ import {
   getFileSystemBasePath,
   getFileSubmission,
   saveFileSubmission,
+  saveFileSubmissionTemplate,
 } from './fileSystem.mjs';
 import {
   getSubject,
@@ -953,6 +954,7 @@ export const processRequest = async (req, res) => {
             const [fields, files] = await form.parse(req);
             // 1. Extract data (Note: Formidable v3 uses arrays for fields)
             const practiceId = fields.practice_id?.[0] || 'unknown';
+            const submissionTemplate = fields.studentTemplate;
             const uploadedFile = files.evaluatorFiles?.[0]; // This is the file object
             if (uploadedFile) {
               const result = await query(
@@ -969,15 +971,47 @@ export const processRequest = async (req, res) => {
               // 2. Define your new name
               // Example: "practice_123_evaluator.zip"
               const newFileName = `practice_${practiceId}_evaluator${path.extname(uploadedFile.originalFilename || '.zip')}`;
-              const newPath = `${FILESYSTEM_PATH}/${subject_id}/${practiceId}/evaluator/${newFileName}`;
+              const newPath = `${subject_id}/${practiceId}/evaluator/${newFileName}`;
 
               try {
                 // 3. Rename/Move the file from the temp name to your specific name
-                await fs.rename(uploadedFile.filepath, newPath);
+                await fs.rename(
+                  uploadedFile.filepath,
+                  `${FILESYSTEM_PATH}/${newPath}`
+                );
                 console.log(`Saved as: ${newFileName}`);
               } catch (renameError) {
                 console.error('Error renaming file:', renameError);
                 // Fallback: if rename fails, we still have the temp file
+              }
+              const submissionTemplatePath = `${subject_id}/${practiceId}/submissions/template.m`;
+              const saveResult = await saveFileSubmissionTemplate(
+                submissionTemplatePath,
+                submissionTemplate,
+                practiceId
+              );
+              switch (saveResult) {
+                case 500: {
+                  res.statusCode = 500;
+                  return res.end(
+                    JSON.stringify({
+                      error:
+                        'Internal Server Error on saving submission template',
+                    })
+                  );
+                }
+                case 400: {
+                  res.statusCode = 400;
+                  return res.end(
+                    JSON.stringify({
+                      error:
+                        'Error executing submission template file. Syntax Error',
+                    })
+                  );
+                }
+                case 201: {
+                  console.log('Submission template file saved succesfully');
+                }
               }
             }
             // 4. Send response

@@ -38,7 +38,7 @@ export const launchMatlabClient = () => {
   });
 };
 
-export function executeStudentSubmision(filePath) {
+export function executeMatlabFile(filePath) {
   return new Promise((resolve, reject) => {
     exec(
       `${matlabPath} -batch "run('${filePath}')"`,

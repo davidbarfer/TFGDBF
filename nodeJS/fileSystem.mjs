@@ -1,7 +1,7 @@
 import * as fs from 'node:fs/promises';
 import util from 'node:util';
 import { query } from './database.mjs';
-import { executeStudentSubmision } from './matlabFunctions.mjs';
+import { executeMatlabFile } from './matlabFunctions.mjs';
 
 const ERROR_MAP = util.getSystemErrorMap();
 const ERROR_CODES = {
@@ -102,7 +102,7 @@ export async function saveFileSubmission(url, content, submission_id) {
     return 500;
   }
   try {
-    await executeStudentSubmision(filePath);
+    await executeMatlabFile(filePath);
   } catch (error) {
     console.error('Error executing student submision:', error);
     fs.unlink(filePath);
@@ -112,6 +112,39 @@ export async function saveFileSubmission(url, content, submission_id) {
     const fileUrlResponse = await query(
       'UPDATE submissions SET file_url = ? WHERE id = ?',
       [url, submission_id]
+    );
+    if (fileUrlResponse.results.affectedRows === 0) {
+      console.error('No rows were updated in the database.');
+      fs.unlink(filePath);
+      return 500;
+    }
+    return 201;
+  } catch (error) {
+    console.error('Error updating database:', error);
+    fs.unlink(filePath);
+    return 500;
+  }
+}
+export async function saveFileSubmissionTemplate(url, content, practice_id) {
+  const path = getFileSystemBasePath();
+  const filePath = `${path}/${url}`;
+  try {
+    await fs.writeFile(filePath, content, 'utf-8');
+  } catch (error) {
+    console.error('Error writing file:', error);
+    return 500;
+  }
+  try {
+    await executeMatlabFile(filePath);
+  } catch (error) {
+    console.error('Error executing student submision:', error);
+    fs.unlink(filePath);
+    return 400;
+  }
+  try {
+    const fileUrlResponse = await query(
+      'UPDATE practice SET submissions_template_url = ? WHERE id = ?',
+      [url, practice_id]
     );
     if (fileUrlResponse.results.affectedRows === 0) {
       console.error('No rows were updated in the database.');
