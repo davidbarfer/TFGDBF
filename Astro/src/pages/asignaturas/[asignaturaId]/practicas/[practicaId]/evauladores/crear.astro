@@ -5,6 +5,7 @@ import PracticeInfo from "@/components/submissions/practiceInfo.astro";
 import StudentTemplateExample from '@/components/submissions/studentTemplateExample.astro';
 import jwt from 'jsonwebtoken'
 import { parse } from 'cookie';
+import Spinner from "@/components/Spinner.astro";
 const { practicaId: id } = Astro.params;
 const cookies = parse(Astro.request.headers.get('cookie') || '');
 const token = cookies.token;
@@ -38,13 +39,17 @@ const { data: practice, error: practicesError } = await Astro.callAction(actions
           <p>No hay ningún archivo selecionado</p>
         </div>
       </div>
-      <button type="submit" id="evaluatorFormBtn">Subir Evaluador</button>
+      <section class="evaluatorFormBtnSection">
+        <button type="submit" id="evaluatorFormBtn">Subir Evaluador</button>
+        <Spinner>
+      </section>
     </form>
   </article>
 </Layout>
 
 <script>
 import { actions } from "astro:actions";
+const spinner = document.querySelector('.spinner-container') as HTMLElement;
 const inputFile = document.getElementById("evaluatorFiles");
 const preview = document.querySelector(".preview");
 const form = document.getElementById('evaluatorForm');
@@ -52,6 +57,9 @@ const fileTypes = [ "application/zip",];
 inputFile?.addEventListener("change", updateFileDisplay);
 form?.addEventListener("submit", async (e) => {
   e.preventDefault();
+  const submitBtn = document.getElementById('evaluatorFormBtn');
+  submitBtn?.classList.toggle('toggleSendBtn')
+  spinner?.classList.toggle('toggleVisiblity')
   const formData = new FormData(e.target);
   try {
     await formData.append('practice_id', form.dataset.practiceid);
@@ -74,6 +82,9 @@ form?.addEventListener("submit", async (e) => {
     preview?.replaceChildren(para);
   } catch (err) {
     alert(`Error al subir el archivo: ${err}`)
+  } finally {
+    submitBtn?.classList.toggle('toggleSendBtn')
+    spinner?.classList.toggle('toggleVisiblity')
   }
 });
 
@@ -167,5 +178,11 @@ function returnFileSize(number: any) {
     margin-block: 12px;
     background-color: var(--color-background-modal);
     border: 1px solid var(--color-border);
+  }
+  .toggleSendBtn {
+    display: none !important;
+  }
+  .evaluatorFormBtnSection {
+    align-self: center;
   }
 </style>
