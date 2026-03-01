@@ -1,0 +1,188 @@
+---
+import { actions } from "astro:actions";
+import Layout from "@/layouts/Layout.astro";
+import PracticeInfo from "@/components/submissions/practiceInfo.astro";
+import StudentTemplateExample from '@/components/submissions/studentTemplateExample.astro';
+import jwt from 'jsonwebtoken'
+import { parse } from 'cookie';
+import Spinner from "@/components/Spinner.astro";
+const { practicaId: id } = Astro.params;
+const cookies = parse(Astro.request.headers.get('cookie') || '');
+const token = cookies.token;
+const secret = import.meta.env.JWT_SECRET;
+let user = null;
+if (token) {
+  try {
+    user = jwt.verify(token, secret); // same secret as backend
+  } catch (err) {
+    console.warn("Invalid or expired token", err);
+  }
+}
+const { data: practice, error: practicesError } = await Astro.callAction(actions.user.getPractice, { token: token as string, practice_id: String(id) as string });
+---
+
+<Layout>
+  <article>
+    <PracticeInfo practice={practice } />
+    <form id="evaluatorForm" data-practiceid={id} data-token={token}>
+      <label for="studentTemplate">
+        <h2>Plantilla del alumno</h2>
+        <StudentTemplateExample />
+      </label>
+      <textarea id="studentTemplate" name="studentTemplate" required rows="8" cols="50" />
+      <div>
+        <h2>Archivos del Evaluador</h2>
+        <p>Adjuntar un .zip que contenta el archivo evaluador.m así como todos los ficheros auxliares necesarios</p>
+        <label for="evaluatorFiles" id="evaluatorFilesLabel">Selecciona el archivo .zip</label>
+        <input type="file" id="evaluatorFiles" name="evaluatorFiles" accept="application/zip" required />
+        <div class="preview">
+          <p>No hay ningún archivo selecionado</p>
+        </div>
+      </div>
+      <section class="evaluatorFormBtnSection">
+        <button type="submit" id="evaluatorFormBtn">Subir Evaluador</button>
+        <Spinner>
+      </section>
+    </form>
+  </article>
+</Layout>
+
+<script>
+import { actions } from "astro:actions";
+const spinner = document.querySelector('.spinner-container') as HTMLElement;
+const inputFile = document.getElementById("evaluatorFiles");
+const preview = document.querySelector(".preview");
+const form = document.getElementById('evaluatorForm');
+const fileTypes = [ "application/zip",];
+inputFile?.addEventListener("change", updateFileDisplay);
+form?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const submitBtn = document.getElementById('evaluatorFormBtn');
+  submitBtn?.classList.toggle('toggleSendBtn')
+  spinner?.classList.toggle('toggleVisiblity')
+  const formData = new FormData(e.target);
+  try {
+    await formData.append('practice_id', form.dataset.practiceid);
+    await formData.append('token', form.dataset.token)
+  } catch (err) {
+    console.error(err)
+  }
+
+  
+  try {
+    const { data, error } = await actions.professor.createEvaulatorPractice(formData);
+    
+    if (error) {
+      alert(`Error al subir el archivo: ${error}`)
+      return;
+    }
+    
+    const para = document.createElement("p");
+    para.append("Archivo subido con éxito!");
+    preview?.replaceChildren(para);
+  } catch (err) {
+    alert(`Error al subir el archivo: ${err}`)
+  } finally {
+    submitBtn?.classList.toggle('toggleSendBtn')
+    spinner?.classList.toggle('toggleVisiblity')
+  }
+});
+
+function updateFileDisplay() {
+  while (preview?.firstChild) {
+    preview.removeChild(preview.firstChild);
+  }
+
+  const curFiles = inputFile?.files;
+  if (curFiles.length === 0) {
+    const para = document.createElement("p");
+    para.textContent = "Ningún archivo selecionado actualmente";
+    preview?.appendChild(para);
+  } else {
+    const list = document.createElement("ol");
+    preview?.appendChild(list);
+
+    for (const file of curFiles) {
+      const listItem = document.createElement("li");
+      const para = document.createElement("p");
+      if (validFileType(file)) {
+        para.textContent = `Nombre archivo: ${file.name}, Tamaño archivo: ${returnFileSize(
+          file.size,
+        )}.`;
+        listItem.appendChild(para);
+      } else {
+        para.textContent = `Nombre archivo: ${file.name} -> No es un tipo de archivo valido. Actualiza la selección de archivo.`;
+        listItem.appendChild(para);
+      }
+
+      list.appendChild(listItem);
+    }
+  }
+}
+
+function validFileType(file : any) {
+  return fileTypes.includes(file.type);
+}
+function returnFileSize(number: any) {
+  if (number < 1e3) {
+    return `${number} bytes`;
+  } else if (number >= 1e3 && number < 1e6) {
+    return `${(number / 1e3).toFixed(1)} KB`;
+  }
+  return `${(number / 1e6).toFixed(1)} MB`;
+}
+</script>
+
+<style>
+  article {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    justify-content: center;
+    align-items: center;
+    padding-block: 1rem;
+  }
+  form {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding-inline: 1rem;Create a Create a ff
+    align-items: center;
+  }
+  p {
+    max-width: fit-content;
+  }
+  textarea {
+    resize: none;
+  }
+  #evaluatorFilesLabel {
+    background-color: var(--color-primary);
+    color: var(--color-tertiary);
+    font-weight: bold;
+    text-transform: uppercase;
+    padding: 4px 8px;
+    border-radius: 4px;
+    height: auto;
+  }
+  #evaluatorFilesLabel:hover {
+    background-color: var(--color-tertiary);
+    color: var(--color-primary);
+    transition: all 0.2 ease;
+  }
+  #evaluatorFiles {
+    opacity: 0;
+  }
+  .preview {
+    padding: 4px;
+    margin-block: 12px;
+    background-color: var(--color-background-modal);
+    border: 1px solid var(--color-border);
+  }
+  .toggleSendBtn {
+    display: none !important;
+  }
+  .evaluatorFormBtnSection {
+    align-self: center;
+  }
+</style>

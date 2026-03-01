@@ -1,11 +1,19 @@
 import jwt from 'jsonwebtoken';
+import formidable from 'formidable';
+import fs from 'node:fs/promises';
+import path from 'node:path';
 import { query, hashPassword, verifyPassword } from './database.mjs';
 import {
   authProviders,
   authenticate,
   unhandledUserDefinedException,
 } from './database.mjs';
-import { getFileSubmission, saveFileSubmission } from './fileSystem.mjs';
+import {
+  getFileSystemBasePath,
+  getFileSubmission,
+  saveFileSubmission,
+  saveFileSubmissionTemplate,
+} from './fileSystem.mjs';
 import {
   getSubject,
   getSubjectPractices,
@@ -29,6 +37,7 @@ import {
   postPracticeSubmissions,
   postPracticeGroupSubmissions,
   postPracticeSubmissionEdit,
+  postPracticeEvaluatorCreate,
 } from './regExpPost.mjs';
 import {
   postStudentSubmissionGrade,
@@ -36,9 +45,12 @@ import {
 } from './regExpPut.mjs';
 import { deleteGroup, deleteStudentGroup } from './regExpDelete.mjs';
 import { add7days, parseDateMatlab } from './utils.mjs';
+const FRONTEND_URL = `http://${process.env.BASE_IP}:${process.env.FRONTEND_PORT}`;
+const BACKEND_URL = `http://${process.env.BASE_IP}:${process.env.BACKEND_PORT}`;
+const FILESYSTEM_PATH = getFileSystemBasePath();
 // CORS headers configuration
 const corsHeaders = {
-  'Access-Control-Allow-Origin': `${process.env.FRONTEND_URL}`, // Your frontend URL
+  'Access-Control-Allow-Origin': `${FRONTEND_URL}`, // Your frontend URL
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
   'Access-Control-Allow-Credentials': 'true', // Crucial for cookies
@@ -449,6 +461,7 @@ export const processRequest = async (req, res) => {
         practice_id_submissions: postPracticeSubmissions(url),
         practice_id_group_id_submissions: postPracticeGroupSubmissions(url),
         practice_id_submission_id_edit: postPracticeSubmissionEdit(url),
+        practice_id_evaluator_create: postPracticeEvaluatorCreate(url),
       };
       if (postRoutes.subject_id_practices) {
         try {
@@ -927,6 +940,122 @@ export const processRequest = async (req, res) => {
           res.statusCode = 500;
           return res.end(JSON.stringify({ error: 'Internal server error' }));
         }
+      } else if (postRoutes.practice_id_evaluator_create) {
+        try {
+          await authenticate(req, res);
+          try {
+            const uploadSubmisisonDir = `${FILESYSTEM_PATH}/temp`;
+
+            const form = formidable({
+              uploadDir: uploadSubmisisonDir,
+              keepExtensions: true,
+              maxFileSize: 50 * 1024 * 1024, // 50MB
+            });
+            const [fields, files] = await form.parse(req);
+            // 1. Extract data (Note: Formidable v3 uses arrays for fields)
+            const practiceId = fields.practice_id?.[0] || 'unknown';
+            const submissionTemplate = fields.studentTemplate;
+            const uploadedFile = files.evaluatorFiles?.[0]; // This is the file object
+            if (uploadedFile) {
+              const result = await query(
+                'SELECT subject_id FROM practice where id = ?',
+                [practiceId]
+              );
+              if (result.results.length === 0) {
+                res.statusCode = 500;
+                return res.end(
+                  JSON.stringify({ error: 'Internal server error' })
+                );
+              }
+              const subject_id = result.results[0].subject_id;
+              // 2. Define your new name
+              // Example: "practice_123_evaluator.zip"
+              const newFileName = `evaluator_S${subject_id}_P${practiceId}${path.extname(uploadedFile.originalFilename || '.zip')}`;
+              const newPath = `${subject_id}/${practiceId}/evaluator/${newFileName}`;
+
+              try {
+                // 3. Rename/Move the file from the temp name to your specific name
+                await fs.rename(
+                  uploadedFile.filepath,
+                  `${FILESYSTEM_PATH}/${newPath}`
+                );
+              } catch (renameError) {
+                console.error('Error renaming file:', renameError);
+                // Fallback: if rename fails, we still have the temp file
+              }
+              try {
+                const fileUrlResponse = await query(
+                  'UPDATE practice SET evaluator_template_url = ? WHERE id = ?',
+                  [newPath, practiceId]
+                );
+                if (fileUrlResponse.results.affectedRows === 0) {
+                  console.error('No rows were updated in the database.');
+                  res.statusCode = 500;
+                  return res.end(
+                    JSON.stringify({
+                      error:
+                        'Internal Server Error on saving submission template',
+                    })
+                  );
+                }
+              } catch (error) {
+                console.error('Error updating database:', error);
+                res.statusCode = 500;
+                return res.end(
+                  JSON.stringify({
+                    error:
+                      'Internal Server Error on saving submission template',
+                  })
+                );
+              }
+              const submissionTemplatePath = `${subject_id}/${practiceId}/submissions/template.m`;
+              const saveResult = await saveFileSubmissionTemplate(
+                submissionTemplatePath,
+                submissionTemplate,
+                practiceId
+              );
+              switch (saveResult) {
+                case 500: {
+                  res.statusCode = 500;
+                  return res.end(
+                    JSON.stringify({
+                      error:
+                        'Internal Server Error on saving submission template',
+                    })
+                  );
+                }
+                case 400: {
+                  res.statusCode = 400;
+                  return res.end(
+                    JSON.stringify({
+                      error:
+                        'Error executing submission template file. Syntax Error',
+                    })
+                  );
+                }
+                case 201: {
+                  console.log('Submission template file saved succesfully');
+                }
+              }
+            }
+            // 4. Send response
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(
+              JSON.stringify({
+                success: true,
+                fileName: uploadedFile?.originalFilename,
+              })
+            );
+          } catch (error) {
+            console.error('Database query error on edit submissions:', error);
+            res.statusCode = 500;
+            return res.end(JSON.stringify({ error: 'Internal server error' }));
+          }
+        } catch (error) {
+          console.error('Database query error on edit the submission', error);
+          res.statusCode = 500;
+          return res.end(JSON.stringify({ error: 'Internal server error' }));
+        }
       } else {
         switch (url) {
           case '/login': {
@@ -1001,7 +1130,7 @@ export const processRequest = async (req, res) => {
                   process.env.JWT_SECRET,
                   {
                     expiresIn: '1h',
-                    issuer: `${process.env.BACKEND_URL}`,
+                    issuer: `${BACKEND_URL}`,
                   }
                 );
 
@@ -1009,7 +1138,7 @@ export const processRequest = async (req, res) => {
                 const headers = {
                   'Content-Type': 'application/json',
                   'Set-Cookie': `token=${token}; HttpOnly; Max-Age=3600; Path=/`,
-                  'Access-Control-Allow-Origin': `${process.env.FRONTEND_URL}`,
+                  'Access-Control-Allow-Origin': `${FRONTEND_URL}`,
                   'Access-Control-Allow-Credentials': 'true',
                 };
 

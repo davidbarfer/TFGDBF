@@ -303,4 +303,51 @@ export const professor = {
       return true;
     },
   }),
+  createEvaulatorPractice: defineAction({
+    accept: "form", // ← Key change: accept form data instead of json
+    input: z.object({
+      token: z.string(),
+      practice_id: z.string(),
+      studentTemplate: z.string(),
+      evaluatorFiles: z
+        .instanceof(File)
+        .refine((file) => file.size > 0, "File is required")
+        .refine(
+          (file) => file.size <= 50_000_000, // 50MB max
+          "Max file size is 50MB"
+        )
+        .refine(
+          (file) => file.type === "application/zip" || file.name.endsWith('.zip'),
+          "Only .zip files are allowed"
+        ),
+    }),
+    handler: async(input) => {
+    // Convert File to Buffer or FormData for your backend
+      const buffer = await input.evaluatorFiles.arrayBuffer();
+      const fileBuffer = Buffer.from(buffer);
+      
+      // Option 1: Send as multipart/form-data to backend
+      const formData = new FormData();
+      formData.append('studentTemplate', input.studentTemplate);
+      formData.append('evaluatorFiles', input.evaluatorFiles);
+      formData.append('practice_id', input.practice_id);
+      const response = await fetch(
+        `${API_URL}/practice/${input.practice_id}/evaluator/create`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: input.token,
+          },
+          body: formData,
+        }
+      );
+      if (!response.ok) {
+        return new ActionError({
+          code: ActionError.statusToCode(response.status),
+          message: response.statusText,
+        });
+      }
+      return true;
+    },
+  }),
 };

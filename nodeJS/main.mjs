@@ -7,9 +7,9 @@ import { generateFileSystem } from './fileSystem.mjs';
 
 const server = http.createServer(processRequest);
 
-server.listen(Number(process.env.BACKEND_PORT), process.env.BACKEND_IP, () => {
+server.listen(Number(process.env.BACKEND_PORT), process.env.BASE_IP, () => {
   console.log(
-    `API server listening on: http://${process.env.BACKEND_IP}:${process.env.BACKEND_PORT}`
+    `API server listening on: http://${process.env.BASE_IP}:${process.env.BACKEND_PORT}`
   );
 });
 

@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS practice (
   description TEXT,
   deadline DATE,
   submissions_template_url VARCHAR(255) DEFAULT NULL,
-  evaluation_template_url VARCHAR(255) DEFAULT NULL,
+  evaluator_template_url VARCHAR(255) DEFAULT NULL,
   FOREIGN KEY (subject_id) REFERENCES subject(id)
 );
 
