@@ -350,4 +350,32 @@ export const professor = {
       return true;
     },
   }),
+  executeSubmssionEvaluator: defineAction({
+    input: z.object({
+      token: z.string(),
+      url_data: z.object({
+        user_id: z.string(),
+        submission_id: z.string(),
+      }),
+    }),
+    handler: async(input) => {
+      const response = await fetch(        
+        `${API_URL}/student/${input.url_data.user_id}/submission/${input.url_data.submission_id}/evaluate`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: input.token,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (!response.ok) {
+        return new ActionError({
+          code: ActionError.statusToCode(response.status),
+          message: response.statusText,
+        });
+      }
+      return true;
+    },
+  }),
 };

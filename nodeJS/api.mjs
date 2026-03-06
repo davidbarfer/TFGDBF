@@ -38,6 +38,7 @@ import {
   postPracticeGroupSubmissions,
   postPracticeSubmissionEdit,
   postPracticeEvaluatorCreate,
+  postStudentSubmissionEvaluate,
 } from './regExpPost.mjs';
 import {
   postStudentSubmissionGrade,
@@ -462,6 +463,7 @@ export const processRequest = async (req, res) => {
         practice_id_group_id_submissions: postPracticeGroupSubmissions(url),
         practice_id_submission_id_edit: postPracticeSubmissionEdit(url),
         practice_id_evaluator_create: postPracticeEvaluatorCreate(url),
+        student_id_submission_id_evaluate: postStudentSubmissionEvaluate(url),
       };
       if (postRoutes.subject_id_practices) {
         try {
@@ -1053,6 +1055,50 @@ export const processRequest = async (req, res) => {
           }
         } catch (error) {
           console.error('Database query error on edit the submission', error);
+          res.statusCode = 500;
+          return res.end(JSON.stringify({ error: 'Internal server error' }));
+        }
+      } else if (postRoutes.student_id_submission_id_evaluate) {
+        try {
+          await authenticate(req, res, false);
+          req.on('data', async () => {});
+          req.on('end', async () => {
+            try {
+              // Descomprimir el archivo
+              const submision = await query(
+                'SELECT id, user_id, practice_id, file_url from submissions WHERE id = ?',
+                [postRoutes.student_id_submission_id_evaluate.submission_id]
+              );
+              // TODO: RETURN IF SUBMISSION IS NOT ON DATABASE
+              console.log('SUBMISSION: ', submision.results[0]);
+              const evaluator_template_url = await query(
+                'SELECT evaluator_template_url from practice WHERE id = ?',
+                [submision.results[0].practice_id]
+              );
+              console.log(evaluator_template_url.results[0]);
+              // Ejecutar el evaulador
+              // Actualizar la base de datos
+              // Eliminar los archivos descomprimidos
+              // Send response
+              res.writeHead(200, { 'Content-Type': 'application/json' });
+              res.end(
+                JSON.stringify({
+                  success: true,
+                  message: 'Success',
+                })
+              );
+            } catch (error) {
+              console.error(
+                'Database query error on executing evaluator:',
+                error
+              );
+              res.statusCode = 500;
+              return res.end(
+                JSON.stringify({ error: 'Internal server error' })
+              );
+            }
+          });
+        } catch {
           res.statusCode = 500;
           return res.end(JSON.stringify({ error: 'Internal server error' }));
         }
