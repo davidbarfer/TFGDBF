@@ -15,6 +15,7 @@ import {
   saveFileSubmissionTemplate,
   extractZip,
 } from './fileSystem.mjs';
+import { executeMatlabFiles } from './matlabFunctions.mjs';
 import {
   getSubject,
   getSubjectPractices,
@@ -1084,6 +1085,19 @@ export const processRequest = async (req, res) => {
                 console.log(err);
               }
               // Ejecutar el evaulador
+              // const evaluadorFiles = [
+              //   `${FILESYSTEM_PATH}/${submision.results[0].file_url}`,
+              //   `${outputPath}/evaluador.m`,
+              // ];
+              const evaluadorFiles = [
+                '/home/davidbarfer/Us/TFG/P1/D30287279M.m',
+                `${outputPath}/evaluador.m`,
+              ];
+              try {
+                await executeMatlabFiles(evaluadorFiles);
+              } catch (error) {
+                console.log('Error executing evaluator:', error);
+              }
               // Actualizar la base de datos
               // Eliminar los archivos descomprimidos
               // Send response

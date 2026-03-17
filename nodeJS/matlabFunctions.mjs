@@ -56,3 +56,28 @@ export function executeMatlabFile(filePath) {
     );
   });
 }
+
+/**
+ * Executes multiple MATLAB files in a single persistent workspace.
+ * @param {string[]} filePaths - An array of absolute or relative paths to .m files.
+ * @returns {Promise<string>} - The combined stdout from MATLAB.
+ */
+export function executeMatlabFiles(filePaths) {
+  return new Promise((resolve, reject) => {
+    // 1. Transform ['a.m', 'b.m'] into "run('a.m'); run('b.m');"
+    const runCommands = filePaths.map(path => `run('${path}')`).join('; ');
+
+    // 2. Execute as a single batch operation
+    exec(
+      `${matlabPath} -batch "${runCommands} ;disp(s);"`,
+      // eslint-disable-next-line no-unused-vars
+      (error, stdout, _stderr) => {
+        if (error) {
+          // Note: If one file fails, MATLAB stops and rejects here
+          return reject(error);
+        }
+        resolve(stdout);
+      }
+    );
+  });
+}
