@@ -13,6 +13,7 @@ import {
   getFileSubmission,
   saveFileSubmission,
   saveFileSubmissionTemplate,
+  extractZip,
 } from './fileSystem.mjs';
 import {
   getSubject,
@@ -1070,12 +1071,18 @@ export const processRequest = async (req, res) => {
                 [postRoutes.student_id_submission_id_evaluate.submission_id]
               );
               // TODO: RETURN IF SUBMISSION IS NOT ON DATABASE
-              console.log('SUBMISSION: ', submision.results[0]);
               const evaluator_template_url = await query(
                 'SELECT evaluator_template_url from practice WHERE id = ?',
                 [submision.results[0].practice_id]
               );
-              console.log(evaluator_template_url.results[0]);
+              const zipFilePath = `${FILESYSTEM_PATH}/${evaluator_template_url.results[0].evaluator_template_url}`;
+              const outputPath = `${FILESYSTEM_PATH}/temp`;
+              try {
+                const result = await extractZip(zipFilePath, outputPath);
+                console.log(result);
+              } catch (err) {
+                console.log(err);
+              }
               // Ejecutar el evaulador
               // Actualizar la base de datos
               // Eliminar los archivos descomprimidos

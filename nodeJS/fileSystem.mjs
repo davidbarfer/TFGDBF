@@ -1,7 +1,11 @@
+import fsnp from 'node:fs';
 import * as fs from 'node:fs/promises';
+import path from 'node:path';
 import util from 'node:util';
+import unzipper from 'unzipper';
 import { query } from './database.mjs';
 import { executeMatlabFile } from './matlabFunctions.mjs';
+import { pipeline } from 'node:stream/promises';
 
 const ERROR_MAP = util.getSystemErrorMap();
 const ERROR_CODES = {
@@ -156,5 +160,40 @@ export async function saveFileSubmissionTemplate(url, content, practice_id) {
     console.error('Error updating database:', error);
     fs.unlink(filePath);
     return 500;
+  }
+}
+
+/**
+ * Descomprime un archivo .zip en la ruta especificada.
+ * @param {string} zipPath - Ruta absoluta o relativa al archivo .zip
+ * @param {string} outputPath - Directorio donde se extraerán los archivos
+ */
+export async function extractZip(zipPath, outputPath) {
+  try {
+    // 1. Verificar si el archivo ZIP existe antes de empezar
+    await fs.access(zipPath);
+
+    // 2. Asegurar que la carpeta de destino existe (recursivo)
+    await fs.mkdir(outputPath, { recursive: true });
+
+    // 3. Crear los flujos (streams)
+    const readStream = fsnp.createReadStream(zipPath);
+    const extractor = unzipper.Extract({ path: outputPath });
+
+    // 4. Ejecutar la descompresión
+    // pipeline gestiona automáticamente el cierre de streams y captura errores
+    await pipeline(readStream, extractor);
+
+    return {
+      success: true,
+      message: `Extracción completada en ${path.resolve(outputPath)}`,
+      path: outputPath,
+    };
+  } catch (error) {
+    // Manejo de errores específicos
+    if (error.code === 'ENOENT') {
+      throw new Error(`El archivo original no existe en: ${zipPath}`);
+    }
+    throw new Error(`Error al descomprimir: ${error.message}`);
   }
 }
