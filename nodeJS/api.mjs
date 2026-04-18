@@ -1086,12 +1086,8 @@ export const processRequest = async (req, res) => {
                 console.log(err);
               }
               // Ejecutar el evaulador
-              // const evaluadorFiles = [
-              //   `${FILESYSTEM_PATH}/${submision.results[0].file_url}`,
-              //   `${outputPath}/evaluador.m`,
-              // ];
               const evaluadorFiles = [
-                '/home/davidbarfer/Us/TFG/P1/D30287279M.m',
+                `${FILESYSTEM_PATH}/${submision.results[0].file_url}`,
                 `${outputPath}/evaluador.m`,
               ];
               let resultExecuteFiles;
