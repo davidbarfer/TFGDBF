@@ -14,8 +14,9 @@ import {
   saveFileSubmission,
   saveFileSubmissionTemplate,
   extractZip,
+  clearTempDirectory,
 } from './fileSystem.mjs';
-import { executeMatlabFiles } from './matlabFunctions.mjs';
+import { executeMatlabFiles, extractGrade } from './matlabFunctions.mjs';
 import {
   getSubject,
   getSubjectPractices,
@@ -1093,14 +1094,34 @@ export const processRequest = async (req, res) => {
                 '/home/davidbarfer/Us/TFG/P1/D30287279M.m',
                 `${outputPath}/evaluador.m`,
               ];
+              let resultExecuteFiles;
               try {
-                await executeMatlabFiles(evaluadorFiles);
+                resultExecuteFiles = await executeMatlabFiles(evaluadorFiles);
               } catch (error) {
                 console.log('Error executing evaluator:', error);
               }
+              const grade = extractGrade(resultExecuteFiles);
               // Actualizar la base de datos
+              const updateDbResult = await query(
+                'UPDATE submissions set evaluator_grade = ?, evaluator_result = ? WHERE id = ?',
+                [grade, resultExecuteFiles, submision.results[0].id]
+              );
+              if (updateDbResult.results.affectedRows === 0) {
+                res.statusCode = 404;
+                return res.end(
+                  JSON.stringify({ error: 'No submissions affected' })
+                );
+              }
               // Eliminar los archivos descomprimidos
+              const DeleteTempFiles = await clearTempDirectory(outputPath);
+              if (!DeleteTempFiles) {
+                console.log('Error deleteing temp files');
+              }
               // Send response
+              // res.statusCode = 204;
+              // return res.end(
+              //   JSON.stringify({ message: 'Submission updated successfully' })
+              // );
               res.writeHead(200, { 'Content-Type': 'application/json' });
               res.end(
                 JSON.stringify({
