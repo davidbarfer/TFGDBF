@@ -81,3 +81,19 @@ export function executeMatlabFiles(filePaths) {
     );
   });
 }
+/**
+ * From s variable printed in stdout, it will extract the Grade
+ * @param {string} stdout
+ */
+export function extractGrade(stdout) {
+  // Explicación del Regex:
+  // Nota    -> Busca literalmente la palabra "Nota"
+  // \s+     -> Busca uno o más espacios después
+  // ([\d.]+) -> Captura el grupo que contiene dígitos o puntos (el número)
+  const regex = /Nota\s+([\d.]+)/;
+
+  const matchedString = stdout.match(regex);
+
+  // Si encuentra la coincidencia, devuelve el valor como número, sino devuelve null
+  return matchedString ? parseFloat(matchedString[1]) : null;
+}
