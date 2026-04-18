@@ -197,3 +197,24 @@ export async function extractZip(zipPath, outputPath) {
     throw new Error(`Error al descomprimir: ${error.message}`);
   }
 }
+export async function clearTempDirectory(tempPath) {
+  try {
+    // 1. Read all files and subdirectories within the path
+    const files = await fs.readdir(tempPath);
+    // 2. Delete each item individually
+    // Using Promise.all for faster, concurrent deletion
+    await Promise.all(
+      files.map(file =>
+        fs.rm(path.join(tempPath, file), { recursive: true, force: true })
+      )
+    );
+    return true;
+  } catch (err) {
+    // If the directory doesn't exist, we treat it as a success
+    if (err.code === 'ENOENT') {
+      return true;
+    }
+    console.error('Error clearing TEMP directory:', err);
+    return false;
+  }
+}
