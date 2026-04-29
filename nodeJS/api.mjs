@@ -30,14 +30,12 @@ export const processRequest = async (req, res) => {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   // Find matching route
   const route = routes.find(r => r.method === method && r.regex.test(url));
-  console.log(route);
   if (!route) {
     res.statuscode = 404;
     return res.end(JSON.stringify({ error: 'Route not found' }));
   }
   try {
     const params = url.match(route.regex);
-    console.log('This are the params', params, typeof params);
     await route.handler(req, res, params);
   } catch (err) {
     console.error(`[Router error]: ${err}`);
