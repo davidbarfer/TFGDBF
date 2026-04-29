@@ -1114,15 +1114,11 @@ export const processRequest = async (req, res) => {
                 console.log('Error deleteing temp files');
               }
               // Send response
-              // res.statusCode = 204;
-              // return res.end(
-              //   JSON.stringify({ message: 'Submission updated successfully' })
-              // );
-              res.writeHead(200, { 'Content-Type': 'application/json' });
-              res.end(
+              res.statusCode = 204;
+              return res.end(
                 JSON.stringify({
                   success: true,
-                  message: 'Success',
+                  message: 'Submission updated successfully',
                 })
               );
             } catch (error) {
