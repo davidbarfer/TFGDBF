@@ -1,13 +1,11 @@
 import jwt from 'jsonwebtoken';
-import { corsHeaders } from '../api.mjs';
+import { FRONTEND_URL, BACKEND_URL, corsHeaders } from '../api.mjs';
 import {
   query,
   verifyPassword,
   hashPassword,
   authProviders,
 } from '../database.mjs';
-const FRONTEND_URL = `http://${process.env.BASE_IP}:${process.env.FRONTEND_PORT}`;
-const BACKEND_URL = `http://${process.env.BASE_IP}:${process.env.BACKEND_PORT}`;
 export const login = async (req, res, params) => {
   let body = '';
   let requestComplete = false;

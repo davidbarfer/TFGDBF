@@ -1,5 +1,9 @@
 import { login, logout, signup } from '../handler/authHandler.mjs';
 import {
+  deleteGroup,
+  deleteStudentGroup,
+} from '../handler/userDeleteHandler.mjs';
+import {
   getSubject,
   getSubjectPractices,
   getSubjectPracticesGroups,
@@ -15,7 +19,22 @@ import {
   getSubmission,
   getSubjects,
   getUsers,
-} from '../handler/userHandler.mjs';
+} from '../handler/userGetHandler.mjs';
+import {
+  postPracticeCreate,
+  postPracticeGroupsCreate,
+  postGroupStudent,
+  postStudentSubmissionFile,
+  postPracticeSubmissions,
+  postPracticeGroupSubmissions,
+  postPracticeSubmissionEdit,
+  postPracticeEvaluatorCreate,
+  postStudentSubmissionEvaluate,
+} from '../handler/userPostHandler.mjs';
+import {
+  putPracticeSubmissionsGrade,
+  putStudentSubmissionGrade,
+} from '../handler/userPutHandler.mjs';
 
 const getRoutes = [
   {
@@ -110,5 +129,79 @@ const postRoutes = [
     regex: /^\/signup/,
     handler: signup,
   },
+  {
+    method: 'POST',
+    regex: /^\/subject\/\d+\/create$/,
+    handler: postPracticeCreate,
+  },
+  {
+    method: 'POST',
+    regex: /^\/subject\/\d+\/practice\/\d+\/groups\/create$/,
+    handler: postPracticeGroupsCreate,
+  },
+  {
+    method: 'POST',
+    regex: /^\/group\/\d+\/student\/\d+$/,
+    handler: postGroupStudent,
+  },
+  {
+    method: 'POST',
+    regex: /^\/student\/\d+\/submission\/\d+\/file$/,
+    handler: postStudentSubmissionFile,
+  },
+  {
+    method: 'POST',
+    regex: /^\/practice\/\d+\/submissions$/,
+    handler: postPracticeSubmissions,
+  },
+  {
+    method: 'POST',
+    regex: /^\/practice\/\d+\/group\/\d+\/submissions$/,
+    handler: postPracticeGroupSubmissions,
+  },
+  {
+    method: 'POST',
+    regex: /^\/practice\/\d+\/submission\/\d+\/edit$/,
+    handler: postPracticeSubmissionEdit,
+  },
+  {
+    method: 'POST',
+    regex: /^\/practice\/\d+\/evaluator\/create$/,
+    handler: postPracticeEvaluatorCreate,
+  },
+  {
+    method: 'POST',
+    regex: /^\/student\/\d+\/submission\/\d+\/evaluate$/,
+    handler: postStudentSubmissionEvaluate,
+  },
 ];
-export const routes = [...getRoutes, ...postRoutes];
+const putRoutes = [
+  {
+    method: 'PUT',
+    regex: /^\/practice\/\d+\/submissions\/grade$/,
+    handler: putPracticeSubmissionsGrade,
+  },
+  {
+    method: 'PUT',
+    regex: /^\/student\/\d+\/submission\/\d+\/grade$/,
+    handler: putStudentSubmissionGrade,
+  },
+];
+const deleteRoutes = [
+  {
+    method: 'DELETE',
+    regex: /^\/group\/\d+$/,
+    handler: deleteGroup,
+  },
+  {
+    method: 'DELETE',
+    regex: /^\/group\/\d+\/student\/\d+$/,
+    handler: deleteStudentGroup,
+  },
+];
+export const routes = [
+  ...getRoutes,
+  ...postRoutes,
+  ...putRoutes,
+  ...deleteRoutes,
+];

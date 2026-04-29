@@ -1,43 +1,6 @@
-import jwt from 'jsonwebtoken';
-import formidable from 'formidable';
-import fs from 'node:fs/promises';
-import path from 'node:path';
-import { query, hashPassword, verifyPassword } from './database.mjs';
-import {
-  authProviders,
-  authenticate,
-  unhandledUserDefinedException,
-} from './database.mjs';
-import {
-  getFileSystemBasePath,
-  getFileSubmission,
-  saveFileSubmission,
-  saveFileSubmissionTemplate,
-  extractZip,
-  clearTempDirectory,
-} from './fileSystem.mjs';
-import { executeMatlabFiles, extractGrade } from './matlabFunctions.mjs';
 import { routes } from './router/routes.mjs';
-import {
-  postPracticeCreate,
-  postPracticeGroupsCreate,
-  postGroupStudent,
-  postStudentSubmissionFile,
-  postPracticeSubmissions,
-  postPracticeGroupSubmissions,
-  postPracticeSubmissionEdit,
-  postPracticeEvaluatorCreate,
-  postStudentSubmissionEvaluate,
-} from './regExpPost.mjs';
-import {
-  postStudentSubmissionGrade,
-  postPracticeSubmissionsGrade,
-} from './regExpPut.mjs';
-import { deleteGroup, deleteStudentGroup } from './regExpDelete.mjs';
-import { add7days, parseDateMatlab } from './utils.mjs';
-const FRONTEND_URL = `http://${process.env.BASE_IP}:${process.env.FRONTEND_PORT}`;
-const BACKEND_URL = `http://${process.env.BASE_IP}:${process.env.BACKEND_PORT}`;
-const FILESYSTEM_PATH = getFileSystemBasePath();
+export const FRONTEND_URL = `http://${process.env.BASE_IP}:${process.env.FRONTEND_PORT}`;
+export const BACKEND_URL = `http://${process.env.BASE_IP}:${process.env.BACKEND_PORT}`;
 // CORS headers configuration
 export const corsHeaders = {
   'Access-Control-Allow-Origin': `${FRONTEND_URL}`, // Your frontend URL
