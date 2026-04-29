@@ -20,13 +20,21 @@ const { subjectId, submission, token } = Astro.props;
     </main>
     <button slot="closeModal">Cancelar</button>
   </Modal>
-  <button disabled>Ejecutar evaluador</button>
+  <button 
+    class="evaluatorBtn"
+    data-token={token} 
+    data-user_id={submission.user_id} 
+    data-submission_id={submission.id} 
+  >
+    Ejecutar evaluador
+  </button>
   <a href={`/asignaturas/${subjectId}/practicas/${submission.practice_id}/entregas/${submission.id}/edit`}><button>Editar</button></a>
 </section>
 
 <script>
   import { actions } from 'astro:actions';
   const gradeBtns = document.getElementsByClassName('gradeBtn')
+  const evaluatorBtns = document.getElementsByClassName('evaluatorBtn')
   Array.from(gradeBtns).forEach(gradeBtn => gradeBtn.addEventListener('click', async () => {
     const token = gradeBtn?.dataset.token;
     const url_data = {
@@ -42,6 +50,21 @@ const { subjectId, submission, token } = Astro.props;
       alert(error.message);
     }
     window.location.reload();
+  }))
+  Array.from(evaluatorBtns).forEach(evaluatorBtn => evaluatorBtn.addEventListener('click', async() => {
+    const token = evaluatorBtn?.dataset.token;
+    const url_data = {
+      user_id: evaluatorBtn?.dataset.user_id as string,
+      submission_id: evaluatorBtn?.dataset.submission_id as string,
+    }
+    const { data, error } = await actions.professor.executeSubmssionEvaluator({
+      token: token as string,
+      url_data: url_data
+    })
+    if(error) {
+      alert(error.message);
+    }
+    alert('Evaluador ejecutado');
   }))
 </script>
 

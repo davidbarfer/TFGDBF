@@ -80,6 +80,7 @@ CREATE TABLE IF NOT EXISTS submissions (
     delivery_date DATE NOT NULL,
     grade DECIMAL(5,2) DEFAULT NULL,
     evaluator_grade DECIMAL(5,2) DEFAULT NULL,
+    evaluator_result TEXT DEFAULT NULL,
     feedback TEXT,
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (practice_id) REFERENCES practice(id)

@@ -35,6 +35,7 @@
 | `/practice/:id/group/:id/submissions`     | Create submissions for the practice group |
 | `/practice/:id/evaluator/create`          | Create an evaluator for the practice      |
 | `/student/:id/submission/:id/file`        | Submit a file for the student             |
+| `/student/:id/submission/:id/evaluate`    | Execute an evaluator on the practice      |
 
 ## Endpoints PUT
 

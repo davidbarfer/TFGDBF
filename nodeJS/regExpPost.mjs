@@ -68,3 +68,11 @@ export function postPracticeEvaluatorCreate(url) {
   }
   return false;
 }
+export function postStudentSubmissionEvaluate(url) {
+  const regex = /^\/student\/\d+\/submission\/\d+\/evaluate$/;
+  if (regex.test(url)) {
+    const student_id = url.split('/')[2];
+    const submission_id = url.split('/')[4];
+    return { student_id, submission_id };
+  }
+}

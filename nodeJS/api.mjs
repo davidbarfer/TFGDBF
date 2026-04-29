@@ -13,7 +13,10 @@ import {
   getFileSubmission,
   saveFileSubmission,
   saveFileSubmissionTemplate,
+  extractZip,
+  clearTempDirectory,
 } from './fileSystem.mjs';
+import { executeMatlabFiles, extractGrade } from './matlabFunctions.mjs';
 import {
   getSubject,
   getSubjectPractices,
@@ -38,6 +41,7 @@ import {
   postPracticeGroupSubmissions,
   postPracticeSubmissionEdit,
   postPracticeEvaluatorCreate,
+  postStudentSubmissionEvaluate,
 } from './regExpPost.mjs';
 import {
   postStudentSubmissionGrade,
@@ -462,6 +466,7 @@ export const processRequest = async (req, res) => {
         practice_id_group_id_submissions: postPracticeGroupSubmissions(url),
         practice_id_submission_id_edit: postPracticeSubmissionEdit(url),
         practice_id_evaluator_create: postPracticeEvaluatorCreate(url),
+        student_id_submission_id_evaluate: postStudentSubmissionEvaluate(url),
       };
       if (postRoutes.subject_id_practices) {
         try {
@@ -1053,6 +1058,81 @@ export const processRequest = async (req, res) => {
           }
         } catch (error) {
           console.error('Database query error on edit the submission', error);
+          res.statusCode = 500;
+          return res.end(JSON.stringify({ error: 'Internal server error' }));
+        }
+      } else if (postRoutes.student_id_submission_id_evaluate) {
+        try {
+          await authenticate(req, res, false);
+          req.on('data', async () => {});
+          req.on('end', async () => {
+            try {
+              // Descomprimir el archivo
+              const submision = await query(
+                'SELECT id, user_id, practice_id, file_url from submissions WHERE id = ?',
+                [postRoutes.student_id_submission_id_evaluate.submission_id]
+              );
+              // TODO: RETURN IF SUBMISSION IS NOT ON DATABASE
+              const evaluator_template_url = await query(
+                'SELECT evaluator_template_url from practice WHERE id = ?',
+                [submision.results[0].practice_id]
+              );
+              const zipFilePath = `${FILESYSTEM_PATH}/${evaluator_template_url.results[0].evaluator_template_url}`;
+              const outputPath = `${FILESYSTEM_PATH}/temp`;
+              try {
+                const result = await extractZip(zipFilePath, outputPath);
+                console.log(result);
+              } catch (err) {
+                console.log(err);
+              }
+              // Ejecutar el evaulador
+              const evaluadorFiles = [
+                `${FILESYSTEM_PATH}/${submision.results[0].file_url}`,
+                `${outputPath}/evaluador.m`,
+              ];
+              let resultExecuteFiles;
+              try {
+                resultExecuteFiles = await executeMatlabFiles(evaluadorFiles);
+              } catch (error) {
+                console.log('Error executing evaluator:', error);
+              }
+              const grade = extractGrade(resultExecuteFiles);
+              // Actualizar la base de datos
+              const updateDbResult = await query(
+                'UPDATE submissions set evaluator_grade = ?, evaluator_result = ? WHERE id = ?',
+                [grade, resultExecuteFiles, submision.results[0].id]
+              );
+              if (updateDbResult.results.affectedRows === 0) {
+                res.statusCode = 404;
+                return res.end(
+                  JSON.stringify({ error: 'No submissions affected' })
+                );
+              }
+              // Eliminar los archivos descomprimidos
+              const DeleteTempFiles = await clearTempDirectory(outputPath);
+              if (!DeleteTempFiles) {
+                console.log('Error deleteing temp files');
+              }
+              // Send response
+              res.statusCode = 204;
+              return res.end(
+                JSON.stringify({
+                  success: true,
+                  message: 'Submission updated successfully',
+                })
+              );
+            } catch (error) {
+              console.error(
+                'Database query error on executing evaluator:',
+                error
+              );
+              res.statusCode = 500;
+              return res.end(
+                JSON.stringify({ error: 'Internal server error' })
+              );
+            }
+          });
+        } catch {
           res.statusCode = 500;
           return res.end(JSON.stringify({ error: 'Internal server error' }));
         }
