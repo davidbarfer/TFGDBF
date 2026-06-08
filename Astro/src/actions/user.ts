@@ -1,6 +1,7 @@
-import { ActionError, defineAction } from "astro:actions";
+import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
 import { API_URL } from "@/utils/enviroment";
+import { handleActionError } from "@/utils/handler";
 
 export const user = {
   getSubject: defineAction({
@@ -14,12 +15,7 @@ export const user = {
           Authorization: input.token,
         },
       });
-      if (!response.ok) {
-        return new ActionError({
-          code: ActionError.statusToCode(response.status),
-          message: response.statusText,
-        });
-      }
+      if (!response.ok) await handleActionError(response);
       return response.json();
     },
   }),
@@ -33,12 +29,7 @@ export const user = {
           Authorization: input.token,
         },
       });
-      if (!response.ok) {
-        return new ActionError({
-          code: ActionError.statusToCode(response.status),
-          message: response.statusText,
-        });
-      }
+      if (!response.ok) await handleActionError(response);
       return response.json();
     },
   }),
@@ -56,12 +47,7 @@ export const user = {
           },
         }
       );
-      if (!response.ok) {
-        return new ActionError({
-          code: ActionError.statusToCode(response.status),
-          message: response.statusText,
-        });
-      }
+      if (!response.ok) await handleActionError(response);
       return response.json();
     },
   }),
@@ -76,12 +62,7 @@ export const user = {
           Authorization: input.token,
         },
       });
-      if (!response.ok) {
-        return new ActionError({
-          code: ActionError.statusToCode(response.status),
-          message: response.statusText,
-        });
-      }
+      if (!response.ok) await handleActionError(response);
       return response.json();
     },
   }),
@@ -100,12 +81,7 @@ export const user = {
           },
         }
       );
-      if (!response.ok) {
-        return new ActionError({
-          code: ActionError.statusToCode(response.status),
-          message: response.statusText,
-        });
-      }
+      if (!response.ok) await handleActionError(response);
       return response.json();
     },
   }),
@@ -126,12 +102,7 @@ export const user = {
       if (response.status === 404) {
         return [];
       }
-      if (!response.ok) {
-        return new ActionError({
-          code: ActionError.statusToCode(response.status),
-          message: response.statusText,
-        });
-      }
+      if (!response.ok) await handleActionError(response);
       return response.json();
     },
   }),
@@ -155,12 +126,7 @@ export const user = {
           }),
         }
       );
-      if (!response.ok) {
-        return new ActionError({
-          code: ActionError.statusToCode(response.status),
-          message: response.statusText,
-        });
-      }
+      if (!response.ok) await handleActionError(response);
       return response.json();
     },
   }),
@@ -175,12 +141,7 @@ export const user = {
           Authorization: input.token,
         },
       });
-      if (!response.ok) {
-        return new ActionError({
-          code: ActionError.statusToCode(response.status),
-          message: response.statusText,
-        });
-      }
+      if (!response.ok) await handleActionError(response);
       return response.json();
     },
   }),
@@ -201,12 +162,7 @@ export const user = {
       if(response.status === 404) {
         return [];
       }
-      if (!response.ok) {
-        return new ActionError({
-          code: ActionError.statusToCode(response.status),
-          message: response.statusText,
-        });
-      }
+      if (!response.ok) await handleActionError(response);
       return response.json();
     },
   }),
@@ -225,12 +181,7 @@ export const user = {
           },
         }
       );
-      if (!response.ok) {
-        return new ActionError({
-          code: ActionError.statusToCode(response.status),
-          message: response.statusText,
-        });
-      }
+      if (!response.ok) await handleActionError(response);
       return response.json();
     },
   }),
@@ -250,12 +201,7 @@ export const user = {
           },
         }
       );
-      if (!response.ok) {
-        return new ActionError({
-          message: response.statusText,
-          code: ActionError.statusToCode(response.status),
-        });
-      }
+      if (!response.ok) await handleActionError(response);
       return response.json();
     },
   }),
@@ -307,12 +253,7 @@ export const user = {
           }),
         }
       );
-      if (!response.ok) {
-        return new ActionError({
-          code: ActionError.statusToCode(response.status),
-          message: response.statusText,
-        });
-      }
+      if (!response.ok) await handleActionError(response);
       return response.json();
     }
   }),
