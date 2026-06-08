@@ -12,6 +12,7 @@ if (token) {
     console.warn("Invalid or expired token", err);
   }
 }
+const isEvaluator = !practice.evaluator_template_url;
 ---
 
 <section>
@@ -26,7 +27,7 @@ if (token) {
     <button slot="closeModal">Cancelar</button>
   </Modal>
   <button>
-    <a href={`/asignaturas/${practice.subject_id}/practicas/${practice.id}/evauladores/crear`}>Crear evaulador</a>
+    <a href={`/asignaturas/${practice.subject_id}/practicas/${practice.id}/evauladores/crear`}>{isEvaluator ? 'Crear evaulador' : 'Editar Evaluador'}</a>
   </button>
   <button disabled>Ejecutar evaluador</button>
   <button disabled>Calificar</button>
