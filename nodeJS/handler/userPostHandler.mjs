@@ -504,7 +504,12 @@ export const postStudentSubmissionEvaluate = async (req, res, params) => {
           'SELECT id, user_id, practice_id, file_url from submissions WHERE id = ?',
           [student_id_submission_id_evaluate.submission_id]
         );
-        // TODO: RETURN IF SUBMISSION IS NOT ON DATABASE
+        if (submision.results[0].file_url === null) {
+          res.statusCode = 404;
+          return res.end(
+            JSON.stringify({ error: 'Submission file was not found' })
+          );
+        }
         const evaluator_template_url = await query(
           'SELECT evaluator_template_url from practice WHERE id = ?',
           [submision.results[0].practice_id]
@@ -512,10 +517,10 @@ export const postStudentSubmissionEvaluate = async (req, res, params) => {
         const zipFilePath = `${FILESYSTEM_PATH}/${evaluator_template_url.results[0].evaluator_template_url}`;
         const outputPath = `${FILESYSTEM_PATH}/temp`;
         try {
-          const result = await extractZip(zipFilePath, outputPath);
-          console.log(result);
+          await extractZip(zipFilePath, outputPath);
         } catch (err) {
-          console.log(err);
+          res.statusCode = 500;
+          res.end(JSON.stringify({ error: err }));
         }
         // Ejecutar el evaulador
         const evaluadorFiles = [
@@ -525,8 +530,9 @@ export const postStudentSubmissionEvaluate = async (req, res, params) => {
         let resultExecuteFiles;
         try {
           resultExecuteFiles = await executeMatlabFiles(evaluadorFiles);
-        } catch (error) {
-          console.log('Error executing evaluator:', error);
+        } catch (err) {
+          res.statusCode = 500;
+          res.end(JSON.stringify({ error: err }));
         }
         const grade = extractGrade(resultExecuteFiles);
         // Actualizar la base de datos
