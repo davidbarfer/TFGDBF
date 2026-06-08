@@ -1,6 +1,7 @@
-import { ActionError, defineAction } from "astro:actions";
+import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
 import { API_URL } from "@/utils/enviroment";
+import { handleActionError } from "@/utils/handler";
 
 export const professor = {
   getSubjectsStudents: defineAction({
@@ -17,12 +18,7 @@ export const professor = {
           },
         }
       );
-      if (!response.ok) {
-        return new ActionError({
-          code: ActionError.statusToCode(response.status),
-          message: response.statusText,
-        });
-      }
+      if (!response.ok) await handleActionError(response);
       return response.json();
     },
   }),
@@ -42,12 +38,7 @@ export const professor = {
           },
         }
       );
-      if (!response.ok) {
-        return new ActionError({
-          code: ActionError.statusToCode(response.status),
-          message: response.statusText,
-        });
-      }
+      if (!response.ok) await handleActionError(response);
       return response.json();
     },
   }),
@@ -63,12 +54,7 @@ export const professor = {
           Authorization: input.token,
         },
       });
-      if (!response.ok) {
-        return new ActionError({
-          code: ActionError.statusToCode(response.status),
-          message: response.statusText,
-        });
-      }
+      if (!response.ok) await handleActionError(response);
       return response.json();
     },
   }),
@@ -94,12 +80,7 @@ export const professor = {
           body: JSON.stringify(input.practice_data),
         }
       );
-      if (!response.ok) {
-        return new ActionError({
-          code: ActionError.statusToCode(response.status),
-          message: response.statusText,
-        });
-      }
+      if (!response.ok) await handleActionError(response);
       return response.json();
     },
   }),
@@ -128,12 +109,7 @@ export const professor = {
           body: JSON.stringify(input.group_data),
         }
       );
-      if (!response.ok) {
-        return new ActionError({
-          code: ActionError.statusToCode(response.status),
-          message: response.statusText,
-        });
-      }
+      if (!response.ok) await handleActionError(response);
       return response.json();
     },
   }),
@@ -151,12 +127,7 @@ export const professor = {
           },
         }
       );
-      if (!response.ok) {
-        return new ActionError({
-          code: ActionError.statusToCode(response.status),
-          message: response.statusText,
-        });
-      }
+      if (!response.ok) await handleActionError(response);
       return response.json();
     },
   }),
@@ -174,12 +145,7 @@ export const professor = {
           },
         }
       );
-      if (!response.ok) {
-        return new ActionError({
-          code: ActionError.statusToCode(response.status),
-          message: response.statusText,
-        });
-      }
+      if (!response.ok) await handleActionError(response);
       return response.json();
     },
   }),
@@ -200,12 +166,7 @@ export const professor = {
           body: JSON.stringify({ practice_id: input.practice_id }),
         }
       );
-      if (!response.ok) {
-        return new ActionError({
-          code: ActionError.statusToCode(response.status),
-          message: response.statusText,
-        });
-      }
+      if (!response.ok) await handleActionError(response);
       return response.json();
     },
   }),
@@ -229,12 +190,7 @@ export const professor = {
           body: JSON.stringify(input.url_data),
         }
       );
-      if (!response.ok) {
-        return new ActionError({
-          code: ActionError.statusToCode(response.status),
-          message: response.statusText,
-        });
-      }
+      if (!response.ok) await handleActionError(response);
       return response.json();
     },
   }),
@@ -259,12 +215,7 @@ export const professor = {
           body: JSON.stringify(input.url_data),
         }
       );
-      if (!response.ok) {
-        return new ActionError({
-          code: ActionError.statusToCode(response.status),
-          message: response.statusText,
-        });
-      }
+      if (!response.ok) await handleActionError(response);
       return true;
     },
   }),
@@ -294,12 +245,7 @@ export const professor = {
           body: JSON.stringify(input.submissionData),
         }
       );
-      if (!response.ok) {
-        return new ActionError({
-          code: ActionError.statusToCode(response.status),
-          message: response.statusText,
-        });
-      }
+      if (!response.ok) await handleActionError(response);
       return true;
     },
   }),
@@ -341,12 +287,7 @@ export const professor = {
           body: formData,
         }
       );
-      if (!response.ok) {
-        return new ActionError({
-          code: ActionError.statusToCode(response.status),
-          message: response.statusText,
-        });
-      }
+      if (!response.ok) await handleActionError(response);
       return true;
     },
   }),
@@ -369,12 +310,7 @@ export const professor = {
           },
         }
       );
-      if (!response.ok) {
-        throw new ActionError({
-          code: ActionError.statusToCode(response.status),
-          message: response.statusText,
-        });
-      }
+      if (!response.ok) await handleActionError(response);
       return true;
     },
   }),
