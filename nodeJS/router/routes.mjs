@@ -30,6 +30,7 @@ import {
   postPracticeSubmissionEdit,
   postPracticeEvaluatorCreate,
   postStudentSubmissionEvaluate,
+  postSubjectCreate,
 } from '../handler/userPostHandler.mjs';
 import {
   putPracticeSubmissionsGrade,
@@ -128,6 +129,11 @@ const postRoutes = [
     method: 'POST',
     regex: /^\/signup/,
     handler: signup,
+  },
+  {
+    method: 'POST',
+    regex: /^\/subject\/create/,
+    handler: postSubjectCreate,
   },
   {
     method: 'POST',

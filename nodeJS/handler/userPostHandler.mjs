@@ -658,3 +658,40 @@ export const postPracticeSubmissions = async (req, res, params) => {
     return res.end(JSON.stringify({ error: 'Internal server error' }));
   }
 };
+export const postSubjectCreate = async (req, res, params) => {
+  await authenticate(req, res);
+  let body = '';
+  req.on('data', chunk => {
+    body += chunk.toString();
+  });
+  req.on('end', async () => {
+    try {
+      const data = JSON.parse(body);
+      if (!data.name || !data.course || !data.degree) {
+        res.statusCode = 400;
+        return res.end(
+          JSON.stringify({ error: 'Name, course and degree are required.' })
+        );
+      }
+      try {
+        const subject = await query(
+          'INSERT INTO subject (name, course, degree) VALUES (?, ?, ?)',
+          [data.name, data.course, data.degree]
+        );
+        res.statusCode = 201;
+        return res.end(JSON.stringify(subject.results));
+      } catch (err) {
+        console.error('Database query error on create subject:', err);
+        if (err.sqlState === unhandledUserDefinedException) {
+          res.statusCode = 400;
+          return res.end(JSON.stringify({ error: err.sqlMessage }));
+        }
+        res.statusCode = 500;
+        return res.end(JSON.stringify({ error: 'Internal server error' }));
+      }
+    } catch {
+      res.statusCode = 500;
+      return res.end(JSON.stringify({ error: 'Internal server error' }));
+    }
+  });
+};

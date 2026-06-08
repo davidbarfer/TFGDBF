@@ -314,4 +314,28 @@ export const professor = {
       return true;
     },
   }),
+  createSubject: defineAction({
+    input: z.object({
+      token: z.string(),
+      subject: z.object({
+        name: z.string(),
+        course: z.number(),
+        degree: z.string(),
+      })
+    }),
+    handler: async(input) => {
+      const response = await fetch(
+        `${API_URL}/subject/create`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: input.token,
+          },
+          body: JSON.stringify(input.subject),
+        }
+      );
+      if (!response.ok) await handleActionError(response);
+      return response.json()
+    },
+  }),
 };

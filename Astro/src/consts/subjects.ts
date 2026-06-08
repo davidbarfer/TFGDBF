@@ -1,0 +1,1 @@
+export const DEGREES = ['Grado en Ingeniería de Tecnologías Industriales','Grado en Ingeniería de las Tecnologías de Telecomunicación',]
