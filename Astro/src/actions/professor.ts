@@ -370,7 +370,7 @@ export const professor = {
         }
       );
       if (!response.ok) {
-        return new ActionError({
+        throw new ActionError({
           code: ActionError.statusToCode(response.status),
           message: response.statusText,
         });
