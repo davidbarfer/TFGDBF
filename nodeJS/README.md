@@ -27,6 +27,7 @@
 | `/login`                                  | Returns a token                           |
 | `/logout`                                 | Removes the token                         |
 | `/signup`                                 | Returns a user                            |
+| `/subject/create`                         | Create a subject                          |
 | `/subject/:id/create`                     | Create a practice for the subject         |
 | `/subject/:id/practice/:id/groups/create` | Create groups for the practice            |
 | `/group/:id/student/:id`                  | Add a student to a group                  |
