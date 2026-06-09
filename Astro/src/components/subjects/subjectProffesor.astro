@@ -12,14 +12,13 @@ if (token) {
   }
 }
 let { data: students, error: studentsError } = await Astro.callAction(actions.professor.getSubjectsStudents, { token: token as string, subject_id: String(subject?.id) });
-if (students === null) {
+if (students === null || studentsError != undefined) {
   students = [];
 }
 let { data: practices, error: practicesError } = await Astro.callAction(actions.user.getPractices, { token: token as string, subject_id: String(subject?.id) });
-if (practices === null) {
+if (practices === null || practicesError != undefined) {
   practices = [];
 }
-// Replace the forEach with Promise.all and map
 practices = await Promise.all(practices.map(async (practice: any) => {
   const { data: groups, error:groupsError } = await Astro.callAction(actions.user.getGroups, { token: token as string, subject_id: String(subject?.id), practice_id: String(practice.id) });
   if(groups && Array.isArray(groups)) {
