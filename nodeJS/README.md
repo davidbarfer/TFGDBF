@@ -5,7 +5,7 @@
 | URL                                | Description                                       |
 | :--------------------------------- | :------------------------------------------------ |
 | `/subjects`                        | Returns all subjects of a user                    |
-| `/subject/:id`                     | Returns a subject of the professor                |
+| `/subject/:id`                     | Returns a subject of user                         |
 | `/subject/:id/students`            | Returns all students of the subject               |
 | `/subject/:id/practices`           | Returns all practices of the subject              |
 | `/subject/:id/practice/:id/groups` | Return all groups of the practice                 |
@@ -19,6 +19,7 @@
 | `/student/:id/submission/:id/file` | Returns the file of the submission of the student |
 | `/submission/:id`                  | Returns the submission                            |
 | `/users`                           | Returns all users                                 |
+| `/users/professors/`               | Returns all users that are professors             |
 
 ## Endpoints POST
 

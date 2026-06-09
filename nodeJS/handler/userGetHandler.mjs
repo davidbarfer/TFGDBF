@@ -1,6 +1,7 @@
 import { authenticate } from '../database.mjs';
 import { query } from '../database.mjs';
 import { getFileSubmission } from '../fileSystem.mjs';
+import { roles } from '../utils.mjs';
 
 export const getSubjects = async (req, res, params) => {
   try {
@@ -23,6 +24,25 @@ export const getUsers = async (req, res, params) => {
   try {
     const users = await query('SELECT * FROM users');
     return res.end(JSON.stringify(users.results));
+  } catch (error) {
+    console.error('Database query error:', error);
+    res.statusCode = 500;
+    return res.end(JSON.stringify({ error: 'Internal server error' }));
+  }
+};
+export const getUsersProfessors = async (req, res, params) => {
+  await authenticate(req, res);
+  try {
+    const professors = await query(
+      'SELECT id, name, surname FROM users WHERE role = ?',
+      [roles.professor]
+    );
+    if (professors.results.length === 0) {
+      res.statusCode = 404;
+      return res.end(JSON.stringify({ error: 'No professor found' }));
+    }
+    res.statusCode = 200;
+    res.end(JSON.stringify(professors.results));
   } catch (error) {
     console.error('Database query error:', error);
     res.statusCode = 500;

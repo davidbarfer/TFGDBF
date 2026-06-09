@@ -19,6 +19,7 @@ import {
   getSubmission,
   getSubjects,
   getUsers,
+  getUsersProfessors,
 } from '../handler/userGetHandler.mjs';
 import {
   postPracticeCreate,
@@ -47,6 +48,11 @@ const getRoutes = [
     method: 'GET',
     regex: /^\/users/,
     handler: getUsers,
+  },
+  {
+    method: 'GET',
+    regex: /^\/users\/professors$/,
+    handler: getUsersProfessors,
   },
   {
     method: 'GET',
