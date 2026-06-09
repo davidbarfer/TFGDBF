@@ -6,10 +6,15 @@ INSERT INTO users (username, password, password_salt, role, name, surname) VALUE
 ('student2', '$2b$12$W16liLOZR6U4Zp3iptOPEOPNCl8ob/ieZqmEkdOWrrD5yo3qYK5xW',12,'student', 'Manolo', 'Garcia')
 ON DUPLICATE KEY UPDATE username = username;
 
-INSERT INTO subject (name, course, degree) VALUES
-('Fundametos de Control Automático', 2, 'Grado en Ingeniería de Tecnologías Industriales'),
-('Complentos de Control', 4, 'Grado en Ingeniería de Tecnologías Industriales')
-ON DUPLICATE KEY UPDATE name = name, course = course, degree = degree; 
+INSERT INTO degrees (name) VALUES
+('Grado en Ingeniería de Tecnologías Industriales'),
+('Grado en Ingeniería de las Tecnologías de Telecomunicación')
+ON DUPLICATE KEY UPDATE name = name;
+
+INSERT INTO subject (name, course, degree_id) VALUES
+('Fundametos de Control Automático', 2, 1),
+('Complentos de Control', 4, 1)
+ON DUPLICATE KEY UPDATE name = name, course = course, degree_id = degree_id; 
 
 INSERT INTO practice (subject_id, name, description, deadline) VALUES
 (1, 'Control PI', 'Diseñe un control PI', '2025-12-31'),
