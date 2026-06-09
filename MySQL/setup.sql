@@ -111,6 +111,7 @@ CREATE TABLE IF NOT EXISTS practice_groups_users (
   FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
+source /home/davidbarfer/Dev/DoctusLite/MySQL/views.sql;
 source /home/davidbarfer/Dev/DoctusLite/MySQL/triggers.sql;
 source /home/davidbarfer/Dev/DoctusLite/MySQL/data.sql;
 

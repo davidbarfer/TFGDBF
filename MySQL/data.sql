@@ -56,7 +56,9 @@ SHOW TABLES;
 
 -- Display sample data
 SELECT * FROM users;
+SELECT * FROM degrees;
 SELECT * FROM subject;
+SELECT * FROM v_subject;
 SELECT * FROM practice;
 SELECT * FROM practice_groups;
 SELECT * FROM submissions;
