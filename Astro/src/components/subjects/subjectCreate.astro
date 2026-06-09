@@ -9,7 +9,7 @@ import { DEGREES } from "@/consts/subjects";
     <input type="text" id="name" name="name" required>
     <label for="course">Curso (Año)</label>
     <input type="number" id="course" name="course" required></>
-    <label for="degree">Fecha de vencimiento</label>
+    <label for="degree">Titulación</label>
     <select id="degree" name="degree" required>
        {Object.entries(DEGREES).map((([degree_id,degree]) => (
         <option value={degree_id}>{degree}</option>
