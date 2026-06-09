@@ -9,7 +9,7 @@ export const getSubjects = async (req, res, params) => {
       'SELECT subject_id FROM users_subjects WHERE user_id = ?',
       [decoded.userId]
     );
-    const subjects = await query('SELECT * FROM subject WHERE id IN (?)', [
+    const subjects = await query('SELECT * FROM v_subject WHERE id IN (?)', [
       subjects_id.results.map(subject => subject.subject_id).flat(),
     ]);
     return res.end(JSON.stringify(subjects.results));
@@ -33,7 +33,7 @@ export const getSubject = async (req, res, params) => {
   const subject_id = params[0].split('/').pop();
   try {
     await authenticate(req, res, true);
-    const subject = await query('SELECT * FROM subject WHERE id = ?', [
+    const subject = await query('SELECT * FROM v_subject WHERE id = ?', [
       subject_id,
     ]);
     if (subject.results.length === 0) {
