@@ -675,7 +675,7 @@ export const postSubjectCreate = async (req, res, params) => {
       }
       try {
         const subject = await query(
-          'INSERT INTO subject (name, course, degree) VALUES (?, ?, ?)',
+          'INSERT INTO subject (name, course, degree_id) VALUES (?, ?, ?)',
           [data.name, data.course, data.degree]
         );
         res.statusCode = 201;

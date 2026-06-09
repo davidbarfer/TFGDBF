@@ -11,8 +11,8 @@ import { DEGREES } from "@/consts/subjects";
     <input type="number" id="course" name="course" required></>
     <label for="degree">Fecha de vencimiento</label>
     <select id="degree" name="degree" required>
-       {DEGREES.map((degree => (
-        <option value={degree}>{degree}</option>
+       {Object.entries(DEGREES).map((([degree_id,degree]) => (
+        <option value={degree_id}>{degree}</option>
        )))}
     </select>
     <button type="submit">Crear</button>
