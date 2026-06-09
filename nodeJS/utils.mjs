@@ -8,3 +8,8 @@ export function parseDateMatlab(date) {
   const dateObject = new Date(date);
   return dateObject.toISOString().replace(/[-:.]/g, '_');
 }
+export const roles = {
+  admin: 'admin',
+  professor: 'professor',
+  student: 'student',
+}
