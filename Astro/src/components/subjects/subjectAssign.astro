@@ -1,0 +1,31 @@
+---
+const {token} = Astro.props
+---
+
+<section>
+  <h1>Asignar profesor a sus asignaturas</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Surname</th>
+        <th>Asignaturas Asignadas</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>John</td>
+        <td>Smith</td>
+        <td>Asignatura 1, Asignatura 2</td>
+        <td>
+          <select>
+            <option>Asignatura 1</option>
+            <option>Asignatura 2</option>
+          </select>
+          <button>Añadir asignatura</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</section>

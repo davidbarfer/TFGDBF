@@ -25,6 +25,7 @@ const isStudent = user?.role === roles.student;
   <article>
     {(isAdmin || isProfessor) &&
       <section>
+        <a href="/asignaturas/gestionar" class="btn-primary">Gestionar Asignaturas</a>
         <a href="/asignaturas/crear" class="btn-primary">Crear asignatura</a>
         <button disabled>Eliminar asignatura</button>
       </section>
