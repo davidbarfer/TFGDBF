@@ -57,6 +57,24 @@ export const getUsersProfessors = async (req, res, params) => {
       res.statusCode = 404;
       return res.end(JSON.stringify({ error: 'No professor found' }));
     }
+    const professors_ids_arrays = professors.results
+      .map(professor => professor.id)
+      .flat();
+    const user_subjects = await query(
+      `SELECT user_id, subject_id from users_subjects WHERE user_id IN (${professors_ids_arrays.map(() => '?').join(',')})`,
+      professors_ids_arrays
+    );
+    if (user_subjects.results.length !== 0) {
+      professors.results.forEach(professor => {
+        professor.subjects_id = user_subjects.results
+          .filter(e => e.user_id === professor.id)
+          .map(e => e.subject_id);
+      });
+    } else {
+      professors.results.forEach(professor => {
+        professor.subjects_id = [];
+      });
+    }
     res.statusCode = 200;
     res.end(JSON.stringify(professors.results));
   } catch (error) {
