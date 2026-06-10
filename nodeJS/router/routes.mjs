@@ -41,12 +41,12 @@ import {
 const getRoutes = [
   {
     method: 'GET',
-    regex: /^\/subjects/,
+    regex: /^\/subjects$/,
     handler: getSubjects,
   },
   {
     method: 'GET',
-    regex: /^\/users/,
+    regex: /^\/users$/,
     handler: getUsers,
   },
   {
