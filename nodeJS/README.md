@@ -4,8 +4,8 @@
 
 | URL                                | Description                                       |
 | :--------------------------------- | :------------------------------------------------ |
-| `/subjects`                        | Returns all subjects of a user                    |
-| `/subject/:id`                     | Returns a subject of user                         |
+| `/subjects`                        | Returns all subjects of logged user               |
+| `/subject/:id`                     | Returns a subject                                 |
 | `/subject/:id/students`            | Returns all students of the subject               |
 | `/subject/:id/practices`           | Returns all practices of the subject              |
 | `/subject/:id/practice/:id/groups` | Return all groups of the practice                 |
