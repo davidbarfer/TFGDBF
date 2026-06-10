@@ -22,18 +22,27 @@ const { data: subjects, error: subjectsError } = await Astro.callAction(actions.
         <td>{professor.surname}</td>
         <td>
           <form id={`AddSubjectForm${professor.id}`}>
-          <select>
-            {subjects
-              .filter((subject: any) => !professor.subjects_id?.includes(subject.id))
-              .map((subject: any) => (
-                <option value={subject.id}>{subject.name}</option>
-            ))}
-          </select>
-          <button type="submit">Añadir asignatura</button>
+            {subjects.filter((subject: any) => !professor.subjects_id?.includes(subject.id)).length === 0 ? (
+              <select disabled>
+                <option>Todas las asignaturas asignadas</option>
+              </select>
+                <button type="submit" disabled>
+                  Añadir asignatura
+                </button>
+            ) : (
+              <select>
+                {subjects
+                  .filter((subject: any) => !professor.subjects_id?.includes(subject.id))
+                  .map((subject: any) => (
+                  <option value={subject.id}>{subject.name} ({subject.degree})</option>
+                ))}
+              </select>
+              <button type="submit">Añadir asignatura</button>
+            )}
           </form>
         </td>
       </tr>
-  ))}
+      ))}
     </tbody>
   </table>
 </section>
