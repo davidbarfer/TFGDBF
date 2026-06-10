@@ -33,6 +33,20 @@ export const user = {
       return response.json();
     },
   }),
+  getSubjectsUser: defineAction({
+    input: z.object({
+      token: z.string(),
+    }),
+    handler: async (input) => {
+      const response = await fetch(`${API_URL}/subjects/user`, {
+        headers: {
+          Authorization: input.token,
+        },
+      });
+      if (!response.ok) await handleActionError(response);
+      return response.json();
+    },
+  }),
   getPractices: defineAction({
     input: z.object({
       token: z.string(),

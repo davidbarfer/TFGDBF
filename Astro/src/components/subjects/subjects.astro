@@ -2,7 +2,7 @@
 import { actions } from 'astro:actions';
 import Error from "@/components/Error.astro";
 const { token } = Astro.props;
-const { data: subjects, error } = await Astro.callAction(actions.user.getSubjects, { token: token as string });
+const { data: subjects, error } = await Astro.callAction(actions.user.getSubjectsUser, { token: token as string });
 ---
 {error ? (<Error error={error} />) : (
 <section>

@@ -1,5 +1,9 @@
 ---
+import { actions } from "astro:actions";
 const {token} = Astro.props
+let { data: professors, error: professorsError} = await Astro.callAction(actions.professor.getUsersProfessors,{token: token as string});
+const { data: subjects, error: subjectsError } = await Astro.callAction(actions.user.getSubjects, {token})
+console.log(subjects)
 ---
 
 <section>
@@ -14,18 +18,23 @@ const {token} = Astro.props
       </tr>
     </thead>
     <tbody>
-      <tr>
-        <td>John</td>
-        <td>Smith</td>
+      {professors.map((professor : any) => (
+        <tr>
+        <td>{professor.name}</td>
+        <td>{professor.surname}</td>
         <td>Asignatura 1, Asignatura 2</td>
         <td>
+          <form id={`AddSubjectForm${professor.id}`}>
           <select>
-            <option>Asignatura 1</option>
-            <option>Asignatura 2</option>
+            {subjects.map((subject : any) => (
+              <option value={subject.id}>{subject.name}</option>
+            ))}
           </select>
-          <button>Añadir asignatura</button>
+          <button type="submit">Añadir asignatura</button>
+          </form>
         </td>
       </tr>
+  ))}
     </tbody>
   </table>
 </section>

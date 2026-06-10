@@ -22,6 +22,20 @@ export const professor = {
       return response.json();
     },
   }),
+  getUsersProfessors: defineAction({
+    input: z.object({token: z.string()}),
+    handler: async(input) => {
+      const response = await fetch(`${API_URL}/users/professors`, 
+        {
+          headers: {
+            Authorization: input.token,
+          },
+        }
+      );
+      if (!response.ok) await handleActionError(response);
+      return response.json();
+    },
+  }),
   deleteStudentGroup: defineAction({
     input: z.object({
       token: z.string(),

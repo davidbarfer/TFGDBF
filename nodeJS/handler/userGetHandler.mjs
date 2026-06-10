@@ -1,9 +1,25 @@
+import { error } from 'node:console';
 import { authenticate } from '../database.mjs';
 import { query } from '../database.mjs';
 import { getFileSubmission } from '../fileSystem.mjs';
 import { roles } from '../utils.mjs';
 
 export const getSubjects = async (req, res, params) => {
+  try {
+    await authenticate(req, res, true);
+    const subjects = await query('SELECT * FROM v_subject');
+    if (subjects.results.length === 0) {
+      res.statusCode = 404;
+      res.end({ error: 'Subjects not found' });
+    }
+    return res.end(JSON.stringify(subjects.results));
+  } catch (error) {
+    console.error('Database query error:', error);
+    res.statusCode = 500;
+    return res.end(JSON.stringify({ error: 'Internal server error' }));
+  }
+};
+export const getSubjectsUser = async (req, res, params) => {
   try {
     const decoded = await authenticate(req, res, true);
     const subjects_id = await query(
