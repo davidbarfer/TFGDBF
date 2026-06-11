@@ -24,7 +24,7 @@ const { data: subjects, error: subjectsError } = await Astro.callAction(actions.
                 <option>Todas las asignaturas asignadas</option>
               </select>
                 <button type="submit" disabled>
-                  Añadir asignatura
+                  Asignar
                 </button>
             ) : (
               <select name="subject_id">
@@ -34,7 +34,7 @@ const { data: subjects, error: subjectsError } = await Astro.callAction(actions.
                   <option value={subject.id}>{subject.name} ({subject.degree})</option>
                 ))}
               </select>
-              <button type="submit">Añadir asignatura</button>
+              <button type="submit">Asignar</button>
             )}
           </form>
         </td>
