@@ -39,6 +39,7 @@
 | `/practice/:id/evaluator/create`          | Create an evaluator for the practice      |
 | `/student/:id/submission/:id/file`        | Submit a file for the student             |
 | `/student/:id/submission/:id/evaluate`    | Execute an evaluator on the practice      |
+| `/user/:id/subject/:id`                   | Add a subject to a specific user          |
 
 ## Endpoints PUT
 

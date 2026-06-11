@@ -352,4 +352,25 @@ export const professor = {
       return response.json()
     },
   }),
+  assignUserSubject: defineAction({
+    input: z.object({
+      token: z.string(),
+      user_id: z.number(),
+      subject_id: z.number(),
+    }),
+    handler: async(input) => {
+      const response = await fetch(
+        `${API_URL}/user/${input.user_id}/subject/${input.subject_id}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: input.token,
+          },
+          body: null,
+        }
+      );
+      if (!response.ok) await handleActionError(response);
+      return response.json()
+    }
+  }),
 };

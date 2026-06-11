@@ -21,16 +21,16 @@ const { data: subjects, error: subjectsError } = await Astro.callAction(actions.
         <td>{professor.name}</td>
         <td>{professor.surname}</td>
         <td>
-          <form id={`AddSubjectForm${professor.id}`}>
+          <form id={`AddSubjectForm${professor.id}`} data-userId = {professor.id} data-token={token}>
             {subjects.filter((subject: any) => !professor.subjects_id?.includes(subject.id)).length === 0 ? (
-              <select disabled>
+              <select name="subject_id" disabled>
                 <option>Todas las asignaturas asignadas</option>
               </select>
                 <button type="submit" disabled>
                   Añadir asignatura
                 </button>
             ) : (
-              <select>
+              <select name="subject_id">
                 {subjects
                   .filter((subject: any) => !professor.subjects_id?.includes(subject.id))
                   .map((subject: any) => (
@@ -46,3 +46,25 @@ const { data: subjects, error: subjectsError } = await Astro.callAction(actions.
     </tbody>
   </table>
 </section>
+
+<script>
+  import { actions } from "astro:actions";
+  const AddSubjectForms = document.getElementsByTagName('form');
+  Object.entries(AddSubjectForms).forEach(AddSubjectForm => {
+    const form = AddSubjectForm[1]
+    form?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const token = form.dataset.token;
+      const user_id = form.dataset.userid;
+      const formData = new FormData(e.target);
+      const subject_id = formData.get('subject_id');
+      const { data: response, error: responseError } = await actions.professor.assignUserSubject({ token: token as string, user_id: Number(user_id), subject_id: Number(subject_id)})  
+      if(responseError) {
+        alert(responseError);
+      } else {
+        alert(response.message)
+        window.location.reload();
+      }
+  })
+  })
+</script>
