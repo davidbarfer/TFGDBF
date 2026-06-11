@@ -31,7 +31,10 @@ const isStudent = user?.role === roles.student;
       </section>
     }
       {isAdmin || isProfessor || isStudent ? (
+        <section class="subjectsList">
+        <h1>Tus asignaturas</h1>
         <Subjects token={token as string} />
+        </section>
       ) : (
         <p>No tienes permiso para ver esta página</p>
         <a href="/">Volver al inicio</a>
@@ -51,6 +54,10 @@ const isStudent = user?.role === roles.student;
   section {
     display: flex;
     gap: 1rem;
+  }
+  .subjectsList {
+    display: flex;
+    flex-direction: column;
   }
   a {
     text-decoration: none;
