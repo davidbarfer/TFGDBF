@@ -4,6 +4,7 @@ import SubjectAssign from "@/components/subjects/subjectAssign.astro";
 import jwt from 'jsonwebtoken'
 import { parse } from 'cookie';
 import { roles } from "@/consts/users";
+import { actions } from "astro:actions";
 const cookies = parse(Astro.request.headers.get('cookie') || '');
 const token = cookies.token;
 const secret = import.meta.env.JWT_SECRET;
@@ -15,13 +16,28 @@ if (token) {
     console.warn("Invalid or expired token", err);
   }
 }
+let { data: professors, error: professorsError} = await Astro.callAction(actions.professor.getUsersProfessors,{token: token as string});
+let { data: students, error: studentsError} = await Astro.callAction(actions.professor.getUsersStudents,{token: token as string});
+
 ---
 
 <Layout>
   {user?.role === roles.professor || user?.role === roles.admin ? (
-    <SubjectAssign token = {token} />
+    <section>
+      <h1>Asignar asignaturas a profesores</h1>
+      <SubjectAssign token = {token} users= {professors}/>
+      <h1>Asignar asignatura a estudiantes</h1>
+      <SubjectAssign token = {token} users= {students}/>
+    </section>
   ) : (
     <p>No tienes permiso para crear prácticas</p>
     <a href="/">Volver al inicio</a>
   )}
 </Layout>
+
+<style>
+  section {
+    display: flex;
+    flex-direction: column;
+  }
+</style>

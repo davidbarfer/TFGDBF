@@ -1,12 +1,9 @@
 ---
 import { actions } from "astro:actions";
-const {token} = Astro.props
-let { data: professors, error: professorsError} = await Astro.callAction(actions.professor.getUsersProfessors,{token: token as string});
+const {token, users} = Astro.props
 const { data: subjects, error: subjectsError } = await Astro.callAction(actions.user.getSubjects, {token})
 ---
 
-<section>
-  <h1>Asignar profesor a sus asignaturas</h1>
   <table>
     <thead>
       <tr>
@@ -16,13 +13,13 @@ const { data: subjects, error: subjectsError } = await Astro.callAction(actions.
       </tr>
     </thead>
     <tbody>
-      {professors.map((professor : any) => (
+      {users.map((user : any) => (
         <tr>
-        <td>{professor.name}</td>
-        <td>{professor.surname}</td>
+        <td>{user.name}</td>
+        <td>{user.surname}</td>
         <td>
-          <form id={`AddSubjectForm${professor.id}`} data-userId = {professor.id} data-token={token}>
-            {subjects.filter((subject: any) => !professor.subjects_id?.includes(subject.id)).length === 0 ? (
+          <form id={`AddSubjectForm${user.id}`} data-userId = {user.id} data-token={token}>
+            {subjects.filter((subject: any) => !user.subjects_id?.includes(subject.id)).length === 0 ? (
               <select name="subject_id" disabled>
                 <option>Todas las asignaturas asignadas</option>
               </select>
@@ -32,7 +29,7 @@ const { data: subjects, error: subjectsError } = await Astro.callAction(actions.
             ) : (
               <select name="subject_id">
                 {subjects
-                  .filter((subject: any) => !professor.subjects_id?.includes(subject.id))
+                  .filter((subject: any) => !user.subjects_id?.includes(subject.id))
                   .map((subject: any) => (
                   <option value={subject.id}>{subject.name} ({subject.degree})</option>
                 ))}
@@ -45,7 +42,6 @@ const { data: subjects, error: subjectsError } = await Astro.callAction(actions.
       ))}
     </tbody>
   </table>
-</section>
 
 <script>
   import { actions } from "astro:actions";
@@ -68,3 +64,9 @@ const { data: subjects, error: subjectsError } = await Astro.callAction(actions.
   })
   })
 </script>
+
+<style>
+  table {
+    width: 100%;
+  }
+</style>

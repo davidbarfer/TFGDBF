@@ -25,7 +25,21 @@ export const professor = {
   getUsersProfessors: defineAction({
     input: z.object({token: z.string()}),
     handler: async(input) => {
-      const response = await fetch(`${API_URL}/users/professors`, 
+      const response = await fetch(`${API_URL}/users/professor`, 
+        {
+          headers: {
+            Authorization: input.token,
+          },
+        }
+      );
+      if (!response.ok) await handleActionError(response);
+      return response.json();
+    },
+  }),
+  getUsersStudents: defineAction({
+    input: z.object({token: z.string()}),
+    handler: async(input) => {
+      const response = await fetch(`${API_URL}/users/student`, 
         {
           headers: {
             Authorization: input.token,

@@ -20,7 +20,7 @@
 | `/student/:id/submission/:id/file` | Returns the file of the submission of the student |
 | `/submission/:id`                  | Returns the submission                            |
 | `/users`                           | Returns all users                                 |
-| `/users/professors/`               | Returns all users that are professors             |
+| `/users/:role/`                    | Returns all users by role             |
 
 ## Endpoints POST
 
