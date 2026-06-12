@@ -190,7 +190,9 @@ export const getPracticeSubmissions = async (req, res, params) => {
     );
     if (submissions.results.length === 0) {
       res.statusCode = 404;
-      return res.end(JSON.stringify({ error: 'User submissions not found' }));
+      return res.end(
+        JSON.stringify({ error: 'There are no submissions for that practice' })
+      );
     }
     await Promise.all(
       submissions.results.map(async (submission, idx) => {

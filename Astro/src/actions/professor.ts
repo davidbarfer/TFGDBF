@@ -155,6 +155,7 @@ export const professor = {
           },
         }
       );
+      if (response.status === 404) return [];
       if (!response.ok) await handleActionError(response);
       return response.json();
     },
