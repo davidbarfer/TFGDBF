@@ -19,6 +19,8 @@ import {
   getSubmission,
   getSubjects,
   getUsers,
+  getSubjectsUser,
+  getUsersByRole,
 } from '../handler/userGetHandler.mjs';
 import {
   postPracticeCreate,
@@ -30,6 +32,8 @@ import {
   postPracticeSubmissionEdit,
   postPracticeEvaluatorCreate,
   postStudentSubmissionEvaluate,
+  postSubjectCreate,
+  postUserSubject,
 } from '../handler/userPostHandler.mjs';
 import {
   putPracticeSubmissionsGrade,
@@ -39,13 +43,23 @@ import {
 const getRoutes = [
   {
     method: 'GET',
-    regex: /^\/subjects/,
+    regex: /^\/subjects$/,
     handler: getSubjects,
   },
   {
     method: 'GET',
-    regex: /^\/users/,
+    regex: /^\/users$/,
     handler: getUsers,
+  },
+  {
+    method: 'GET',
+    regex: /^\/users\/(professor|student|admin)$/,
+    handler: getUsersByRole,
+  },
+  {
+    method: 'GET',
+    regex: /^\/subjects\/user$/,
+    handler: getSubjectsUser,
   },
   {
     method: 'GET',
@@ -131,6 +145,11 @@ const postRoutes = [
   },
   {
     method: 'POST',
+    regex: /^\/subject\/create/,
+    handler: postSubjectCreate,
+  },
+  {
+    method: 'POST',
     regex: /^\/subject\/\d+\/create$/,
     handler: postPracticeCreate,
   },
@@ -173,6 +192,11 @@ const postRoutes = [
     method: 'POST',
     regex: /^\/student\/\d+\/submission\/\d+\/evaluate$/,
     handler: postStudentSubmissionEvaluate,
+  },
+  {
+    method: 'POST',
+    regex: /^\/user\/\d+\/subject\/\d+$/,
+    handler: postUserSubject,
   },
 ];
 const putRoutes = [

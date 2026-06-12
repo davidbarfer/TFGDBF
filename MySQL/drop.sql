@@ -1,3 +1,5 @@
+-- Drop View if exist
+DROP VIEW IF EXISTS v_subject;
 -- Drop Triggers if exist
 DROP TRIGGER IF EXISTS create_group;
 DROP TRIGGER IF EXISTS delete_group;

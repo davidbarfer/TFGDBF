@@ -1,15 +1,32 @@
+import { error } from 'node:console';
 import { authenticate } from '../database.mjs';
 import { query } from '../database.mjs';
 import { getFileSubmission } from '../fileSystem.mjs';
+import { roles } from '../utils.mjs';
 
 export const getSubjects = async (req, res, params) => {
+  try {
+    await authenticate(req, res, true);
+    const subjects = await query('SELECT * FROM v_subject');
+    if (subjects.results.length === 0) {
+      res.statusCode = 404;
+      res.end({ error: 'Subjects not found' });
+    }
+    return res.end(JSON.stringify(subjects.results));
+  } catch (error) {
+    console.error('Database query error:', error);
+    res.statusCode = 500;
+    return res.end(JSON.stringify({ error: 'Internal server error' }));
+  }
+};
+export const getSubjectsUser = async (req, res, params) => {
   try {
     const decoded = await authenticate(req, res, true);
     const subjects_id = await query(
       'SELECT subject_id FROM users_subjects WHERE user_id = ?',
       [decoded.userId]
     );
-    const subjects = await query('SELECT * FROM subject WHERE id IN (?)', [
+    const subjects = await query('SELECT * FROM v_subject WHERE id IN (?)', [
       subjects_id.results.map(subject => subject.subject_id).flat(),
     ]);
     return res.end(JSON.stringify(subjects.results));
@@ -29,11 +46,49 @@ export const getUsers = async (req, res, params) => {
     return res.end(JSON.stringify({ error: 'Internal server error' }));
   }
 };
+export const getUsersByRole = async (req, res, params) => {
+  const roleMatch = req.url.match(/^\/users\/(\w+)$/)[1];
+  await authenticate(req, res);
+  try {
+    const UsersByRole = await query(
+      'SELECT id, name, surname FROM users WHERE role = ?',
+      [roles[roleMatch]]
+    );
+    if (UsersByRole.results.length === 0) {
+      res.statusCode = 404;
+      return res.end(JSON.stringify({ error: 'No professor found' }));
+    }
+    const UsersByRole_ids_arrays = UsersByRole.results
+      .map(professor => professor.id)
+      .flat();
+    const user_subjects = await query(
+      `SELECT user_id, subject_id from users_subjects WHERE user_id IN (${UsersByRole_ids_arrays.map(() => '?').join(',')})`,
+      UsersByRole_ids_arrays
+    );
+    if (user_subjects.results.length !== 0) {
+      UsersByRole.results.forEach(professor => {
+        professor.subjects_id = user_subjects.results
+          .filter(e => e.user_id === professor.id)
+          .map(e => e.subject_id);
+      });
+    } else {
+      UsersByRole.results.forEach(professor => {
+        professor.subjects_id = [];
+      });
+    }
+    res.statusCode = 200;
+    res.end(JSON.stringify(UsersByRole.results));
+  } catch (error) {
+    console.error('Database query error:', error);
+    res.statusCode = 500;
+    return res.end(JSON.stringify({ error: 'Internal server error' }));
+  }
+};
 export const getSubject = async (req, res, params) => {
   const subject_id = params[0].split('/').pop();
   try {
     await authenticate(req, res, true);
-    const subject = await query('SELECT * FROM subject WHERE id = ?', [
+    const subject = await query('SELECT * FROM v_subject WHERE id = ?', [
       subject_id,
     ]);
     if (subject.results.length === 0) {

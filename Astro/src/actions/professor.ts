@@ -22,6 +22,34 @@ export const professor = {
       return response.json();
     },
   }),
+  getUsersProfessors: defineAction({
+    input: z.object({token: z.string()}),
+    handler: async(input) => {
+      const response = await fetch(`${API_URL}/users/professor`, 
+        {
+          headers: {
+            Authorization: input.token,
+          },
+        }
+      );
+      if (!response.ok) await handleActionError(response);
+      return response.json();
+    },
+  }),
+  getUsersStudents: defineAction({
+    input: z.object({token: z.string()}),
+    handler: async(input) => {
+      const response = await fetch(`${API_URL}/users/student`, 
+        {
+          headers: {
+            Authorization: input.token,
+          },
+        }
+      );
+      if (!response.ok) await handleActionError(response);
+      return response.json();
+    },
+  }),
   deleteStudentGroup: defineAction({
     input: z.object({
       token: z.string(),
@@ -313,5 +341,50 @@ export const professor = {
       if (!response.ok) await handleActionError(response);
       return true;
     },
+  }),
+  createSubject: defineAction({
+    input: z.object({
+      token: z.string(),
+      subject: z.object({
+        name: z.string(),
+        course: z.number(),
+        degree: z.string(),
+      })
+    }),
+    handler: async(input) => {
+      const response = await fetch(
+        `${API_URL}/subject/create`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: input.token,
+          },
+          body: JSON.stringify(input.subject),
+        }
+      );
+      if (!response.ok) await handleActionError(response);
+      return response.json()
+    },
+  }),
+  assignUserSubject: defineAction({
+    input: z.object({
+      token: z.string(),
+      user_id: z.number(),
+      subject_id: z.number(),
+    }),
+    handler: async(input) => {
+      const response = await fetch(
+        `${API_URL}/user/${input.user_id}/subject/${input.subject_id}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: input.token,
+          },
+          body: null,
+        }
+      );
+      if (!response.ok) await handleActionError(response);
+      return response.json()
+    }
   }),
 };

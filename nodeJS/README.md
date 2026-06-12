@@ -4,8 +4,9 @@
 
 | URL                                | Description                                       |
 | :--------------------------------- | :------------------------------------------------ |
-| `/subjects`                        | Returns all subjects of a user                    |
-| `/subject/:id`                     | Returns a subject of the professor                |
+| `/subjects`                        | Returns all subjects                              |
+| `/subjects/user`                   | Returns all subjects of logged user               |
+| `/subject/:id`                     | Returns a subject                                 |
 | `/subject/:id/students`            | Returns all students of the subject               |
 | `/subject/:id/practices`           | Returns all practices of the subject              |
 | `/subject/:id/practice/:id/groups` | Return all groups of the practice                 |
@@ -19,6 +20,7 @@
 | `/student/:id/submission/:id/file` | Returns the file of the submission of the student |
 | `/submission/:id`                  | Returns the submission                            |
 | `/users`                           | Returns all users                                 |
+| `/users/:role/`                    | Returns all users by role             |
 
 ## Endpoints POST
 
@@ -27,6 +29,7 @@
 | `/login`                                  | Returns a token                           |
 | `/logout`                                 | Removes the token                         |
 | `/signup`                                 | Returns a user                            |
+| `/subject/create`                         | Create a subject                          |
 | `/subject/:id/create`                     | Create a practice for the subject         |
 | `/subject/:id/practice/:id/groups/create` | Create groups for the practice            |
 | `/group/:id/student/:id`                  | Add a student to a group                  |
@@ -36,6 +39,7 @@
 | `/practice/:id/evaluator/create`          | Create an evaluator for the practice      |
 | `/student/:id/submission/:id/file`        | Submit a file for the student             |
 | `/student/:id/submission/:id/evaluate`    | Execute an evaluator on the practice      |
+| `/user/:id/subject/:id`                   | Add a subject to a specific user          |
 
 ## Endpoints PUT
 

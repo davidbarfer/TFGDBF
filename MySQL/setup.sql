@@ -13,7 +13,6 @@ USE doctus_lite;
 -- Drop Triggers and Tables if exist
 source /home/davidbarfer/Dev/DoctusLite/MySQL/drop.sql;
 
-
 -- Table: users
 CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -38,12 +37,19 @@ CREATE TABLE saml_sessions (
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
+-- Tabla: Grados
+CREATE TABLE IF NOT EXISTS degrees (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(150) NOT NULL UNIQUE
+);
+
 -- Tabla: asignaturas
 CREATE TABLE IF NOT EXISTS subject (
   id INT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(100) NOT NULL,
   course NUMERIC NOT NULL,
-  degree ENUM('Grado en Ingeniería de Tecnologías Industriales', 'Grado en Ingeniería de las Tecnologías de Telecomunicación') NOT NULL
+  degree_id INT NOT NULL,
+  FOREIGN KEY (degree_id) REFERENCES degrees(id)
 );
 
 -- Tabla: Practicas
@@ -105,6 +111,7 @@ CREATE TABLE IF NOT EXISTS practice_groups_users (
   FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
+source /home/davidbarfer/Dev/DoctusLite/MySQL/views.sql;
 source /home/davidbarfer/Dev/DoctusLite/MySQL/triggers.sql;
 source /home/davidbarfer/Dev/DoctusLite/MySQL/data.sql;
 

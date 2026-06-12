@@ -22,7 +22,7 @@ if (token) {
 }
 let practices: object[] = [];
 if (user?.role === roles.professor || user?.role === roles.admin) {
-  const { data: subjects, error: subjectsError } = await Astro.callAction(actions.user.getSubjects, { token: token as string });
+  const { data: subjects, error: subjectsError } = await Astro.callAction(actions.user.getSubjectsUser, { token: token as string });
   await Promise.all(
     subjects.map(async (subject) => {
       const { data: practicesSubject, error: practicesSubjectError } = await Astro.callAction(actions.user.getPractices, { token: token as string, subject_id: String(subject.id) });

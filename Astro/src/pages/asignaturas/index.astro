@@ -16,28 +16,48 @@ if (token) {
     console.warn("Invalid or expired token", err);
   }
 }
+const isAdmin = user?.role === roles.admin;
+const isProfessor = user?.role === roles.professor;
+const isStudent = user?.role === roles.student;
 ---
 
 <Layout>
-  <section>
-
-    {user?.role === roles.admin || user?.role === roles.professor || user?.role === roles.student ? (
-      <Subjects token={token as string} />
-    ) : (
-      <p>No tienes permiso para ver esta página</p>
-      <a href="/">Volver al inicio</a>
-    )}
-  </section>
+  <article>
+    {(isAdmin || isProfessor) &&
+      <section>
+        <a href="/asignaturas/gestionar" class="btn-primary">Gestionar Asignaturas</a>
+        <a href="/asignaturas/crear" class="btn-primary">Crear asignatura</a>
+        <button disabled>Eliminar asignatura</button>
+      </section>
+    }
+      {isAdmin || isProfessor || isStudent ? (
+        <section class="subjectsList">
+        <h1>Tus asignaturas</h1>
+        <Subjects token={token as string} />
+        </section>
+      ) : (
+        <p>No tienes permiso para ver esta página</p>
+        <a href="/">Volver al inicio</a>
+      )}
+  </article>
 </Layout>
 
 <style>
-  section {
+  article {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     width: 100%;
     gap: 1rem;
+  }
+  section {
+    display: flex;
+    gap: 1rem;
+  }
+  .subjectsList {
+    display: flex;
+    flex-direction: column;
   }
   a {
     text-decoration: none;

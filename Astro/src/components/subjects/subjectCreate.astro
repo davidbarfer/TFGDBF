@@ -1,0 +1,54 @@
+---
+const { token } = Astro.props;
+import { DEGREES } from "@/consts/subjects";
+---
+<section>
+  <h1>Crear Asignatura</h1>
+  <form id="SubjectForm" data-token={token}>
+    <label for="name">Nombre</label>
+    <input type="text" id="name" name="name" required>
+    <label for="course">Curso (Año)</label>
+    <input type="number" id="course" name="course" required></>
+    <label for="degree">Titulación</label>
+    <select id="degree" name="degree" required>
+       {Object.entries(DEGREES).map((([degree_id,degree]) => (
+        <option value={degree_id}>{degree}</option>
+       )))}
+    </select>
+    <button type="submit">Crear</button>
+  </form>
+</section>
+
+<script>
+import { actions } from "astro:actions";
+const form = document.getElementById('SubjectForm');
+if (form) {
+  const subject_id = form?.dataset.id;
+  const token = form?.dataset.token;
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = {
+      name: formData.get('name') as string,
+      course: Number(formData.get('course')),
+      degree: formData.get('degree') as string,
+    };
+    const { data: response, error: responseError} = await actions.professor.createSubject({ token: token as string, subject: data });
+    if(responseError) {
+      alert(responseError.message);
+    }
+    else {
+      alert('Asignatura creada exitosamente');
+      window.location.href = `/asignaturas/`;
+    }
+  });
+}
+</script>
+
+<style>
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+</style>
