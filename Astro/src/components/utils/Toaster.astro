@@ -6,11 +6,15 @@
 <style>
   .toaster-container {
     position: fixed;
-    bottom: 20px;
-    right: 20px;
+    bottom: var(--space-16);
+    left: 0;
+    right: 0;
+    margin-inline: auto; /* Centra horizontalmente automáticamente */
+    width: max-content;
+    max-width: 90vw;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: var(--space-2);
     z-index: 9999;
     pointer-events: none;
   }
