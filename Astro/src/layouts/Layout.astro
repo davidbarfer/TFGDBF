@@ -1,5 +1,6 @@
 ---
 import Header from '@/components/Header.astro';
+import Toaster from '@/components/utils/Toaster.astro';
 import jwt from 'jsonwebtoken'
 import { parse } from 'cookie';
 
@@ -28,6 +29,7 @@ if (token) {
 	<body>
 		<Header user={user}/>
 		<slot />
+    <Toaster />
 	</body>
 </html>
 
@@ -38,6 +40,8 @@ if (token) {
 		--color-tertiary: #0033a1;
 		--color-border: #dddddd;
     --color-background-modal: rgba(221, 221, 221, 0.8);
+    --color-success: #2e7d32; 
+    --color-error: #c62828;
 	}
 	html,
 	body {
