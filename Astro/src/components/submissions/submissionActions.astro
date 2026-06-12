@@ -46,6 +46,7 @@ const { subjectId, submission, token } = Astro.props;
 
 <script>
   import { actions } from 'astro:actions';
+  import { showToastOnLoad, TOASTSTYLE } from "@/utils/toaster";
   const gradeBtns = document.getElementsByClassName('gradeBtn')
   const evaluatorBtns = document.getElementsByClassName('evaluatorBtn')
   const spinners = document.getElementsByClassName('spinner-container');
@@ -61,7 +62,7 @@ const { subjectId, submission, token } = Astro.props;
       url_data: url_data
     })
     if(error) {
-      alert(error.message);
+      showToastOnLoad(error.message, TOASTSTYLE.error);
     }
     window.location.reload();
   }))
@@ -80,9 +81,9 @@ const { subjectId, submission, token } = Astro.props;
     })
     try {
       if(error) {
-        alert(error.message);
+        showToastOnLoad(error.message, TOASTSTYLE.error);
       }
-      alert('Evaluador ejecutado');
+      showToastOnLoad('Evaluador ejecutado', TOASTSTYLE.success);
       window.location.reload();
     } finally {
       spinner?.classList.toggle('toggleVisiblity');

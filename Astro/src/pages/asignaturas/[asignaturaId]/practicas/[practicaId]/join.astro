@@ -85,6 +85,7 @@ const isEnrolled = matchingIds.length > 0;
 
 <script>
 import { actions } from "astro:actions";
+import { showToast, showToastOnLoad, TOASTSTYLE } from "@/utils/toaster";
 const buttons = document.querySelectorAll('.joinGroupBtn');
 buttons.forEach(button => {
   button.addEventListener('click', async (event) => {
@@ -94,10 +95,10 @@ buttons.forEach(button => {
     const { data: response, error: addStudentError } = await actions.user.addStudentToGroup({ token: token as string, group_id: groupId as string, student_id: userId as string });
     // const { data: response, error: addStudentError } = await Astro.callAction(actions.user.addStudentToGroup, { token: token as string, group_id: groupId as string, student_id: userId as string });
     if(addStudentError) {
-      alert(addStudentError.message);
+      showToast(addStudentError.message, TOASTSTYLE.error);
     }
     else {
-      alert('Alumno inscrito');
+      showToastOnLoad('Alumno inscrito', TOASTSTYLE.success);
       window.location.reload();
     }
   });

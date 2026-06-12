@@ -45,6 +45,7 @@ const { data: subjects, error: subjectsError } = await Astro.callAction(actions.
 
 <script>
   import { actions } from "astro:actions";
+  import { showToast, showToastOnLoad, TOASTSTYLE } from "@/utils/toaster";
   const AddSubjectForms = document.getElementsByTagName('form');
   Object.entries(AddSubjectForms).forEach(AddSubjectForm => {
     const form = AddSubjectForm[1]
@@ -56,9 +57,9 @@ const { data: subjects, error: subjectsError } = await Astro.callAction(actions.
       const subject_id = formData.get('subject_id');
       const { data: response, error: responseError } = await actions.professor.assignUserSubject({ token: token as string, user_id: Number(user_id), subject_id: Number(subject_id)})  
       if(responseError) {
-        alert(responseError);
+        showToast(responseError.message, TOASTSTYLE.error);
       } else {
-        alert(response.message)
+        showToastOnLoad(response.message, TOASTSTYLE.success)
         window.location.reload();
       }
   })

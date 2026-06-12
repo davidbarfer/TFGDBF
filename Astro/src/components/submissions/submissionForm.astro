@@ -21,6 +21,7 @@ const {submission, token} = Astro.props;
 
 <script>
   import { actions } from "astro:actions";
+  import { showToast, showToastOnLoad, TOASTSTYLE } from "@/utils/toaster";
   const form = document.getElementById('submissionForm');
   const spinner = document.querySelector('.spinner-container') as HTMLElement;
   form?.addEventListener('submit', async (e) => {
@@ -45,10 +46,10 @@ const {submission, token} = Astro.props;
     const response = await actions.user.saveSubmissionFile(data);
     try{
       if(response.error) {
-        alert(`Error al realizar la entrega: ${response.error}`)
+        showToast(`Error al realizar la entrega: ${response.error}`, TOASTSTYLE.error)
       }
       if (response.data) {
-        alert('Entrega realizada');
+        showToastOnLoad('Entrega realizada', TOASTSTYLE.success);
         window.location.href = `/entregas/`;
       }
     } finally {

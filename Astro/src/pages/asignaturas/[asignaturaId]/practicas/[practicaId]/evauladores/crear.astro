@@ -49,6 +49,7 @@ const { data: practice, error: practicesError } = await Astro.callAction(actions
 
 <script>
 import { actions } from "astro:actions";
+import { showToast, showToastOnLoad, TOASTSTYLE } from "@/utils/toaster";
 const spinner = document.querySelector('.spinner-container') as HTMLElement;
 const inputFile = document.getElementById("evaluatorFiles");
 const preview = document.querySelector(".preview");
@@ -73,7 +74,7 @@ form?.addEventListener("submit", async (e) => {
     const { data, error } = await actions.professor.createEvaulatorPractice(formData);
     
     if (error) {
-      alert(`Error al subir el archivo: ${error}`)
+      showToast(`Error al subir el archivo: ${error}`, TOASTSTYLE.error)
       return;
     }
     
@@ -81,7 +82,7 @@ form?.addEventListener("submit", async (e) => {
     para.append("Archivo subido con éxito!");
     preview?.replaceChildren(para);
   } catch (err) {
-    alert(`Error al subir el archivo: ${err}`)
+    showToast(`Error al subir el archivo: ${err}`, TOASTSTYLE.error)
   } finally {
     submitBtn?.classList.toggle('toggleSendBtn')
     spinner?.classList.toggle('toggleVisiblity')
