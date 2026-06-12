@@ -152,7 +152,7 @@ const { data: students, error: studentsError } = await Astro.callAction(
     if (responseError) {
       showToast(responseError.message, TOASTSTYLE.error);
     } else {
-      showToast("Alumno eliminado", TOASTSTYLE.success);
+      showToastOnLoad("Alumno eliminado", TOASTSTYLE.success);
       window.location.reload();
     }
   });
