@@ -169,6 +169,8 @@ const { data: students, error: studentsError } = await Astro.callAction(
         },
       });
     if (responseError) {
+      const modal = document.getElementById('createSubmissionsGroupModal') as HTMLDialogElement;
+      modal?.close()
       showToast(responseError.message, TOASTSTYLE.error);
     } else {
       showToastOnLoad("Entregas creadas", TOASTSTYLE.success);

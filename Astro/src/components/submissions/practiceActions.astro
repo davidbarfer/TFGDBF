@@ -57,6 +57,8 @@ const isEvaluator = !practice.evaluator_template_url;
     const practice_id = createSubmissionsBtn?.dataset.practice_id;
     const { data: response, error: responseError } = await actions.professor.createSubmissions({ token: token as string, practice_id: String(practice_id) });
     if(responseError) {
+      const modal = document.getElementById('createSubmissionsModal') as HTMLDialogElement;
+      modal?.close()
       showToast(responseError.message, TOASTSTYLE.error);
     }
     else {
