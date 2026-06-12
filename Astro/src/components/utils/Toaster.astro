@@ -1,0 +1,90 @@
+---
+---
+
+<output id="toaster" class="toaster-container"></output>
+
+<style>
+  .toaster-container {
+    position: fixed;
+    bottom: var(--space-16);
+    left: 0;
+    right: 0;
+    margin-inline: auto; /* Centra horizontalmente automáticamente */
+    width: max-content;
+    max-width: 90vw;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    z-index: 9999;
+    pointer-events: none;
+  }
+
+  :global(.toast) {
+    /* Fondo por defecto si no es ni success ni error */
+    background-color: var(--color-background-modal); 
+    color: var(--color-tertiary);
+    padding: 12px 24px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    animation: slideIn 0.3s ease forwards, fadeOut 0.3s ease 2.7s forwards;
+    pointer-events: auto;
+  }
+
+  /* CORREGIDO: var(--color-success) con doble 'c' */
+  /* Añadimos un toque para que el texto sea blanco sobre estos fondos de color */
+  :global(.toast.success) { 
+    background-color: var(--color-success); 
+    color: #ffffff; 
+  }
+  
+  :global(.toast.error) { 
+    background-color: var(--color-error); 
+    color: #ffffff; 
+  }
+
+  @keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  @keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+</style>
+
+<script>
+  const createToastElement = (message: string, type: string) => {
+    const toaster = document.getElementById('toaster');
+    if (!toaster) return;
+
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+    toaster.appendChild(toast);
+
+    setTimeout(() => {
+      toast.remove();
+    }, 3000);
+  };
+
+  window.addEventListener('toast', ((e: CustomEvent) => {
+    const { message, type } = e.detail;
+    createToastElement(message, type);
+  }) as EventListener);
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const pendingData = localStorage.getItem('pending_toast');
+    
+    if (pendingData) {
+      try {
+        const { message, type } = JSON.parse(pendingData);
+        createToastElement(message, type);
+      } catch (e) {
+        console.error("Error al leer el toast pendiente", e);
+      } finally {
+        localStorage.removeItem('pending_toast');
+      }
+    }
+  });
+</script>

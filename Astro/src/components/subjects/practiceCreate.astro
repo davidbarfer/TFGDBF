@@ -16,6 +16,7 @@ const { id, token } = Astro.props;
 
 <script>
 import { actions } from "astro:actions";
+import { showToast, showToastOnLoad, TOASTSTYLE } from "@/utils/toaster";
 const form = document.getElementById('practiceForm');
 if (form) {
   const subject_id = form?.dataset.id;
@@ -30,10 +31,10 @@ if (form) {
     };
     const { data: response, error: responseError} = actions.professor.createPractice({ token: token as string, subject_id: String(subject_id), practice_data: data });
     if(responseError) {
-      alert(responseError.message);
+      showToast(responseError.message, TOASTSTYLE.error);
     }
     else {
-      alert('Práctica creada exitosamente');
+      showToastOnLoad('Práctica creada exitosamente', TOASTSTYLE.success);
       window.location.href = `/asignaturas/${subject_id}`;
     }
   });

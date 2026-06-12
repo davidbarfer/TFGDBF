@@ -1,6 +1,6 @@
 ---
 import { actions } from 'astro:actions';
-import Error from "@/components/Error.astro";
+import Error from "@/components/utils/Error.astro";
 const { token } = Astro.props;
 const { data: subjects, error } = await Astro.callAction(actions.user.getSubjectsUser, { token: token as string });
 ---

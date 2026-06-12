@@ -89,6 +89,7 @@ if(submission.file_url) {
 
 <script>
   import { actions } from "astro:actions";
+  import { showToastOnLoad, TOASTSTYLE } from "@/utils/toaster";
   const submissionForm = document.getElementById('submissionForm');
   if(submissionForm) {
     const token = submissionForm?.dataset.token;
@@ -108,10 +109,10 @@ if(submission.file_url) {
       if(data.grade === "") data.grade = null;
       const {data: response, error: responseError} = await actions.professor.editSubmissionStudent({ token: token as string, url_data: urlData, submissionData: data });
       if (responseError) {
-        alert(responseError.message);
+        showToastOnLoad(responseError.message, TOASTSTYLE.error);
         window.location.reload();
       } else {
-        alert('Entrega editada exitosamente');
+        showToastOnLoad('Entrega editada exitosamente', TOASTSTYLE.success);
         history.back();
       }
     });

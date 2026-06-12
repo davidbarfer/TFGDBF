@@ -1,6 +1,6 @@
 ---
 import jwt from 'jsonwebtoken'
-import Modal from '@/components/Modal.astro';
+import Modal from '@/components/utils/Modal.astro';
 
 const secret = import.meta.env.JWT_SECRET;
 const { token , practice } = Astro.props;
@@ -50,16 +50,17 @@ const isEvaluator = !practice.evaluator_template_url;
 
 <script>
   import { actions } from "astro:actions";
+  import { showToast, showToastOnLoad, TOASTSTYLE } from "@/utils/toaster";
   const createSubmissionsBtn = document.getElementById('createSubmissionsBtn');
   createSubmissionsBtn?.addEventListener('click',async () => {
     const token = createSubmissionsBtn?.dataset.token;
     const practice_id = createSubmissionsBtn?.dataset.practice_id;
     const { data: response, error: responseError } = await actions.professor.createSubmissions({ token: token as string, practice_id: String(practice_id) });
     if(responseError) {
-      alert(responseError.message);
+      showToast(responseError.message, TOASTSTYLE.error);
     }
     else {
-      alert('Entregas creadas');
+      showToastOnLoad('Entregas creadas', TOASTSTYLE.success);
       window.location.reload();
     }
   });

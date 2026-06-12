@@ -21,6 +21,7 @@ import { DEGREES } from "@/consts/subjects";
 
 <script>
 import { actions } from "astro:actions";
+import { showToast, showToastOnLoad, TOASTSTYLE } from "@/utils/toaster";
 const form = document.getElementById('SubjectForm');
 if (form) {
   const subject_id = form?.dataset.id;
@@ -35,10 +36,10 @@ if (form) {
     };
     const { data: response, error: responseError} = await actions.professor.createSubject({ token: token as string, subject: data });
     if(responseError) {
-      alert(responseError.message);
+      showToast(responseError.message, TOASTSTYLE.error);
     }
     else {
-      alert('Asignatura creada exitosamente');
+      showToastOnLoad('Asignatura creada exitosamente', TOASTSTYLE.success);
       window.location.href = `/asignaturas/`;
     }
   });
