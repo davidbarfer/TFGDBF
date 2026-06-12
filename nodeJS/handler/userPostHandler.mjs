@@ -305,6 +305,10 @@ export const postPracticeGroupSubmissions = async (req, res, params) => {
         res.statusCode = 201;
         return res.end(JSON.stringify(result));
       } catch (error) {
+        if (error.sqlState === unhandledUserDefinedException) {
+          res.statusCode = 400;
+          return res.end(JSON.stringify({ error: error.sqlMessage }));
+        }
         console.error('Database query error on create submissions:', error);
         res.statusCode = 500;
         return res.end(JSON.stringify({ error: 'Internal server error' }));
@@ -649,6 +653,10 @@ export const postPracticeSubmissions = async (req, res, params) => {
         return res.end(JSON.stringify(result));
       } catch (error) {
         console.error('Database query error on create submissions:', error);
+        if (error.sqlState === unhandledUserDefinedException) {
+          res.statusCode = 400;
+          return res.end(JSON.stringify({ error: error.sqlMessage }));
+        }
         res.statusCode = 500;
         return res.end(JSON.stringify({ error: 'Internal server error' }));
       }
