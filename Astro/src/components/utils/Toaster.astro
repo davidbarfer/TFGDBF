@@ -1,7 +1,7 @@
 ---
 ---
 
-<output id="toaster" class=".toaster-container"></output>
+<output id="toaster" class="toaster-container"></output>
 
 <style>
   .toaster-container {
@@ -12,22 +12,31 @@
     flex-direction: column;
     gap: 10px;
     z-index: 9999;
-    pointer-events: none; /* Allows clicking through the container empty space */
+    pointer-events: none;
   }
 
-  /* We use global here so dynamically added toasts get styled */
   :global(.toast) {
-    background-color: var(--color-background-modal);
+    /* Fondo por defecto si no es ni success ni error */
+    background-color: var(--color-background-modal); 
     color: var(--color-tertiary);
     padding: 12px 24px;
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     animation: slideIn 0.3s ease forwards, fadeOut 0.3s ease 2.7s forwards;
-    pointer-events: auto; /* Re-enable clicks for the actual toast */
+    pointer-events: auto;
   }
 
-  :global(.toast.success) { background-color: var(--color-sucess); }
-  :global(.toast.error) { background-color: var(--color-error); }
+  /* CORREGIDO: var(--color-success) con doble 'c' */
+  /* Añadimos un toque para que el texto sea blanco sobre estos fondos de color */
+  :global(.toast.success) { 
+    background-color: var(--color-success); 
+    color: #ffffff; 
+  }
+  
+  :global(.toast.error) { 
+    background-color: var(--color-error); 
+    color: #ffffff; 
+  }
 
   @keyframes slideIn {
     from { transform: translateX(100%); opacity: 0; }
@@ -41,7 +50,6 @@
 </style>
 
 <script>
-  // 1. Función interna para crear y renderizar el elemento HTML del toast
   const createToastElement = (message: string, type: string) => {
     const toaster = document.getElementById('toaster');
     if (!toaster) return;
@@ -56,25 +64,21 @@
     }, 3000);
   };
 
-  // 2. Escuchar eventos en tiempo real (para cuando NO hay recarga de página)
   window.addEventListener('toast', ((e: CustomEvent) => {
     const { message, type } = e.detail;
     createToastElement(message, type);
   }) as EventListener);
 
-  // 3. COMPROBACIÓN AL CARGAR LA PÁGINA: Ver si hay un toast pendiente en localStorage
   document.addEventListener('DOMContentLoaded', () => {
     const pendingData = localStorage.getItem('pending_toast');
     
     if (pendingData) {
       try {
         const { message, type } = JSON.parse(pendingData);
-        // Mostramos el toast guardado
         createToastElement(message, type);
       } catch (e) {
         console.error("Error al leer el toast pendiente", e);
       } finally {
-        // IMPORTANTE: Borramos el toast para que no vuelva a salir si el usuario refresca otra vez
         localStorage.removeItem('pending_toast');
       }
     }
