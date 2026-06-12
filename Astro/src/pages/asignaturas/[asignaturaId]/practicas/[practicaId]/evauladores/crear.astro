@@ -5,7 +5,7 @@ import PracticeInfo from "@/components/submissions/practiceInfo.astro";
 import StudentTemplateExample from '@/components/submissions/studentTemplateExample.astro';
 import jwt from 'jsonwebtoken'
 import { parse } from 'cookie';
-import Spinner from "@/components/Spinner.astro";
+import Spinner from "@/components/utils/Spinner.astro";
 const { practicaId: id } = Astro.params;
 const cookies = parse(Astro.request.headers.get('cookie') || '');
 const token = cookies.token;

@@ -1,6 +1,6 @@
 ---
 import jwt from 'jsonwebtoken'
-import Modal from '@/components/Modal.astro';
+import Modal from '@/components/utils/Modal.astro';
 
 const secret = import.meta.env.JWT_SECRET;
 const { token , practice } = Astro.props;
