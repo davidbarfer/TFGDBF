@@ -2,6 +2,7 @@
 import  Modal  from '@/components/utils/Modal.astro';
 import Spinner from '@/components/utils/Spinner.astro';
 const { subjectId, submission, token } = Astro.props;
+const currentPath = Astro.url.pathname;
 ---
 <section class="actionsSubmision">
   <Modal id=`gradeModal${submission.id}` btnText="Calificar">
@@ -41,7 +42,7 @@ const { subjectId, submission, token } = Astro.props;
   </main>
   <button slot="closeModal">Cancelar</button>
   </Modal>
-  <a href={`/asignaturas/${subjectId}/practicas/${submission.practice_id}/entregas/${submission.id}/edit`}><button>Editar</button></a>
+  <a href={`/asignaturas/${subjectId}/practicas/${submission.practice_id}/entregas/${submission.id}/edit?redirect=${encodeURIComponent(currentPath)}`}><button>Editar</button></a>
 </section>
 
 <script>

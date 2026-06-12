@@ -113,7 +113,9 @@ if(submission.file_url) {
         window.location.reload();
       } else {
         showToastOnLoad('Entrega editada exitosamente', TOASTSTYLE.success);
-        history.back();
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirectTo = urlParams.get('redirect') || '/default-fallback-path';
+        window.location.assign(redirectTo);
       }
     });
   }
