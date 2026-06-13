@@ -118,6 +118,7 @@ export const postPracticeCreate = async (req, res, params) => {
           'INSERT INTO practice (subject_id, name, description, deadline) VALUES (?, ?, ?, ?)',
           [subject_id_practices, data.name, data.description, data.deadline]
         );
+        res.statusCode = 201;
         return res.end(JSON.stringify(practice.results));
       } catch (error) {
         console.error('Database query error on create practice:', error);

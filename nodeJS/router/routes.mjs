@@ -145,7 +145,7 @@ const postRoutes = [
   },
   {
     method: 'POST',
-    regex: /^\/subject\/create/,
+    regex: /^\/subject\/create$/,
     handler: postSubjectCreate,
   },
   {
