@@ -29,7 +29,7 @@ if (form) {
       description: formData.get('description') as string,
       deadline: formData.get('deadline') as string,
     };
-    const { data: response, error: responseError} = actions.professor.createPractice({ token: token as string, subject_id: String(subject_id), practice_data: data });
+    const { data: response, error: responseError} = await actions.professor.createPractice({ token: token as string, subject_id: String(subject_id), practice_data: data });
     if(responseError) {
       showToast(responseError.message, TOASTSTYLE.error);
     }
