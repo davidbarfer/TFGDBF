@@ -47,7 +47,7 @@ const { data: userSubmissions, error: userSubmissionsError } = await Astro.callA
               <td> {userGroups.find((group: any) => group.practice_id === practice.id) !== undefined ? (
                 <a href={`/asignaturas/${subject?.id}/grupos/${userGroups.find((group: any) => group.practice_id === practice.id)?.id}`}><button>Ver Grupo</button></a>
               ) : (
-                <a href={`/asignaturas/${subject?.id}/practicas/${practice.id}/join`}><button>Inscribirme</button></a>
+                <a href={`/asignaturas/${subject?.id}/practicas/${practice.id}/grupos/inscribirse`}><button>Inscribirme</button></a>
               )}
               </td>
               <td>
