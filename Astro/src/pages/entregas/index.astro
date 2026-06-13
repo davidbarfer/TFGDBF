@@ -1,13 +1,14 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import { actions } from 'astro:actions';
 import StudentSubmissions from "@/components/submissions/studentSubmissions.astro";
 import ProfessorSubmissions from "@/components/submissions/professorSubmissions.astro";
 import PracticeInfo from "@/components/submissions/practiceInfo.astro";
+import PracticeActions from "@/components/submissions/practiceActions.astro";
+import { showToast, TOASTSTYLE } from "@/utils/toaster";
+import { actions } from 'astro:actions';
 import jwt from 'jsonwebtoken'
 import { parse } from 'cookie';
 import { roles } from "@/consts/users";
-import PracticeActions from "@/components/submissions/practiceActions.astro";
 
 const cookies = parse(Astro.request.headers.get('cookie') || '');
 const token = cookies.token;
@@ -26,7 +27,8 @@ if (user?.role === roles.professor || user?.role === roles.admin) {
   await Promise.all(
     subjects.map(async (subject) => {
       const { data: practicesSubject, error: practicesSubjectError } = await Astro.callAction(actions.user.getPractices, { token: token as string, subject_id: String(subject.id) });
-      practices.push(practicesSubject[0]);
+      if(practicesSubjectError) showToast(practicesSubjectError.message, TOASTSTYLE.error)
+      else practices.push(practicesSubject[0]);
     })
   );
 }
