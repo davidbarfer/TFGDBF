@@ -10,7 +10,7 @@ const { data: practices, error } = await Astro.callAction(actions.user.getPracti
     <label for="practice">Selecciona la práctica</label>
     <select name="practice_id" id="practice">
       <option value="">Selecciona una práctica</option>
-      {practices.map((practice: any) => (
+      {practices?.map((practice: any) => (
         <option value={practice.id}>{practice.name}</option>
       ))}
     </select>
@@ -24,7 +24,9 @@ const { data: practices, error } = await Astro.callAction(actions.user.getPracti
 <script>
 import { actions } from "astro:actions";
 import { showToast, showToastOnLoad, TOASTSTYLE } from "@/utils/toaster";
-const groupsNumber = document.getElementById('groupsNumber');
+
+const groupsNumber = document.getElementById('groupsNumber') as HTMLInputElement | null;
+const form = document.getElementById('groupForm') as HTMLFormElement | null;
 
 function renderGroups(count: number) {
   const groups = document.getElementById('groups');
@@ -49,51 +51,81 @@ function renderGroups(count: number) {
     document.getElementById('groups')?.appendChild(group);
   }
 }
-groupsNumber?.addEventListener('input', (e) => {
-  renderGroups(Number(e?.target?.value));
-  const form = document.getElementById('groupForm');
-  if (form) {
-    const subject_id = form.dataset.id;
-    const token = form.dataset.token;
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const formData = new FormData(e.target);
-      const practice_id = formData.get('practice_id');
-      const groupsNumber = formData.get('groupsNumber');
-      
-      if (!practice_id || !groupsNumber) {
-        showToast('Por favor, completa todos los campos obligatorios', TOASTSTYLE.error);
-        return;
-      }
 
-      try {
-        // Create an array to store all group creation promises
-        const groupPromises = [];
-        
-        // Loop through each group and create it
-        for (let i = 0; i < Number(groupsNumber); i++) {
-          const groupData = {
-            practice_id: practice_id.toString(),
-            group_name: formData.get(`group_name_${i}`)?.toString() || `${i + 1}`,
-            max_participants: Number(formData.get(`max_participants_${i}`)),
-            group_date: formData.get(`group_date_${i}`)?.toString() || '',
-            start_time: formData.get(`start_time_${i}`)?.toString() || '',
-            end_time: formData.get(`end_time_${i}`)?.toString() || ''
-          };
-          groupPromises.push(actions.professor.createGroups({ token: token as string, subject_id: String(subject_id), group_data: groupData }));
-        }
-        
-        // Wait for all groups to be created
-        await Promise.all(groupPromises);
-        showToastOnLoad('Grupos creados exitosamente', TOASTSTYLE.success);
-        window.location.href = `/asignaturas/${subject_id}`;
-      } catch (error : any) {
-        showToast(`Error al crear los grupos: ${error}`, TOASTSTYLE.error);
-      }
-    });
-  } 
+groupsNumber?.addEventListener('input', (e) => {
+  const target = e.target as HTMLInputElement;
+  renderGroups(Number(target.value));
 });
-renderGroups(Number(groupsNumber?.value));
+
+if (form) {
+  const subject_id = form.dataset.id;
+  const token = form.dataset.token;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const targetForm = e.target as HTMLFormElement;
+    const formData = new FormData(targetForm);
+    const practice_id = formData.get('practice_id');
+    const groupsNumberVal = formData.get('groupsNumber');
+    
+    if (!practice_id || !groupsNumberVal) {
+      showToast('Por favor, completa todos los campos obligatorios', TOASTSTYLE.error);
+      return;
+    }
+
+    try {
+      const groupPromises = [];
+      
+      for (let i = 0; i < Number(groupsNumberVal); i++) {
+        const groupData = {
+          practice_id: practice_id.toString(),
+          group_name: formData.get(`group_name_${i}`)?.toString() || `${i + 1}`,
+          max_participants: Number(formData.get(`max_participants_${i}`)),
+          group_date: formData.get(`group_date_${i}`)?.toString() || '',
+          start_time: formData.get(`start_time_${i}`)?.toString() || '',
+          end_time: formData.get(`end_time_${i}`)?.toString() || ''
+        };
+        groupPromises.push(actions.professor.createGroups({ token: token as string, subject_id: String(subject_id), group_data: groupData }));
+      }
+      
+      const results = await Promise.all(groupPromises);
+      
+      // Separamos los éxitos de los fallos mapeando con sus nombres reales
+      const successGroups: string[] = [];
+      const errorMessages: string[] = [];
+
+      results.forEach((result, index) => {
+        const groupName = formData.get(`group_name_${index}`)?.toString() || `${index + 1}`;
+        if (result.error) {
+          errorMessages.push(`Grupo ${groupName}: ${result.error?.message || 'Error al crear'}`);
+        } else {
+          successGroups.push(`Grupo ${groupName}`);
+        }
+      });
+
+      if (errorMessages.length > 0) {
+        // Al haber errores, notificamos qué se creó bien y qué falló usando showToastOnLoad antes del reload
+        if (successGroups.length > 0) {
+          showToastOnLoad(`Creados con éxito: ${successGroups.join(', ')}`, TOASTSTYLE.success);
+        }
+        showToastOnLoad(`No se pudieron crear:\n${errorMessages.join('\n')}`, TOASTSTYLE.error);
+        
+        // Forzamos la recarga de la página para limpiar el formulario
+        window.location.reload();
+      } else {
+        // Todo fue perfecto, redirigimos a la asignatura
+        showToastOnLoad('Todos los grupos fueron creados exitosamente', TOASTSTYLE.success);
+        window.location.href = `/asignaturas/${subject_id}`;
+      }
+    } catch (error: any) {
+      showToastOnLoad(`Error inesperado: ${error.message || error}`, TOASTSTYLE.error);
+      window.location.reload();
+    }
+  });
+}
+
+renderGroups(Number(groupsNumber?.value || 0));
 </script>
 
 <style>
@@ -102,7 +134,7 @@ renderGroups(Number(groupsNumber?.value));
     flex-direction: column;
     gap: 1rem;
   }
-#groups {
+  #groups {
     display: flex;
     flex-direction: column;
     gap: 1rem;
