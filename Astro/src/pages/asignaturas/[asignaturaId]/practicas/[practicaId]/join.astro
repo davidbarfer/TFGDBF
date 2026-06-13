@@ -25,7 +25,7 @@ if(groups && Array.isArray(groups)) {
 }
 const { data: userGroups, error: userGroupsError } = await Astro.callAction(actions.user.getStudentGroups, { token: token as string, user_id: String(user?.userId)});
 // Create a Set of group ids for quick lookup
-const groupIds = new Set(groups.map((g: any) => g.id));
+const groupIds = new Set(groups?.map((g: any) => g.id));
 
 // Find matching userGroup ids
 const matchingIds = userGroups
@@ -40,11 +40,12 @@ const isEnrolled = matchingIds.length > 0;
     <section>
       <h1>Práctica {practice?.name}</h1>
       <div>
-        <p>{practice?.description}</p>
+        <p>Descripción: {practice?.description}</p>
         <p>Fecha de entrega: {new Date(practice?.deadline).toLocaleDateString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit' })}</p>
       </div>
     </section>
     <section>
+    {practice?.groups ? (
       <table>
         <thead>
           <tr>
@@ -56,7 +57,7 @@ const isEnrolled = matchingIds.length > 0;
           </tr>
         </thead>
         <tbody>
-          {practice?.groups.map((group: any) => (
+          {practice?.groups?.map((group: any) => (
             <tr>
             <td>{group.name}</td>
             <td>{new Date(group.practice_group_date).toLocaleDateString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit' })}</td>
@@ -77,8 +78,11 @@ const isEnrolled = matchingIds.length > 0;
             </td>
           </tr>
         ))}
-      </tbody>
-    </table>
+        </tbody>
+      </table>
+    ) : (
+      <p>No hay grupos disponibles para inscribirte.</p>
+    )}
   </section>
 </div>
 </Layout>
