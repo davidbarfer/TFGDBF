@@ -4,7 +4,7 @@ import Error from "@/components/utils/Error.astro";
 const { token } = Astro.props;
 const { data: subjects, error: subjectsError } = await Astro.callAction(actions.user.getSubjectsUser, { token: token as string });
 ---
-{subjectsError ? (<Error error={subjectsError?.message} />) : (
+{subjectsError ? (<Error message={subjectsError?.message} />) : (
   <table>
     <thead>
       <tr>
