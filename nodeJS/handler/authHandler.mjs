@@ -172,8 +172,8 @@ export const signup = async (req, res, params) => {
 
       // Insert new user
       await query(
-        'INSERT INTO users (username, password, password_salt, role) VALUES (?, ?, ?, ?)',
-        [data.username, hashedPassword, 12, data.role]
+        'INSERT INTO users (username, password, password_salt, name, surname, role) VALUES (?, ?, ?, ?, ?, ?)',
+        [data.username, hashedPassword, 12, data.name, data.surname, data.role]
       );
 
       // Registration successful
