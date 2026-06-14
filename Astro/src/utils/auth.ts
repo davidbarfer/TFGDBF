@@ -24,10 +24,11 @@ export function logout() {
     credentials: 'include',
   })
     .then(() => {
+      showToastOnLoad('Logout successful')
       window.location.href = '/login';
     })
     .catch((error) => {
-      console.error('Logout error:', error);
+      showToast(error, TOASTSTYLE.error)
     });
 }
 export async function signup(data: { username: string; password: string; role: string }) {
