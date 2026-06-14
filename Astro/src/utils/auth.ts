@@ -1,5 +1,5 @@
 import { API_URL } from "@/utils/enviroment";
-import { showToastOnLoad, TOASTSTYLE } from "./toaster";
+import { showToast, showToastOnLoad, TOASTSTYLE } from "./toaster";
 export async function login(data: { username: string; password: string }){
   const response = await fetch(`${API_URL}/login`, {
     method: "POST",
@@ -10,9 +10,12 @@ export async function login(data: { username: string; password: string }){
     body: JSON.stringify(data),
   });
   if (response.ok) {
+    const responseMsg = await response.json();
+    showToastOnLoad(responseMsg.message, TOASTSTYLE.success)
     window.location.href = '/';
   } else {
-    console.error("Login failed");
+    const responseMsg = await response.json();
+    showToast(responseMsg.error, TOASTSTYLE.error)
   }
 }
 export function logout() {
@@ -41,7 +44,7 @@ export async function signup(data: { username: string; password: string; role: s
     showToastOnLoad(responseMsg?.message, TOASTSTYLE.success);
   } else {
     const responseMsg = await response.json();
-    showToastOnLoad(responseMsg?.message, TOASTSTYLE.error);
+    showToastOnLoad(responseMsg?.error, TOASTSTYLE.error);
   }
   window.location.href = '/login';
 }

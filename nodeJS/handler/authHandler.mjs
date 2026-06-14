@@ -6,6 +6,7 @@ import {
   hashPassword,
   authProviders,
 } from '../database.mjs';
+import { error } from 'node:console';
 export const login = async (req, res, params) => {
   let body = '';
   let requestComplete = false;
@@ -43,9 +44,10 @@ export const login = async (req, res, params) => {
       }
 
       // Find user by username
-      const users = await query('SELECT * FROM users WHERE username = ?', [
-        data.username,
-      ]);
+      const users = await query(
+        'SELECT id, username, password, is_active, role FROM users WHERE username = ?',
+        [data.username]
+      );
       const user = users.results[0];
 
       if (!user) {
@@ -61,6 +63,16 @@ export const login = async (req, res, params) => {
       if (!isPasswordValid) {
         res.statusCode = 401;
         return res.end(JSON.stringify({ error: 'Invalid credentials' }));
+      }
+
+      // Account active
+      if (!user.is_active) {
+        res.statusCode = 403; // Forbidden
+        return res.end(
+          JSON.stringify({
+            error: 'Your account is pending approval by an administrator.',
+          })
+        );
       }
 
       // Generate token
