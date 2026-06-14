@@ -167,20 +167,33 @@ export const signup = async (req, res, params) => {
         return res.end(JSON.stringify({ error: 'User already exists' }));
       }
 
+      const isActive = data.role === 'student' ? true : false;
+
       // Hash password
       const hashedPassword = await hashPassword(data.password);
 
       // Insert new user
       await query(
-        'INSERT INTO users (username, password, password_salt, name, surname, role) VALUES (?, ?, ?, ?, ?, ?)',
-        [data.username, hashedPassword, 12, data.name, data.surname, data.role]
+        'INSERT INTO users (username, password, password_salt, name, surname, role, is_active) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [
+          data.username,
+          hashedPassword,
+          12,
+          data.name,
+          data.surname,
+          data.role,
+          isActive,
+        ]
       );
 
       // Registration successful
       res.statusCode = 201;
       return res.end(
         JSON.stringify({
-          message: 'User registered successfully',
+          message:
+            data.role === 'professor'
+              ? 'Registration successful. Waiting for administrator approval.'
+              : 'User registered successfully',
           user: {
             username: data.username,
             role: data.role,

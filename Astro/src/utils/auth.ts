@@ -1,4 +1,5 @@
 import { API_URL } from "@/utils/enviroment";
+import { showToastOnLoad, TOASTSTYLE } from "./toaster";
 export async function login(data: { username: string; password: string }){
   const response = await fetch(`${API_URL}/login`, {
     method: "POST",
@@ -36,8 +37,11 @@ export async function signup(data: { username: string; password: string; role: s
     body: JSON.stringify(data),
   });
   if (response.ok) {
-    window.location.href = '/login';
+    const responseMsg = await response.json();
+    showToastOnLoad(responseMsg?.message, TOASTSTYLE.success);
   } else {
-    console.error('Signup failed');
+    const responseMsg = await response.json();
+    showToastOnLoad(responseMsg?.message, TOASTSTYLE.error);
   }
+  window.location.href = '/login';
 }
