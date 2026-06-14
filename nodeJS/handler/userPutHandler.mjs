@@ -1,4 +1,4 @@
-import { authenticate, query } from '../database.mjs';
+import { authenticate, query, unhandledUserDefinedException } from '../database.mjs';
 export const putStudentSubmissionGrade = async (req, res, params) => {
   const student_id_submission_id_grade = {
     student_id: params[0].split('/')[2],
@@ -99,6 +99,10 @@ export const updateGroup = async (req, res, params) => {
         res.statusCode = 200;
         res.end(JSON.stringify({ message: 'Group have been updated' }));
       } catch (error) {
+        if (error.sqlState === unhandledUserDefinedException) {
+          res.statusCode = 400;
+          return res.end(JSON.stringify({ error: error.sqlMessage }));
+        }
         console.error('ERROR ON GROUP:', error);
         res.statusCode = 500;
         return res.end(JSON.stringify({ error: 'Internal server error' }));

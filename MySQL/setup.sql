@@ -112,6 +112,7 @@ CREATE TABLE IF NOT EXISTS practice_groups_users (
 );
 
 source /home/davidbarfer/Dev/DoctusLite/MySQL/views.sql;
+source /home/davidbarfer/Dev/DoctusLite/MySQL/procedures.sql;
 source /home/davidbarfer/Dev/DoctusLite/MySQL/triggers.sql;
 source /home/davidbarfer/Dev/DoctusLite/MySQL/data.sql;
 

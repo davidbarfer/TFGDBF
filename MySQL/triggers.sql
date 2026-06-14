@@ -93,87 +93,32 @@ BEGIN
   END IF;
 END//
 
-CREATE TRIGGER check_group_date_after_practice_deadline
+CREATE TRIGGER practice_groups_before_insert_deadline
 BEFORE INSERT ON practice_groups
 FOR EACH ROW
 BEGIN
-  DECLARE deadline_var DATE;
-  DECLARE practice_count INT;
-  
-  -- Check if practice exists
-  SELECT COUNT(*) INTO practice_count 
-  FROM practice 
-  WHERE id = NEW.practice_id;
-  
-  IF practice_count = 0 THEN
-    SIGNAL SQLSTATE '45000'
-    SET MESSAGE_TEXT = 'Invalid practice_id: Practice does not exist';
-  ELSE
-    -- Get the deadline
-    SELECT deadline INTO deadline_var 
-    FROM practice 
-    WHERE id = NEW.practice_id;
-    
-    -- Check for NULL dates
-    IF NEW.practice_group_date IS NULL THEN
-      SIGNAL SQLSTATE '45000'
-      SET MESSAGE_TEXT = 'practice_group_date cannot be NULL';
-    ELSEIF deadline_var IS NULL THEN
-      SIGNAL SQLSTATE '45000'
-      SET MESSAGE_TEXT = 'Practice deadline is not set';
-    -- Check the date condition
-    ELSEIF NEW.practice_group_date >= deadline_var THEN
-      SET @message = CONCAT('Group date (', NEW.practice_group_date, 
-                           ') must be before practice deadline (', 
-                           deadline_var, ')');
-      SIGNAL SQLSTATE '45000'
-      SET MESSAGE_TEXT = @message;
-    END IF;
-  END IF;
+  CALL validate_group_date(NEW.practice_id, NEW.practice_group_date);
 END//
 
--- Groups of the same practice cannot exist on the same time at the same day
-CREATE TRIGGER check_groups_dates_compability
+CREATE TRIGGER practice_groups_before_insert_compatibility
 BEFORE INSERT ON practice_groups
 FOR EACH ROW
 BEGIN
-  DECLARE practice_count INT;
-  
-  -- Check if practice exists
-  SELECT COUNT(*) INTO practice_count 
-  FROM practice 
-  WHERE id = NEW.practice_id;
-  
-  IF practice_count = 0 THEN
-    SIGNAL SQLSTATE '45000'
-    SET MESSAGE_TEXT = 'Invalid practice_id: Practice does not exist';
-  ELSE
-    -- Check for time overlaps with existing groups of the same practice on the same day
-    -- An overlap occurs if:
-    -- 1. New group starts during an existing group
-    -- 2. New group ends during an existing group
-    -- 3. New group completely contains an existing group
-    IF EXISTS (
-      SELECT 1 
-      FROM practice_groups pg
-      WHERE pg.practice_id = NEW.practice_id
-        AND pg.practice_group_date = NEW.practice_group_date
-        AND pg.id != NEW.id  -- For updates, don't compare with self
-        AND (
-          -- New group starts during existing group
-          (NEW.start_time >= pg.start_time AND NEW.start_time < pg.end_time) OR
-          -- New group ends during existing group
-          (NEW.end_time > pg.start_time AND NEW.end_time <= pg.end_time) OR
-          -- New group completely contains existing group
-          (NEW.start_time <= pg.start_time AND NEW.end_time >= pg.end_time)
-        )
-    ) THEN
-      SET @message = CONCAT('Time slot conflicts with another group of the same practice on ', 
-                           NEW.practice_group_date);
-      SIGNAL SQLSTATE '45000'
-      SET MESSAGE_TEXT = @message;
-    END IF;
-  END IF;
+  CALL validate_group_time_compatibility(NEW.id, NEW.practice_id, NEW.practice_group_date, NEW.start_time, NEW.end_time);
+END//
+
+CREATE TRIGGER practice_groups_before_update_deadline
+BEFORE UPDATE ON practice_groups
+FOR EACH ROW
+BEGIN
+  CALL validate_group_date(NEW.practice_id, NEW.practice_group_date);
+END//
+
+CREATE TRIGGER practice_groups_before_update_compatibility
+BEFORE UPDATE ON practice_groups
+FOR EACH ROW
+BEGIN
+  CALL validate_group_time_compatibility(NEW.id, NEW.practice_id, NEW.practice_group_date, NEW.start_time, NEW.end_time);
 END//
 
 CREATE TRIGGER submission_insert
