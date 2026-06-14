@@ -2,6 +2,8 @@ import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
 import { API_URL } from "@/utils/enviroment";
 import { handleActionError } from "@/utils/handler";
+import { url } from "node:inspector";
+import type { group } from "node:console";
 
 export const professor = {
   getSubjectsStudents: defineAction({
@@ -388,4 +390,31 @@ export const professor = {
       return response.json()
     }
   }),
+  updateGroup: defineAction({
+    input: z.object({
+      token: z.string(),
+      group_id: z.number(),
+      group: z.object({
+        name: z.string(),
+        max_participants: z.string(),
+        group_date: z.string(),
+        start_time: z.string(),
+        end_time: z.string(),
+      }),
+    }),
+    handler: async (input) => {
+      const response = await fetch(
+        `${API_URL}/groups/${input.group_id}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: input.token,
+          },
+          body: JSON.stringify(input.group),
+        }
+      );
+      if (!response.ok) await handleActionError(response);
+      return response.json()
+    }
+  })
 };

@@ -45,8 +45,9 @@
 
 | URL                                       | Description                               |
 | :---------------------------------------- | :---------------------------------------- |
-| `/student/:id/submission/:id/grade`       | Grade a student submission             |
-| `/practice/:id/submissions/grade`         | Grade all submisions for the practice  |
+| `/student/:id/submission/:id/grade`       | Grade a student submission                |
+| `/practice/:id/submissions/grade`         | Grade all submisions for the practice     |
+| `/groups/:id`                             | Edit/Update a group                       |
 
 ## Endpoints DELETE
 
