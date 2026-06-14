@@ -1,15 +1,16 @@
 ---
+import { setISODateYYYYMMDD } from "@/utils/dates";
 const { group, token} = Astro.props;
 ---
 <section> 
   <h1>Editar grupo {group?.name}</h1>
   <form id="groupForm" data-id={group?.id} data-token={token}>
-    <label for="group_name">Nombre del grupo</label>
-    <input type="text" id="group_name" name="group_name" value={group?.name} required readonly>
+    <label for="name">Nombre del grupo</label>
+    <input type="text" id="group_name" name="name" value={group?.name} required readonly>
     <label for="max_participants">Máximo de participantes</label>
     <input type="number" id="max_participants" name="max_participants" value={group?.max_participants} required>
     <label for="group_date">Fecha del grupo</label>
-    <input type="date" id="group_date" name="group_date" value={group?.practice_group_date} required>
+    <input type="date" id="group_date" name="group_date" value={setISODateYYYYMMDD(group?.practice_group_date)} required>
     <label for="start_time">Hora de inicio</label>
     <input type="time" id="start_time" name="start_time" value={group?.start_time} required>
     <label for="end_time">Hora de fin</label>
@@ -19,16 +20,25 @@ const { group, token} = Astro.props;
 </section>
 
 <script>
+import { showToast, showToastOnLoad, TOASTSTYLE } from "@/utils/toaster";
+import { actions } from "astro:actions";
 const form = document.getElementById('groupForm');
 if (form) {
-  const group_id = form?.dataset.id;
-  const token = form?.dataset.token;
+  const group_id = Number(form?.dataset.id);
+  const token = form?.dataset.token as string;
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
-    const data = Object.fromEntries(formData.entries());
-    // updateGroup(token, group_id, data);
-  });
+    const data = Object.fromEntries(formData);
+    const {data: response, error: responseError } = await actions.professor.updateGroup({ token: token, group_id: group_id, group: data})
+    if(responseError) {
+      showToast(responseError.message, TOASTSTYLE.error)
+    } else {
+      showToastOnLoad(response.message, TOASTSTYLE.success)
+      const redirectTo = window.location.pathname.split('edit')[0];
+      window.location.assign(redirectTo)
+    }
+  });  
 }
 </script>
 
@@ -37,6 +47,9 @@ if (form) {
     display: flex;
     flex-direction: column;
     gap: 1rem;
+  }
+  input:read-only {
+    background-color: var(--color-primary);
   }
 #groups {
     display: flex;
