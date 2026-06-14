@@ -7,8 +7,8 @@ INSERT INTO users (username, password, password_salt, role, name, surname, is_ac
 ('student', '$2b$12$W16liLOZR6U4Zp3iptOPEOPNCl8ob/ieZqmEkdOWrrD5yo3qYK5xW',12,'student', 'Manolo', 'Garcia', TRUE),
 ('professor', '$2b$12$W16liLOZR6U4Zp3iptOPEOPNCl8ob/ieZqmEkdOWrrD5yo3qYK5xW',12,'professor', 'Mortadelo', 'Filemon', TRUE),
 ('student2', '$2b$12$W16liLOZR6U4Zp3iptOPEOPNCl8ob/ieZqmEkdOWrrD5yo3qYK5xW',12,'student', 'Pedro', 'Picapiedra', TRUE),
-('student3', '$2b$12$W16liLOZR6U4Zp3iptOPEOPNCl8ob/ieZqmEkdOWrrD5yo3qYK5xW',12,'student', 'Manolito', 'Gafotas', FALSE),
-('professor2' ,'$2b$12$W16liLOZR6U4Zp3iptOPEOPNCl8ob/ieZqmEkdOWrrD5yo3qYK5xW',12, 'professor', 'Pepito', 'Palotes', TRUE)
+('professor2', '$2b$12$W16liLOZR6U4Zp3iptOPEOPNCl8ob/ieZqmEkdOWrrD5yo3qYK5xW',12,'professor', 'Manolito', 'Gafotas', FALSE),
+('professor3' ,'$2b$12$W16liLOZR6U4Zp3iptOPEOPNCl8ob/ieZqmEkdOWrrD5yo3qYK5xW',12, 'professor', 'Pepito', 'Palotes', TRUE)
 ON DUPLICATE KEY UPDATE username = username;
 
 INSERT INTO degrees (id,name) VALUES
