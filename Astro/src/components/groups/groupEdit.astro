@@ -35,7 +35,8 @@ if (form) {
       showToast(responseError.message, TOASTSTYLE.error)
     } else {
       showToastOnLoad(response.message, TOASTSTYLE.success)
-      history.back();
+      const redirectTo = window.location.pathname.split('edit')[0];
+      window.location.assign(redirectTo)
     }
   });  
 }
