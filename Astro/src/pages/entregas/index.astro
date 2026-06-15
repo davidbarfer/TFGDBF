@@ -4,6 +4,7 @@ import StudentSubmissions from "@/components/submissions/studentSubmissions.astr
 import ProfessorSubmissions from "@/components/submissions/professorSubmissions.astro";
 import PracticeInfo from "@/components/submissions/practiceInfo.astro";
 import PracticeActions from "@/components/submissions/practiceActions.astro";
+import Error from "@/components/utils/Error.astro";
 import { showToast, TOASTSTYLE } from "@/utils/toaster";
 import { actions } from 'astro:actions';
 import jwt from 'jsonwebtoken'
@@ -22,20 +23,23 @@ if (token) {
   }
 }
 let practices: object[] = [];
+let error = null;
 if (user?.role === roles.professor || user?.role === roles.admin) {
   const { data: subjects, error: subjectsError } = await Astro.callAction(actions.user.getSubjectsUser, { token: token as string });
-  await Promise.all(
-    subjects.map(async (subject) => {
-      const { data: practicesSubject, error: practicesSubjectError } = await Astro.callAction(actions.user.getPractices, { token: token as string, subject_id: String(subject.id) });
-      if(practicesSubjectError) showToast(practicesSubjectError.message, TOASTSTYLE.error)
-      else practices.push(practicesSubject[0]);
+  if(subjects) {
+    await Promise.all(
+      subjects.map(async (subject : any) => {
+        const { data: practicesSubject, error: practicesSubjectError } = await Astro.callAction(actions.user.getPractices, { token: token as string, subject_id: String(subject.id) });
+        if(practicesSubjectError) showToast(practicesSubjectError.message, TOASTSTYLE.error)
+        else practices.push(practicesSubject[0]);
     })
-  );
+  )} else {error = subjectsError}
 }
 ---
 
 <Layout>
   <article>
+    {error ? (<Error message={error.message} />) : (null)}
     {user?.role === roles.professor || user?.role === roles.admin ? (
       practices.map(async (practice) => {
         const { data: submissions, error: submissionsError } = await Astro.callAction(actions.professor.getPracticeSubmissions, {
@@ -48,7 +52,7 @@ if (user?.role === roles.professor || user?.role === roles.admin) {
               <PracticeInfo token={token} practice={practice} />
               <PracticeActions token={token} practice={practice} />
               <p>No hay entregas para esta práctica</p>
-            </>
+            </E>
           )
         }
         return (
