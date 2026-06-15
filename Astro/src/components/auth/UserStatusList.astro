@@ -27,12 +27,35 @@ if (role === roles.professor) {
         <td>{user.surname}</td>
         <td>{user.is_active}</td>
         <td>
-          <button id={`ActivateUser${user.id}`} data-token={token} data-userId ={user.id}>Activar Usuario</button>
+          <button id={`ActivateUseBtn${user.id}`} class="ActiveUserButton" data-token={token} data-userId ={user.id}>Activar Usuario</button>
         </td>
       </tr>
     ))}
   </tbody>
 </table>
+
+<script>
+  import { showToast, showToastOnLoad, TOASTSTYLE } from "@/utils/toaster"
+  import { actions } from "astro:actions"
+  const ActivateUserButtons = document.getElementsByClassName('ActiveUserButton');
+  Object.entries(ActivateUserButtons).forEach(ActiveUserBtn => {
+    const btn = ActiveUserBtn[1] as HTMLElement
+    btn?.addEventListener("click", async (e) => {
+      const token = btn.dataset.token;
+      const user = {
+        id: btn.dataset.userid as string,
+        status: true,
+      }
+      const { data: response, error: responseError} = await actions.professor.updateUserStatus({token: token as string, user: user})
+      if(responseError) {
+        showToast(responseError.message, TOASTSTYLE.error);
+      } else {
+        showToastOnLoad(response.message, TOASTSTYLE.success)
+        window.location.reload();
+      }
+    })
+  })
+</script>
 
 <style>
   table {

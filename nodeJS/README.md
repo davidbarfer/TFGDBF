@@ -20,7 +20,7 @@
 | `/student/:id/submission/:id/file` | Returns the file of the submission of the student |
 | `/submission/:id`                  | Returns the submission                            |
 | `/users`                           | Returns all users                                 |
-| `/users/:role/`                    | Returns all users by role             |
+| `/users/:role/`                    | Returns all users by role                         |
 
 ## Endpoints POST
 
@@ -48,6 +48,7 @@
 | `/student/:id/submission/:id/grade`       | Grade a student submission                |
 | `/practice/:id/submissions/grade`         | Grade all submisions for the practice     |
 | `/groups/:id`                             | Edit/Update a group                       |
+| `/users/:id/status`                       | Update status of a user                   |
 
 ## Endpoints DELETE
 
