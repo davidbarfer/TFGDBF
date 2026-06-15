@@ -6,4 +6,5 @@ const PROJECT_FRAMEWORKS = {
   DATABASE : 'MYSQL',
   FILESYSTEM : 'NODE JS',
 }
-export { PROJECT_NAME, PROJECT_AUTHOR, PROJECT_FRAMEWORKS};
+const PROJECT_DESCRIPTION = 'Este proyecto consiste en una aplicación de gestión de grupos de práctica cuyas entregas se evalúan a través de un evaluador diseñado en MATLAB';
+export { PROJECT_NAME, PROJECT_AUTHOR, PROJECT_FRAMEWORKS, PROJECT_DESCRIPTION};

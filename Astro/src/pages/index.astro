@@ -1,6 +1,7 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import { PROJECT_NAME, PROJECT_AUTHOR, PROJECT_FRAMEWORKS  } from "@/consts/info";
+import CardProject from "@/components/homepage/CardProject.astro";
+import { PROJECT_NAME, PROJECT_AUTHOR, PROJECT_FRAMEWORKS, PROJECT_DESCRIPTION } from "@/consts/info";
 import jwt from "jsonwebtoken";
 import { parse } from "cookie";
 import { roles } from "@/consts/users";
@@ -11,7 +12,7 @@ const secret = import.meta.env.JWT_SECRET;
 let user = null;
 if (token) {
   try {
-    user = jwt.verify(token, secret); // same secret as backend
+    user = jwt.verify(token, secret);
   } catch (err) {
     console.warn("Invalid or expired token", err);
   }
@@ -19,53 +20,57 @@ if (token) {
 ---
 
 <Layout>
-  <main>
-    <section>
-      { user?.role === roles.admin ? (
-          <p>Has iniciado sesión como {user?.role}</p>
-        ) : user?.role === roles.professor ? (
-          <p>Has iniciado sesión como {user?.role}</p>
-        ) : user?.role === roles.student ? (
-          <p>Has iniciado sesión como {user?.role}</p>
+  <main class="container">
+    {/* Estado de la sesión */}
+    <header class="auth-status">
+      { user?.role === roles.admin || user?.role === roles.professor || user?.role === roles.student ? (
+          <p class="logged-in">
+            Sesión iniciada como: <span class="role-badge">{user.role}</span>
+          </p>
         ) : (
-          <p>No tienes sesión iniciada</p>
+          <p class="logged-out">No tienes sesión iniciada</p>
         )
       }
-    </section>
-    <section>
-      <h1>{PROJECT_NAME}</h1>
-      <p>Autor del Trabajo de Fin de grado : <strong>{PROJECT_AUTHOR}</strong></p>
-      <p>Este proyecto consiste en una aplicación de gestión de grupos de práctica cuyas entregas se evaluan a través de un evaluador diseñado en MATLAB</p>
-      <h2>Frameworks utilizados</h2>
-      <section class="frameworks">
-        <p>Frontend: {PROJECT_FRAMEWORKS.FRONTEND}</p>
-        <p>Backend: {PROJECT_FRAMEWORKS.BACKEND}</p>
-        <p>Base de datos: {PROJECT_FRAMEWORKS.DATABASE}</p>
-        <p>Sistema de archivos: {PROJECT_FRAMEWORKS.FILESYSTEM}</p>
-      </section>
-    </section>
+    </header>
+
+    {/* Renderizamos la Card pasándole las propiedades */}
+    <CardProject 
+      projectName={PROJECT_NAME}
+      projectAuthor={PROJECT_AUTHOR}
+      projectDescription={PROJECT_DESCRIPTION}
+      frameworks={PROJECT_FRAMEWORKS}
+    />
   </main>
 </Layout>
 
 <style>
-  main {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    width: 100%;
-    height: 100%;
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+    font-family: system-ui, -apple-system, sans-serif;
+    color: #333;
   }
-  section {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+  .auth-status {
     width: 100%;
+    margin-bottom: 2rem;
+    text-align: right;
+    font-size: 0.9rem;
   }
-  .frameworks {
-    display: flex;
-    flex-direction: row;
-    gap: 1rem;
+  .logged-in {
+    color: var(--color-sucess);
+    font-weight: 500;
+  }
+  .role-badge {
+    background-color: var(--color-primary);
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    font-weight: bold;
+  }
+  .logged-out {
+    color: var(--color-error);
+    font-style: italic;
   }
 </style>
