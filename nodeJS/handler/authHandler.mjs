@@ -6,6 +6,7 @@ import {
   hashPassword,
   authProviders,
 } from '../database.mjs';
+import { error } from 'node:console';
 export const login = async (req, res, params) => {
   let body = '';
   let requestComplete = false;
@@ -43,9 +44,10 @@ export const login = async (req, res, params) => {
       }
 
       // Find user by username
-      const users = await query('SELECT * FROM users WHERE username = ?', [
-        data.username,
-      ]);
+      const users = await query(
+        'SELECT id, username, password, is_active, role FROM users WHERE username = ?',
+        [data.username]
+      );
       const user = users.results[0];
 
       if (!user) {
@@ -61,6 +63,16 @@ export const login = async (req, res, params) => {
       if (!isPasswordValid) {
         res.statusCode = 401;
         return res.end(JSON.stringify({ error: 'Invalid credentials' }));
+      }
+
+      // Account active
+      if (!user.is_active) {
+        res.statusCode = 403; // Forbidden
+        return res.end(
+          JSON.stringify({
+            error: 'Your account is pending approval by an administrator.',
+          })
+        );
       }
 
       // Generate token
@@ -167,20 +179,33 @@ export const signup = async (req, res, params) => {
         return res.end(JSON.stringify({ error: 'User already exists' }));
       }
 
+      const isActive = data.role === 'student' ? true : false;
+
       // Hash password
       const hashedPassword = await hashPassword(data.password);
 
       // Insert new user
       await query(
-        'INSERT INTO users (username, password, password_salt, role) VALUES (?, ?, ?, ?)',
-        [data.username, hashedPassword, 12, data.role]
+        'INSERT INTO users (username, password, password_salt, name, surname, role, is_active) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [
+          data.username,
+          hashedPassword,
+          12,
+          data.name,
+          data.surname,
+          data.role,
+          isActive,
+        ]
       );
 
       // Registration successful
       res.statusCode = 201;
       return res.end(
         JSON.stringify({
-          message: 'User registered successfully',
+          message:
+            data.role === 'professor'
+              ? 'Registration successful. Waiting for administrator approval.'
+              : 'User registered successfully',
           user: {
             username: data.username,
             role: data.role,

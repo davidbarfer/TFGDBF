@@ -114,3 +114,58 @@ export const updateGroup = async (req, res, params) => {
     return res.end(JSON.stringify({ error: 'Internal server error' }));
   }
 };
+export const updateUserStatus = async (req, res, params) => {
+  const user_id = params[0].split('/')[2];
+  try {
+    await authenticate(req, res);
+    let body = '';
+    req.on('data', chunk => {
+      body += chunk.toString();
+    });
+    req.on('end', async () => {
+      try {
+        const data = JSON.parse(body);
+        if (!data) {
+          res.statusCode = 400;
+          return res.end(
+            JSON.stringify({
+              error: 'Data required',
+            })
+          );
+        }
+        if (Number(data.id) != Number(user_id)) {
+          res.statusCode = 404;
+          return res.end(
+            JSON.stringify({
+              error: 'User on URL and User on body does not match',
+            })
+          );
+        }
+        const result = await query(
+          'UPDATE users SET is_active = ? WHERE id = ?',
+          [data.status, user_id]
+        );
+        if (result.results.affectedRows === 0) {
+          res.statusCode = 404;
+          return res.end(
+            JSON.stringify({ error: 'User have not been updated' })
+          );
+        }
+        res.statusCode = 200;
+        res.end(JSON.stringify({ message: 'User status have been updated' }));
+      } catch (error) {
+        if (error.sqlState === unhandledUserDefinedException) {
+          res.statusCode = 400;
+          return res.end(JSON.stringify({ error: error.sqlMessage }));
+        }
+        console.error(error);
+        res.statusCode = 500;
+        return res.end(JSON.stringify({ error: 'Internal server error' }));
+      }
+    });
+  } catch (error) {
+    console.error(error);
+    res.statusCode = 500;
+    return res.end(JSON.stringify({ error: 'Internal server error' }));
+  }
+};

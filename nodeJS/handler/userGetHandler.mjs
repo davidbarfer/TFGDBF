@@ -26,6 +26,12 @@ export const getSubjectsUser = async (req, res, params) => {
       'SELECT subject_id FROM users_subjects WHERE user_id = ?',
       [decoded.userId]
     );
+    if (subjects_id.results.length === 0) {
+      res.statusCode = 404;
+      return res.end(
+        JSON.stringify({ error: 'No subject found for this user' })
+      );
+    }
     const subjects = await query('SELECT * FROM v_subject WHERE id IN (?)', [
       subjects_id.results.map(subject => subject.subject_id).flat(),
     ]);
@@ -51,7 +57,7 @@ export const getUsersByRole = async (req, res, params) => {
   await authenticate(req, res);
   try {
     const UsersByRole = await query(
-      'SELECT id, name, surname FROM users WHERE role = ?',
+      'SELECT id, username, name, surname, is_active FROM users WHERE role = ?',
       [roles[roleMatch]]
     );
     if (UsersByRole.results.length === 0) {

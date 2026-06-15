@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS users (
     role ENUM('professor', 'student', 'admin') DEFAULT 'student',
     name VARCHAR(50) NOT NULL,
     surname VARCHAR(50) NOT NULL,
+    is_active BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );

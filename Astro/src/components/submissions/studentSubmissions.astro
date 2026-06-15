@@ -2,6 +2,7 @@
 import jwt from 'jsonwebtoken'
 import { actions } from 'astro:actions';
 import { submissionStatus} from "@/consts/submissions";
+import Error from '../utils/Error.astro';
 const secret = import.meta.env.JWT_SECRET;
 const { userId, token } = Astro.props;
 let user = null;
@@ -12,12 +13,14 @@ if (token) {
     console.warn("Invalid or expired token", err);
   }
 }
-const { data: submissions, error } = await Astro.callAction(actions.user.getStudentSubmissions, { token: token as string, user_id: String(userId) });
+const { data: submissions, error: submissionsError } = await Astro.callAction(actions.user.getStudentSubmissions, { token: token as string, user_id: String(userId) });
 ---
-
-<div>
+<section>
   <h1>Entregas del alumno {userId}</h1>
-  <table>
+  {submissionsError ? (
+    <Error message={submissionsError.message} />
+  ) : (
+    <table>
     <thead>
       <tr>
         <th>Entrega</th>
@@ -29,7 +32,7 @@ const { data: submissions, error } = await Astro.callAction(actions.user.getStud
       </tr>
     </thead>
     <tbody>
-      {submissions.map(submission => (
+      {submissions?.map((submission : any) => (
         <tr>
           <td>{submission.id}</td>
           <td>{submission.practice_name}</td>
@@ -41,7 +44,8 @@ const { data: submissions, error } = await Astro.callAction(actions.user.getStud
       ))}
     </tbody>
   </table>
-</div>
+  )}
+</section>
 
 <style scoped>
 .status {

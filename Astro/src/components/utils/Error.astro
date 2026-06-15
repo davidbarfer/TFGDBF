@@ -1,9 +1,9 @@
 ---
-const { error } = Astro.props;
+const { message } = Astro.props;
 ---
 
 <section>
-  <p>{error}</p>
+  <p>{message}</p>
   <a href="/">
     <button>Ir al inicio</button>
   </a>
@@ -17,7 +17,7 @@ const { error } = Astro.props;
     justify-content: center;
     width: 100%;
     gap: 1rem;
-    background-color: red;
+    background-color: var(--color-error);
     color: var(--color-tertiary);
     padding: 1rem;
     border-radius: 0.5rem;

@@ -414,5 +414,28 @@ export const professor = {
       if (!response.ok) await handleActionError(response);
       return response.json()
     }
-  })
+  }),
+  updateUserStatus: defineAction({
+    input: z.object({
+      token: z.string(),
+      user: z.object({
+        id: z.string(),
+        status: z.boolean(),
+      }),
+    }),
+    handler: async (input) => {
+      const response = await fetch(
+        `${API_URL}/users/${input.user.id}/status`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: input.token,
+          },
+          body: JSON.stringify(input.user),
+        }
+      );
+      if (!response.ok) await handleActionError(response);
+      return response.json()
+    }
+  }),
 };

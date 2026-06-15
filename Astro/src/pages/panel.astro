@@ -1,0 +1,42 @@
+---
+import Layout from "@/layouts/Layout.astro"
+import UserStatusList from "@/components/auth/UserStatusList.astro";
+import jwt from 'jsonwebtoken'
+import { parse } from 'cookie';
+import { roles } from "@/consts/users";
+
+const cookies = parse(Astro.request.headers.get('cookie') || '');
+const token = cookies.token;
+const secret = import.meta.env.JWT_SECRET;
+let user = null;
+if (token) {
+  try {
+    user = jwt.verify(token, secret); // same secret as backend
+  } catch (err) {
+    console.warn("Invalid or expired token", err);
+  }
+}
+const isAdmin = user?.role === roles.admin;
+const isProfessor = user?.role === roles.professor;
+---
+
+<Layout>
+ { (isAdmin || isProfessor) ? (
+  <section>
+  <h1>Profesores pendientes de aprobación</h1>
+  <UserStatusList token = {token} role = {roles.professor} />
+  </section>
+ ) : (
+  <p>No tienes permiso para ver esta página</p>
+ )}
+</Layout>
+
+<style>
+  section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1 rem;
+  }
+</style>

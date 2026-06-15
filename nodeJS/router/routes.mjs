@@ -39,6 +39,7 @@ import {
   putPracticeSubmissionsGrade,
   putStudentSubmissionGrade,
   updateGroup,
+  updateUserStatus,
 } from '../handler/userPutHandler.mjs';
 
 const getRoutes = [
@@ -215,6 +216,11 @@ const putRoutes = [
     method: 'PUT',
     regex: /^\/groups\/\d+$/,
     handler: updateGroup,
+  },
+  {
+    method: 'PUT',
+    regex: /^\/users\/\d+\/status$/,
+    handler: updateUserStatus,
   },
 ];
 const deleteRoutes = [

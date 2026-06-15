@@ -1,8 +1,8 @@
 SET FOREIGN_KEY_CHECKS = 0;
 
-INSERT INTO users (username, password, password_salt, role, name, surname) VALUES
-('admin', '$2b$12$W16liLOZR6U4Zp3iptOPEOPNCl8ob/ieZqmEkdOWrrD5yo3qYK5xW',12,'admin', 'Admin', 'Barrero'),
-('professor', '$2b$12$W16liLOZR6U4Zp3iptOPEOPNCl8ob/ieZqmEkdOWrrD5yo3qYK5xW',12,'professor', 'David', 'Barrero'),
+INSERT INTO users (username, password, password_salt, role, name, surname, is_active) VALUES
+('admin', '$2b$12$W16liLOZR6U4Zp3iptOPEOPNCl8ob/ieZqmEkdOWrrD5yo3qYK5xW',12,'admin', 'Admin', 'Barrero', TRUE),
+('professor', '$2b$12$W16liLOZR6U4Zp3iptOPEOPNCl8ob/ieZqmEkdOWrrD5yo3qYK5xW',12,'professor', 'David', 'Barrero', TRUE),
 ON DUPLICATE KEY UPDATE username = username;
 
 INSERT INTO degrees (id,name) VALUES

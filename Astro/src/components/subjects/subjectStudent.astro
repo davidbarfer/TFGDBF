@@ -51,10 +51,10 @@ const { data: userSubmissions, error: userSubmissionsError } = await Astro.callA
               )}
               </td>
               <td>
-                {userSubmissions.find((submission: any) => submission.practice_id === practice.id) === undefined ? (
+                {userSubmissions?.find((submission: any) => submission.practice_id === practice.id) === undefined ? (
                   <p>No hay entrega asignada</p>
                 ) : (
-                  <a href={`/asignaturas/${subject?.id}/practicas/${practice.id}/entregas/${userSubmissions.find((submission: any) => submission.practice_id === practice.id)?.id}`}><button>Ver Entrega</button></a>
+                  <a href={`/asignaturas/${subject?.id}/practicas/${practice.id}/entregas/${userSubmissions?.find((submission: any) => submission.practice_id === practice.id)?.id}`}><button>Ver Entrega</button></a>
                 )}
               </td>
             </tr>
