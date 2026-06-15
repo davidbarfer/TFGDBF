@@ -21,7 +21,6 @@ if (token) {
 
 <Layout>
   <main class="container">
-    {/* Estado de la sesión */}
     <header class="auth-status">
       { user?.role === roles.admin || user?.role === roles.professor || user?.role === roles.student ? (
           <p class="logged-in">
@@ -32,8 +31,6 @@ if (token) {
         )
       }
     </header>
-
-    {/* Renderizamos la Card pasándole las propiedades */}
     <CardProject 
       projectName={PROJECT_NAME}
       projectAuthor={PROJECT_AUTHOR}
