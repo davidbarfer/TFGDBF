@@ -4,10 +4,10 @@ interface Props {
   projectAuthor: string;
   projectDescription: string;
   frameworks: {
-    FRONTEND: string;
-    BACKEND: string;
-    DATABASE: string;
-    FILESYSTEM: string;
+    FRONTEND: Record<string, string>;
+    BACKEND: Record<string, string>;
+    DATABASE: Record<string, string>;
+    FILESYSTEM: Record<string, string>;
   };
 }
 
@@ -30,22 +30,39 @@ const { projectName, projectAuthor, projectDescription, frameworks } = Astro.pro
   <section class="tech-stack">
     <h2>Frameworks utilizados</h2>
     <div class="frameworks-grid">
+      
+      {/* Frontend */}
       <div class="framework-item">
-        <span class="tech-label">Frontend</span>
-        <span class="tech-value">{frameworks.FRONTEND}</span>
+        <a href={frameworks.FRONTEND.link} target="_blank" rel="noopener noreferrer" class="framework-link">
+          <span class="tech-label">Frontend</span>
+          <span class="tech-value">{frameworks.FRONTEND.name}</span>
+        </a>
       </div>
+
+      {/* Backend */}
       <div class="framework-item">
-        <span class="tech-label">Backend</span>
-        <span class="tech-value">{frameworks.BACKEND}</span>
+        <a href={frameworks.BACKEND.link} target="_blank" rel="noopener noreferrer" class="framework-link">
+          <span class="tech-label">Backend</span>
+          <span class="tech-value">{frameworks.BACKEND.name}</span>
+        </a>
       </div>
+
+      {/* Base de datos */}
       <div class="framework-item">
-        <span class="tech-label">Base de datos</span>
-        <span class="tech-value">{frameworks.DATABASE}</span>
+        <a href={frameworks.DATABASE.link} target="_blank" rel="noopener noreferrer" class="framework-link">
+          <span class="tech-label">Base de datos</span>
+          <span class="tech-value">{frameworks.DATABASE.name}</span>
+        </a>
       </div>
+
+      {/* Sistema de archivos */}
       <div class="framework-item">
-        <span class="tech-label">Archivos</span>
-        <span class="tech-value">{frameworks.FILESYSTEM}</span>
+        <a href={frameworks.FILESYSTEM.link} target="_blank" rel="noopener noreferrer" class="framework-link">
+          <span class="tech-label">Archivos</span>
+          <span class="tech-value">{frameworks.FILESYSTEM.name}</span>
+        </a>
       </div>
+
     </div>
   </section>
 </article>
@@ -92,21 +109,36 @@ const { projectName, projectAuthor, projectDescription, frameworks } = Astro.pro
     grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
     gap: 1rem;
   }
+  
   .framework-item {
     background: #f8f9fa;
     border: 1px solid #f0f0f0;
     border-radius: 8px;
-    padding: 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    transition: transform 0.2s, box-shadow 0.2s;
+    padding: 0; 
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
   }
   .framework-item:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    border-color: #cbd5e1; 
   }
+
+  /* 🛠️ AQUÍ ESTÁ EL FIX CLAVE */
+  .framework-link {
+    display: flex !important;       /* Forzamos el comportamiento Flexbox */
+    flex-direction: column !important; /* Coloca un elemento DEBAJO del otro */
+    align-items: flex-start;        /* Alinea los textos a la izquierda */
+    gap: 0.25rem;
+    padding: 1rem; 
+    text-decoration: none;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+  }
+
+  /* 🛠️ Aseguramos que los spans actúen como bloques independientes */
   .tech-label {
+    display: block; 
     font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -114,6 +146,7 @@ const { projectName, projectAuthor, projectDescription, frameworks } = Astro.pro
     font-weight: 600;
   }
   .tech-value {
+    display: block;
     font-size: 1.05rem;
     font-weight: 500;
     color: #111;
