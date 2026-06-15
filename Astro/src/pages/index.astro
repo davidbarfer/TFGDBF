@@ -1,6 +1,6 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import Modal from "@/components/utils/Modal.astro";
+import { PROJECT_NAME, PROJECT_AUTHOR, PROJECT_FRAMEWORKS  } from "@/consts/info";
 import jwt from "jsonwebtoken";
 import { parse } from "cookie";
 import { roles } from "@/consts/users";
@@ -20,25 +20,29 @@ if (token) {
 
 <Layout>
   <main>
-    {
-      user?.role === roles.admin ? (
-        <p>Has iniciado sesión como {user?.role}</p>
-      ) : user?.role === roles.professor ? (
-        <p>Has iniciado sesión como {user?.role}</p>
-      ) : user?.role === roles.student ? (
-        <p>Has iniciado sesión como {user?.role}</p>
-      ) : (
-        <p>Doctus Lite</p>
-      )
-    }
     <section>
-      <h1>Doctus Lite Modal:</h1>
-      <Modal id="InfoModal" btnText="Open Modal">
-        <main slot="mainModal">
-          <p>Welcome to Doctus Lite!</p>
-        </main>
-        <button slot="closeModal">Cerrar</button>
-      </Modal>
+      { user?.role === roles.admin ? (
+          <p>Has iniciado sesión como {user?.role}</p>
+        ) : user?.role === roles.professor ? (
+          <p>Has iniciado sesión como {user?.role}</p>
+        ) : user?.role === roles.student ? (
+          <p>Has iniciado sesión como {user?.role}</p>
+        ) : (
+          <p>No tienes sesión iniciada</p>
+        )
+      }
+    </section>
+    <section>
+      <h1>{PROJECT_NAME}</h1>
+      <p>Autor del Trabajo de Fin de grado : <strong>{PROJECT_AUTHOR}</strong></p>
+      <p>Este proyecto consiste en una aplicación de gestión de grupos de práctica cuyas entregas se evaluan a través de un evaluador diseñado en MATLAB</p>
+      <h2>Frameworks utilizados</h2>
+      <section class="frameworks">
+        <p>Frontend: {PROJECT_FRAMEWORKS.FRONTEND}</p>
+        <p>Backend: {PROJECT_FRAMEWORKS.BACKEND}</p>
+        <p>Base de datos: {PROJECT_FRAMEWORKS.DATABASE}</p>
+        <p>Sistema de archivos: {PROJECT_FRAMEWORKS.FILESYSTEM}</p>
+      </section>
     </section>
   </main>
 </Layout>
@@ -48,7 +52,7 @@ if (token) {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;  
+    justify-content: flex-start;
     width: 100%;
     height: 100%;
   }
@@ -58,5 +62,10 @@ if (token) {
     align-items: center;
     justify-content: center;
     width: 100%;
+  }
+  .frameworks {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
   }
 </style>

@@ -1,0 +1,9 @@
+const PROJECT_NAME = 'Doctus Lite';
+const PROJECT_AUTHOR = 'David Barrero Fernandez';
+const PROJECT_FRAMEWORKS = {
+  FRONTEND : 'ASTRO',
+  BACKEND  : 'NODE JS',
+  DATABASE : 'MYSQL',
+  FILESYSTEM : 'NODE JS',
+}
+export { PROJECT_NAME, PROJECT_AUTHOR, PROJECT_FRAMEWORKS};
