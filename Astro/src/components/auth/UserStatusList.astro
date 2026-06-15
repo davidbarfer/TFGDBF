@@ -1,0 +1,48 @@
+---
+import { actions } from "astro:actions";
+import { roles } from "@/consts/users";
+const { token, role } = Astro.props;
+let users = [];
+if (role === roles.professor) {
+  const { data, error} = await Astro.callAction(actions.professor.getUsersProfessors, { token: token})
+  if(data) users = data;
+}
+---
+
+<table>
+  <thead>
+    <tr>
+      <th>Username (DNI)</th>
+      <th>Name</th>
+      <th>Surname</th>
+      <th>Status</th>
+      <th>Acción</th>
+    </tr>
+  </thead>
+  <tbody>
+    {users.filter((user: any) => !user.is_active).map((user : any) => (
+      <tr>
+        <td>{user.username}</td>
+        <td>{user.name}</td>
+        <td>{user.surname}</td>
+        <td>{user.is_active}</td>
+        <td>
+          <button id={`ActivateUser${user.id}`} data-token={token} data-userId ={user.id}>Activar Usuario</button>
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
+
+<style>
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0 auto;
+  }
+  th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+</style>

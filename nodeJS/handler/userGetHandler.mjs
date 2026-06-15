@@ -57,7 +57,7 @@ export const getUsersByRole = async (req, res, params) => {
   await authenticate(req, res);
   try {
     const UsersByRole = await query(
-      'SELECT id, name, surname FROM users WHERE role = ?',
+      'SELECT id, username, name, surname, is_active FROM users WHERE role = ?',
       [roles[roleMatch]]
     );
     if (UsersByRole.results.length === 0) {
