@@ -114,7 +114,11 @@ if(submission.file_url) {
       } else {
         showToastOnLoad('Entrega editada exitosamente', TOASTSTYLE.success);
         const urlParams = new URLSearchParams(window.location.search);
-        const redirectTo = urlParams.get('redirect') || '/default-fallback-path';
+        let redirectTo = urlParams.get('redirect') || '/default-fallback-path';
+        const lastOpenedSubjectId = localStorage.getItem('openSubject');        
+        if (lastOpenedSubjectId) {
+          redirectTo = `${redirectTo}#subject-${lastOpenedSubjectId}`;
+        }
         window.location.assign(redirectTo);
       }
     });

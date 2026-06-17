@@ -64,14 +64,9 @@ if (user?.role === roles.professor || user?.role === roles.admin) {
         return (
           <details 
             class="subject-dropdown" 
-            open={Astro.request.headers.get('cookie')?.includes(`opened_subject_${subjectGroup.subjectId}=true`)}          
-            ontoggle={`
-              if (this.open) {
-                document.cookie = "opened_subject_${subjectGroup.subjectId}=true; path=/; max-age=86400";
-              } else {
-                document.cookie = "opened_subject_${subjectGroup.subjectId}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC";
-              }
-            `}
+            id={`subject-${subjectGroup.subjectId}`} 
+            open={Astro.request.headers.get('cookie')?.includes(`opened_subject_${subjectGroup.subjectId}=true`)}
+            data-id={subjectGroup.subjectId}
           >
             <summary class="subject-title">{subjectGroup?.subjectName} - {subjectGroup?.subjectDegree}</summary>
             
@@ -106,6 +101,27 @@ if (user?.role === roles.professor || user?.role === roles.admin) {
     )}
   </article>
 </Layout>
+
+<script>
+  document.addEventListener('toggle', (event) => {
+    const target = event.target as HTMLDetailsElement;
+
+    // Filtramos para actuar únicamente sobre nuestros desplegables de asignaturas
+    if (target && target.classList.contains('subject-dropdown')) {
+      const subjectId = target.getAttribute('data-id');
+      if (!subjectId) return;
+
+      if (target.open) {
+        // Al abrir, creamos la cookie de la asignatura y la marcamos como la última activa
+        document.cookie = `opened_subject_${subjectId}=true; path=/; max-age=86400; SameSite=Lax`;
+        localStorage.setItem('openSubject', subjectId);
+      } else {
+        // Al cerrar, destruimos su cookie caducándola en el pasado
+        document.cookie = `opened_subject_${subjectId}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; SameSite=Lax`;
+      }
+    }
+  }, true); // El parámetro 'true' activa la fase de captura necesaria para el evento toggle
+</script>
 
 <style>
   section {
