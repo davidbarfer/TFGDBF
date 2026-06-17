@@ -35,14 +35,14 @@ const isAdmin = user?.role === roles.admin;
         )
       }
     </header>
+    {(isProfessor || isAdmin) && <CardRoles userRole={user?.role} roleFunction={ROLES_FUNCTIONS.PROFESSOR} />}
+    {isStudent && <CardRoles userRole={user?.role} roleFunction={ROLES_FUNCTIONS.STUDENT} />}
     <CardProject 
       projectName={PROJECT_NAME}
       projectAuthor={PROJECT_AUTHOR}
       projectDescription={PROJECT_DESCRIPTION}
       frameworks={PROJECT_FRAMEWORKS}
     />
-    {(isProfessor || isAdmin) && <CardRoles userRole={user?.role} roleFunction={ROLES_FUNCTIONS.PROFESSOR} />}
-    {isStudent && <CardRoles userRole={user?.role} roleFunction={ROLES_FUNCTIONS.STUDENT} />}
   </main>
 </Layout>
 
