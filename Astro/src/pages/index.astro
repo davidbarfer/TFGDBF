@@ -1,7 +1,8 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import CardProject from "@/components/homepage/CardProject.astro";
-import { PROJECT_NAME, PROJECT_AUTHOR, PROJECT_FRAMEWORKS, PROJECT_DESCRIPTION } from "@/consts/info";
+import CardRoles from "@/components/homepage/CardRoles.astro";
+import { PROJECT_NAME, PROJECT_AUTHOR, PROJECT_FRAMEWORKS, PROJECT_DESCRIPTION, ROLES_FUNCTIONS  } from "@/consts/info";
 import jwt from "jsonwebtoken";
 import { parse } from "cookie";
 import { roles } from "@/consts/users";
@@ -17,14 +18,17 @@ if (token) {
     console.warn("Invalid or expired token", err);
   }
 }
+const isProfessor = user?.role === roles.professor;
+const isStudent = user?.role === roles.student;
+const isAdmin = user?.role === roles.admin;
 ---
 
 <Layout>
   <main class="container">
     <header class="auth-status">
-      { user?.role === roles.admin || user?.role === roles.professor || user?.role === roles.student ? (
+      { isAdmin || isProfessor || isStudent ? (
           <p class="logged-in">
-            Sesión iniciada como: <span class="role-badge">{user.role}</span>
+            Sesión iniciada como: <span class="role-badge">{user?.role}</span>
           </p>
         ) : (
           <p class="logged-out">No tienes sesión iniciada</p>
@@ -37,11 +41,16 @@ if (token) {
       projectDescription={PROJECT_DESCRIPTION}
       frameworks={PROJECT_FRAMEWORKS}
     />
+    {(isProfessor || isAdmin) && <CardRoles userRole={user?.role} roleFunction={ROLES_FUNCTIONS.PROFESSOR} />}
+    {isStudent && <CardRoles userRole={user?.role} roleFunction={ROLES_FUNCTIONS.STUDENT} />}
   </main>
 </Layout>
 
 <style>
   .container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
     max-width: 800px;
     margin: 0 auto;
     padding: 2rem 1rem;
