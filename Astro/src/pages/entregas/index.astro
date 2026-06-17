@@ -27,11 +27,15 @@ let error = null;
 if (user?.role === roles.professor || user?.role === roles.admin) {
   const { data: subjects, error: subjectsError } = await Astro.callAction(actions.user.getSubjectsUser, { token: token as string });
   if(subjects) {
-    await Promise.all(
+    practices = await Promise.all(
       subjects.map(async (subject : any) => {
         const { data: practicesSubject, error: practicesSubjectError } = await Astro.callAction(actions.user.getPractices, { token: token as string, subject_id: String(subject.id) });
         if(practicesSubjectError) showToast(practicesSubjectError.message, TOASTSTYLE.error)
-        else practices.push(...practicesSubject);
+        return {
+          subjectName: subject.name,
+          subjectDegree: subject.degree,
+          list: practicesSubject || []
+        }
     })
   )} else {error = subjectsError}
 }
@@ -40,27 +44,45 @@ if (user?.role === roles.professor || user?.role === roles.admin) {
 <Layout>
   <article>
     {error ? (<Error message={error.message} />) : (null)}
+    
     {user?.role === roles.professor || user?.role === roles.admin ? (
-      practices.map(async (practice) => {
-        const { data: submissions, error: submissionsError } = await Astro.callAction(actions.professor.getPracticeSubmissions, {
-          token: token as string,
-          practice_id: String(practice.id),
-        });
-        if (submissions.status === 404) {
-          return(
-            <>
-              <PracticeInfo token={token} practice={practice} />
-              <PracticeActions token={token} practice={practice} />
-              <p>No hay entregas para esta práctica</p>
-            </E>
-          )
-        }
+      // Loop 1: Iterate through our subjects
+      practices.map(async (subjectGroup : any) => {
+        
+        // Fetch all submissions for this specific group before rendering HTML
+        const practicesWithSubmissions = await Promise.all(
+          subjectGroup?.list.map(async (practice: any) => {
+            const { data: submissions } = await Astro.callAction(actions.professor.getPracticeSubmissions, {
+              token: token as string,
+              practice_id: String(practice.id),
+            });
+            return { ...practice, submissions }; // Attach submissions to the original practice object
+          })
+        );
+
         return (
-          <>
-            <PracticeInfo token={token} practice={practice} />
-            <PracticeActions token={token} practice={practice} />
-            <ProfessorSubmissions token={token} submissions={submissions} subjectId={practice.subject_id} />
-          </>
+          <details class="subject-dropdown">
+            <summary class="subject-title">{subjectGroup?.subjectName} - {subjectGroup?.subjectDegree}</summary>
+            
+            <div class="subject-content">
+              {practicesWithSubmissions.length === 0 ? (
+                <p>No hay prácticas para esta asignatura</p>
+              ) : (
+                // Loop 2: Synchronously render the components with the resolved data
+                practicesWithSubmissions.map((practice) => (
+                  <section class="practice-card">
+                    <PracticeInfo token={token} practice={practice} />
+                    <PracticeActions token={token} practice={practice} />
+                    {practice.submissions?.status === 404 ? (
+                      <p>No hay entregas para esta práctica</p>
+                    ) : (
+                      <ProfessorSubmissions token={token} submissions={practice.submissions} subjectId={practice.subject_id} />
+                    )}
+                  </section>
+                ))
+              )}
+            </div>
+          </details>
         );
       })
     ) : user?.role === roles.student ? (
@@ -90,5 +112,34 @@ if (user?.role === roles.professor || user?.role === roles.admin) {
     font-weight: bold;
     padding: 0.5rem;
     cursor: pointer;
+  }
+  details.subject-dropdown {
+    width: 100%;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    margin-bottom: 1rem;
+    background-color: #ffffff;
+  }
+  summary.subject-title {
+    padding: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    color: var(--color-tertiary);
+    user-select: none;
+  }
+  .subject-content {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    border-top: 1px solid var(--color-border);
+  }
+  .practice-card {
+    padding-bottom: 1.5rem;
+    border-bottom: 1px dashed var(--color-border);
+  }
+  .practice-card:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
   }
 </style>
