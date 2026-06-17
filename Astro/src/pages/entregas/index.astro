@@ -31,7 +31,7 @@ if (user?.role === roles.professor || user?.role === roles.admin) {
       subjects.map(async (subject : any) => {
         const { data: practicesSubject, error: practicesSubjectError } = await Astro.callAction(actions.user.getPractices, { token: token as string, subject_id: String(subject.id) });
         if(practicesSubjectError) showToast(practicesSubjectError.message, TOASTSTYLE.error)
-        else practices.push(practicesSubject[0]);
+        else practices.push(...practicesSubject);
     })
   )} else {error = subjectsError}
 }
