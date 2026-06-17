@@ -32,6 +32,7 @@ if (user?.role === roles.professor || user?.role === roles.admin) {
         const { data: practicesSubject, error: practicesSubjectError } = await Astro.callAction(actions.user.getPractices, { token: token as string, subject_id: String(subject.id) });
         if(practicesSubjectError) showToast(practicesSubjectError.message, TOASTSTYLE.error)
         return {
+          subjectId: subject.id,
           subjectName: subject.name,
           subjectDegree: subject.degree,
           list: practicesSubject || []
@@ -61,7 +62,17 @@ if (user?.role === roles.professor || user?.role === roles.admin) {
         );
 
         return (
-          <details class="subject-dropdown">
+          <details 
+            class="subject-dropdown" 
+            open={Astro.request.headers.get('cookie')?.includes(`opened_subject_${subjectGroup.subjectId}=true`)}          
+            ontoggle={`
+              if (this.open) {
+                document.cookie = "opened_subject_${subjectGroup.subjectId}=true; path=/; max-age=86400";
+              } else {
+                document.cookie = "opened_subject_${subjectGroup.subjectId}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC";
+              }
+            `}
+          >
             <summary class="subject-title">{subjectGroup?.subjectName} - {subjectGroup?.subjectDegree}</summary>
             
             <div class="subject-content">
