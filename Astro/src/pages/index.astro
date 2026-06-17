@@ -1,9 +1,12 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import Modal from "@/components/utils/Modal.astro";
+import CardProject from "@/components/homepage/CardProject.astro";
+import CardRoles from "@/components/homepage/CardRoles.astro";
+import { PROJECT_NAME, PROJECT_AUTHOR, PROJECT_FRAMEWORKS, PROJECT_DESCRIPTION, ROLES_FUNCTIONS  } from "@/consts/info";
 import jwt from "jsonwebtoken";
 import { parse } from "cookie";
 import { roles } from "@/consts/users";
+import { actions } from "astro:actions";
 
 const cookies = parse(Astro.request.headers.get("cookie") || "");
 const token = cookies.token;
@@ -11,52 +14,70 @@ const secret = import.meta.env.JWT_SECRET;
 let user = null;
 if (token) {
   try {
-    user = jwt.verify(token, secret); // same secret as backend
+    user = jwt.verify(token, secret);
   } catch (err) {
     console.warn("Invalid or expired token", err);
   }
 }
+const isProfessor = user?.role === roles.professor;
+const isStudent = user?.role === roles.student;
+const isAdmin = user?.role === roles.admin;
+const {data: currentUser, error: currentUserError} = await Astro.callAction(actions.user.getCurrentUser, { token: token as string })
 ---
 
 <Layout>
-  <main>
-    {
-      user?.role === roles.admin ? (
-        <p>Has iniciado sesión como {user?.role}</p>
-      ) : user?.role === roles.professor ? (
-        <p>Has iniciado sesión como {user?.role}</p>
-      ) : user?.role === roles.student ? (
-        <p>Has iniciado sesión como {user?.role}</p>
-      ) : (
-        <p>Doctus Lite</p>
-      )
-    }
-    <section>
-      <h1>Doctus Lite Modal:</h1>
-      <Modal id="InfoModal" btnText="Open Modal">
-        <main slot="mainModal">
-          <p>Welcome to Doctus Lite!</p>
-        </main>
-        <button slot="closeModal">Cerrar</button>
-      </Modal>
-    </section>
+  <main class="container">
+    <header class="auth-status">
+      { isAdmin || isProfessor || isStudent ? (
+        <p>Bienvenido {currentUser?.name} {currentUser?.surname}</p>
+        <p class="logged-in">
+            Sesión iniciada como: <span class="role-badge">{user?.role}</span>
+          </p>
+        ) : (
+          <p class="logged-out">No tienes sesión iniciada</p>
+        )
+      }
+    </header>
+    {(isProfessor || isAdmin) && <CardRoles userRole={user?.role} roleFunction={ROLES_FUNCTIONS.PROFESSOR} />}
+    {isStudent && <CardRoles userRole={user?.role} roleFunction={ROLES_FUNCTIONS.STUDENT} />}
+    <CardProject 
+      projectName={PROJECT_NAME}
+      projectAuthor={PROJECT_AUTHOR}
+      projectDescription={PROJECT_DESCRIPTION}
+      frameworks={PROJECT_FRAMEWORKS}
+    />
   </main>
 </Layout>
 
 <style>
-  main {
+  .container {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;  
-    width: 100%;
-    height: 100%;
+    gap: 1rem;
+    max-width: 800px;
+    margin: 0 auto;
+    font-family: system-ui, -apple-system, sans-serif;
+    color: #333;
   }
-  section {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+  .auth-status {
     width: 100%;
+    text-align: right;
+    font-size: 0.9rem;
+    color: var(--color-tertiary);
+  }
+  .logged-in {
+    font-weight: 500;
+  }
+  .role-badge {
+    background-color: var(--color-primary);
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    font-weight: bold;
+  }
+  .logged-out {
+    color: var(--color-error);
+    font-style: italic;
   }
 </style>

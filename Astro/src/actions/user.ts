@@ -4,6 +4,20 @@ import { API_URL } from "@/utils/enviroment";
 import { handleActionError } from "@/utils/handler";
 
 export const user = {
+  getCurrentUser: defineAction({
+    input: z.object({
+      token: z.string(),
+    }),
+    handler:async (input) => {
+      const response = await fetch(`${API_URL}/users/current`, {
+        headers: {
+          Authorization: input.token,
+        },
+      });
+      if (!response.ok) await handleActionError(response);
+      return response.json();
+    },
+  }),
   getSubject: defineAction({
     input: z.object({
       id: z.string(),

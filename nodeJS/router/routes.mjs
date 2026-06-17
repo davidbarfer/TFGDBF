@@ -21,6 +21,7 @@ import {
   getUsers,
   getSubjectsUser,
   getUsersByRole,
+  getUserCurrent,
 } from '../handler/userGetHandler.mjs';
 import {
   postPracticeCreate,
@@ -57,6 +58,11 @@ const getRoutes = [
     method: 'GET',
     regex: /^\/users\/(professor|student|admin)$/,
     handler: getUsersByRole,
+  },
+  {
+    method: 'GET',
+    regex: /^\/users\/current$/,
+    handler: getUserCurrent,
   },
   {
     method: 'GET',
