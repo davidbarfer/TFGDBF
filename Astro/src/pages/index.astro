@@ -6,6 +6,7 @@ import { PROJECT_NAME, PROJECT_AUTHOR, PROJECT_FRAMEWORKS, PROJECT_DESCRIPTION, 
 import jwt from "jsonwebtoken";
 import { parse } from "cookie";
 import { roles } from "@/consts/users";
+import { actions } from "astro:actions";
 
 const cookies = parse(Astro.request.headers.get("cookie") || "");
 const token = cookies.token;
@@ -21,13 +22,15 @@ if (token) {
 const isProfessor = user?.role === roles.professor;
 const isStudent = user?.role === roles.student;
 const isAdmin = user?.role === roles.admin;
+const {data: currentUser, error: currentUserError} = await Astro.callAction(actions.user.getCurrentUser, { token: token as string })
 ---
 
 <Layout>
   <main class="container">
     <header class="auth-status">
       { isAdmin || isProfessor || isStudent ? (
-          <p class="logged-in">
+        <p>Bienvenido {currentUser?.name} {currentUser?.surname}</p>
+        <p class="logged-in">
             Sesión iniciada como: <span class="role-badge">{user?.role}</span>
           </p>
         ) : (
@@ -53,13 +56,11 @@ const isAdmin = user?.role === roles.admin;
     gap: 1rem;
     max-width: 800px;
     margin: 0 auto;
-    padding: 2rem 1rem;
     font-family: system-ui, -apple-system, sans-serif;
     color: #333;
   }
   .auth-status {
     width: 100%;
-    margin-bottom: 2rem;
     text-align: right;
     font-size: 0.9rem;
   }

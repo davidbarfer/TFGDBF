@@ -90,6 +90,24 @@ export const getUsersByRole = async (req, res, params) => {
     return res.end(JSON.stringify({ error: 'Internal server error' }));
   }
 };
+export const getUserCurrent = async (req, res, params) => {
+  const decodedUser = await authenticate(req, res, true);
+  try {
+    const currentUser = await query(
+      'SELECT id, username, name, surname, is_active FROM users WHERE id = ?',
+      [decodedUser.userId]
+    );
+    if (currentUser.results.length === 0) {
+      res.statusCode = 404;
+      res.end(JSON.stringify({ error: 'User not found' }));
+    }
+    return res.end(JSON.stringify(currentUser.results[0]));
+  } catch (error) {
+    console.error('Database query error:', error);
+    res.statusCode = 500;
+    return res.end(JSON.stringify({ error: 'Internal server error' }));
+  }
+};
 export const getSubject = async (req, res, params) => {
   const subject_id = params[0].split('/').pop();
   try {

@@ -21,6 +21,7 @@
 | `/submission/:id`                  | Returns the submission                            |
 | `/users`                           | Returns all users                                 |
 | `/users/:role/`                    | Returns all users by role                         |
+| `/users/current/`                  | Return current user                               |
 
 ## Endpoints POST
 
