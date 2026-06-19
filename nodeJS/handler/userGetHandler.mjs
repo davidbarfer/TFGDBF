@@ -424,7 +424,7 @@ export const getStudentSubmissionFile = async (req, res, params) => {
     const url = `${subject_id.results[0].subject_id}/${practice_id.results[0].practice_id}/submissions/template.m`;
     const submissionFile = await getFileSubmission(
       url,
-      params.student_id_submission_id_file
+      student_id_submission_id_file
     );
     if (!submissionFile) {
       res.statusCode = 404;
