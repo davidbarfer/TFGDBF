@@ -1,6 +1,7 @@
 ---
+const { id } = Astro.props
 ---
-<div class="spinner-container">
+<div class="spinner-container" id={id}>
   <div class="spinner" role="status" aria-live="polite" aria-label="Loading">
     <span class="sr-only">Loading…</span>
   </div>
