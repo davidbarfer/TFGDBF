@@ -50,7 +50,6 @@ const currentPath = Astro.url.pathname;
   import { showToastOnLoad, TOASTSTYLE } from "@/utils/toaster";
   const gradeBtns = document.getElementsByClassName('gradeBtn')
   const evaluatorBtns = document.getElementsByClassName('evaluatorBtn')
-  const spinners = document.getElementsByClassName('spinner-container');
   Array.from(gradeBtns).forEach(gradeBtn => gradeBtn.addEventListener('click', async () => {
     const token = gradeBtn?.dataset.token;
     const url_data = {
@@ -68,13 +67,14 @@ const currentPath = Astro.url.pathname;
     window.location.reload();
   }))
   Array.from(evaluatorBtns).forEach(evaluatorBtn => evaluatorBtn.addEventListener('click', async() => {
-    const spinner = spinners.item(evaluatorBtn?.dataset.submission_id - 1) as HTMLElement;
+    const submissionId = evaluatorBtn?.dataset.submission_id;
+    const spinner = document.getElementById(`evaluatorSpinner${submissionId}`)
     evaluatorBtn?.classList.toggle('toggleSendBtn');
     spinner?.classList.toggle('toggleVisiblity');
     const token = evaluatorBtn?.dataset.token;
     const url_data = {
       user_id: evaluatorBtn?.dataset.user_id as string,
-      submission_id: evaluatorBtn?.dataset.submission_id as string,
+      submission_id: submissionId as string,
     }
     const { data, error } = await actions.professor.executeSubmssionEvaluator({
       token: token as string,
