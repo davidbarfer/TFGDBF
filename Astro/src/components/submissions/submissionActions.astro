@@ -83,8 +83,9 @@ const currentPath = Astro.url.pathname;
     try {
       if(error) {
         showToastOnLoad(error.message, TOASTSTYLE.error);
+      } else {
+        showToastOnLoad('Evaluador ejecutado', TOASTSTYLE.success);
       }
-      showToastOnLoad('Evaluador ejecutado', TOASTSTYLE.success);
       const lastOpenedSubjectId = localStorage.getItem('openSubject');
       if (lastOpenedSubjectId) {
         window.location.href = `${window.location.pathname}#subject-${lastOpenedSubjectId}`;
