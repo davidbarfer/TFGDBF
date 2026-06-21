@@ -18,14 +18,16 @@ export const getFileSystemBasePath = () => {
   }
   return path;
 };
-export const generateFileSystem = async () => {
+export const generateFileSystem = async (options = { isProduction: false }) => {
   const path = getFileSystemBasePath();
-  // Remove existing directory and its contents for development purposes
-  await fs.rm(path, { recursive: true }).catch(err => {
-    if (err.code !== 'ENOENT') {
-      console.error('Error removing directory:', err);
-    }
-  });
+  if (!options.isProduction) {
+    // Remove existing directory and its contents for development purposes
+    await fs.rm(path, { recursive: true }).catch(err => {
+      if (err.code !== 'ENOENT') {
+        console.error('Error removing directory:', err);
+      }
+    });
+  }
   // Generate file system structure
   await fs.mkdir(path, { recursive: true }).catch(err => {
     console.error('Error creating base directory:', err);

@@ -5,6 +5,8 @@
   "main": "main.mjs",
   "scripts": {
     "start": "node --env-file .env --watch main.mjs",
+    "dev": "npm run start -- --dev",
+    "prod": "node --env-file .env main.mjs --prod",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
