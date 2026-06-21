@@ -47,12 +47,14 @@ export const generateFileSystem = async (options = { isProduction: false }) => {
         await fs.mkdir(practicePath, { recursive: true });
         await fs.mkdir(`${practicePath}/submissions`, { recursive: true });
         await fs.mkdir(`${practicePath}/evaluator`, { recursive: true });
-        // Create a MATLAB file template for testing
-        await fs.writeFile(
-          `${practicePath}/submissions/template.m`,
-          '% PLANTILLA \nA1 = 1;',
-          'utf8'
-        );
+        if (!options.isProduction) {
+          // Create a MATLAB file template for testing
+          await fs.writeFile(
+            `${practicePath}/submissions/template.m`,
+            '% PLANTILLA \nA1 = 1;',
+            'utf8'
+          );
+        }
       });
     });
   } catch (error) {
