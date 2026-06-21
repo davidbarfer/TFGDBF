@@ -91,14 +91,16 @@ export async function getFileSubmission(url, file_params) {
   } catch (error) {
     console.error('Error querying database for file URL:', error);
   }
-  const templateFilePath = `${path}/${url}`;
-  try {
-    const templateFile = await fs.readFile(templateFilePath, 'utf-8');
-    return templateFile;
-  } catch (error) {
-    console.error('Error reading template file:', error);
-    return null;
-  }
+  if (url) {
+    const templateFilePath = `${path}/${url}`;
+    try {
+      const templateFile = await fs.readFile(templateFilePath, 'utf-8');
+      return templateFile;
+    } catch (error) {
+      console.error('Error reading template file:', error);
+      return null;
+    }
+  } else return null;
 }
 export async function saveFileSubmission(url, content, submission_id) {
   const path = getFileSystemBasePath();

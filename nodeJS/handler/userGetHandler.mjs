@@ -413,15 +413,15 @@ export const getStudentSubmissionFile = async (req, res, params) => {
       res.statusCode = 404;
       return res.end(JSON.stringify({ error: 'Practice not found' }));
     }
-    const subject_id = await query(
-      'SELECT subject_id FROM practice WHERE id = ?',
+    const practice = await query(
+      'SELECT subject_id, submissions_template_url FROM practice WHERE id = ?',
       [practice_id.results[0].practice_id]
     );
-    if (subject_id.results.length === 0) {
+    if (practice.results.length === 0) {
       res.statusCode = 404;
       return res.end(JSON.stringify({ error: 'Subject not found' }));
     }
-    const url = `${subject_id.results[0].subject_id}/${practice_id.results[0].practice_id}/submissions/template.m`;
+    const url = practice.results[0].submissions_template_url;
     const submissionFile = await getFileSubmission(
       url,
       student_id_submission_id_file
