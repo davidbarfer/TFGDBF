@@ -18,14 +18,16 @@ export const getFileSystemBasePath = () => {
   }
   return path;
 };
-export const generateFileSystem = async () => {
+export const generateFileSystem = async (options = { isProduction: false }) => {
   const path = getFileSystemBasePath();
-  // Remove existing directory and its contents for development purposes
-  await fs.rm(path, { recursive: true }).catch(err => {
-    if (err.code !== 'ENOENT') {
-      console.error('Error removing directory:', err);
-    }
-  });
+  if (!options.isProduction) {
+    // Remove existing directory and its contents for development purposes
+    await fs.rm(path, { recursive: true }).catch(err => {
+      if (err.code !== 'ENOENT') {
+        console.error('Error removing directory:', err);
+      }
+    });
+  }
   // Generate file system structure
   await fs.mkdir(path, { recursive: true }).catch(err => {
     console.error('Error creating base directory:', err);
@@ -45,12 +47,14 @@ export const generateFileSystem = async () => {
         await fs.mkdir(practicePath, { recursive: true });
         await fs.mkdir(`${practicePath}/submissions`, { recursive: true });
         await fs.mkdir(`${practicePath}/evaluator`, { recursive: true });
-        // Create a MATLAB file template for testing
-        await fs.writeFile(
-          `${practicePath}/submissions/template.m`,
-          '% PLANTILLA \nA1 = 1;',
-          'utf8'
-        );
+        if (!options.isProduction) {
+          // Create a MATLAB file template for testing
+          await fs.writeFile(
+            `${practicePath}/submissions/template.m`,
+            '% PLANTILLA \nA1 = 1;',
+            'utf8'
+          );
+        }
       });
     });
   } catch (error) {
@@ -87,14 +91,16 @@ export async function getFileSubmission(url, file_params) {
   } catch (error) {
     console.error('Error querying database for file URL:', error);
   }
-  const templateFilePath = `${path}/${url}`;
-  try {
-    const templateFile = await fs.readFile(templateFilePath, 'utf-8');
-    return templateFile;
-  } catch (error) {
-    console.error('Error reading template file:', error);
-    return null;
-  }
+  if (url) {
+    const templateFilePath = `${path}/${url}`;
+    try {
+      const templateFile = await fs.readFile(templateFilePath, 'utf-8');
+      return templateFile;
+    } catch (error) {
+      console.error('Error reading template file:', error);
+      return null;
+    }
+  } else return null;
 }
 export async function saveFileSubmission(url, content, submission_id) {
   const path = getFileSystemBasePath();

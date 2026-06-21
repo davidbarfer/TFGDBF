@@ -5,6 +5,11 @@ import { processMatlabRequest, activeConnections } from './matlab.mjs';
 import { launchMatlabClient } from './matlabFunctions.mjs';
 import { generateFileSystem } from './fileSystem.mjs';
 
+const isProduction = process.argv.includes('--prod');
+console.log(
+  `Server starting in [${isProduction ? 'PRODUCTION' : 'DEVELOPMENT'}] mode.`
+);
+
 const server = http.createServer(processRequest);
 
 server.listen(Number(process.env.BACKEND_PORT), process.env.BASE_IP, () => {
@@ -29,7 +34,12 @@ matlabServer.listen(Number(process.env.MATLAB_PORT), () => {
   }
 });
 
-// Generate file system
-generateFileSystem().catch(error => {
-  console.error('Error generating file system:', error);
-});
+if (isProduction) {
+  generateFileSystem({ isProduction: true }).catch(error => {
+    console.error('Production FS Error:', error);
+  });
+} else {
+  generateFileSystem({ isProduction: false }).catch(error => {
+    console.error('Development FS Error:', error);
+  });
+}
