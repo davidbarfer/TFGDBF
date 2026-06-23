@@ -61,6 +61,16 @@ export const generateFileSystem = async (options = { isProduction: false }) => {
     console.error('Error generating file system:', error);
   }
 };
+export async function generateFolder(FolderPath) {
+  const basePath = getFileSystemBasePath();
+  const path = `${basePath}/${FolderPath}`;
+  try {
+    await fs.mkdir(path);
+  } catch (err) {
+    console.error('generateFolder: ', err);
+    return 500;
+  }
+}
 export async function getFileSubmission(url, file_params) {
   const path = getFileSystemBasePath();
   try {

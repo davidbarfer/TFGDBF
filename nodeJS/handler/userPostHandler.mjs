@@ -10,6 +10,7 @@ import {
   getFileSystemBasePath,
   extractZip,
   clearTempDirectory,
+  generateFolder,
 } from '../fileSystem.mjs';
 import { executeMatlabFiles, extractGrade } from '../matlabFunctions.mjs';
 const FILESYSTEM_PATH = getFileSystemBasePath();
@@ -687,6 +688,17 @@ export const postSubjectCreate = async (req, res, params) => {
           'INSERT INTO subject (name, course, degree_id) VALUES (?, ?, ?)',
           [data.name, data.course, data.degree]
         );
+        if (subject.results.affectedRows === 0) {
+          res.statusCode = 500;
+          return res.end(JSON.stringify({ error: 'Internal server error' }));
+        }
+        const createSubjectFolder = await generateFolder(
+          `${subject.results.insertId}`
+        );
+        if (createSubjectFolder === 500) {
+          res.statusCode = 500;
+          return res.end(JSON.stringify({ error: 'Internal server error' }));
+        }
         res.statusCode = 201;
         return res.end(JSON.stringify(subject.results));
       } catch (err) {
