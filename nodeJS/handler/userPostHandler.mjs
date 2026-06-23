@@ -123,7 +123,10 @@ export const postPracticeCreate = async (req, res, params) => {
           res.statusCode = 500;
           return res.end(JSON.stringify({ error: 'Internal server error' }));
         }
-        const practiceUrl = `${subject_id_practices}/${practice.results.insertId}`;
+        const practiceUrl = path.join(
+          String(subject_id_practices),
+          String(practice.results.insertId)
+        );
         try {
           await generateFolder(practiceUrl);
           await generateFolder(path.join(practiceUrl, 'evaluator'));
