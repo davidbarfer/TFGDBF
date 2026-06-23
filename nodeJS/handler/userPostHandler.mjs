@@ -119,6 +119,20 @@ export const postPracticeCreate = async (req, res, params) => {
           'INSERT INTO practice (subject_id, name, description, deadline) VALUES (?, ?, ?, ?)',
           [subject_id_practices, data.name, data.description, data.deadline]
         );
+        if (practice.results.affectedRows === 0) {
+          res.statusCode = 500;
+          return res.end(JSON.stringify({ error: 'Internal server error' }));
+        }
+        const practiceUrl = `${subject_id_practices}/${practice.results.insertId}`;
+        try {
+          await generateFolder(practiceUrl);
+          await generateFolder(`${practiceUrl}/evaluator`);
+          await generateFolder(`${practiceUrl}/submissions`);
+        } catch (err) {
+          console.error(err);
+          res.statusCode = 500;
+          return res.end(JSON.stringify({ error: 'Internal server error' }));
+        }
         res.statusCode = 201;
         return res.end(JSON.stringify(practice.results));
       } catch (error) {
