@@ -33,7 +33,7 @@ export const logger = winston.createLogger({
   ],
 });
 
-if (process.env.NODE_ENV !== 'production' || !process.argv.includes('--prod')) {
+if (process.env.NODE_ENV !== 'production' && !process.argv.includes('--prod')) {
   // Instanciamos el colorizador de Winston para usarlo manualmente dentro del printf
   const colorizer = winston.format.colorize();
 
