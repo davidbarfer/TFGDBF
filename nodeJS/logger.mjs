@@ -33,14 +33,20 @@ export const logger = winston.createLogger({
   ],
 });
 
-// Mirror clean logs to the console if running in development mode
 if (process.env.NODE_ENV !== 'production' || !process.argv.includes('--prod')) {
   logger.add(
     new winston.transports.Console({
       format: winston.format.combine(
-        winston.format.colorize(),
         winston.format.timestamp({ format: 'HH:mm:ss' }),
-        logFormat
+        winston.format.printf(({ timestamp, level, message, ...meta }) => {
+          const metaString = Object.keys(meta).length
+            ? ` | Meta: ${JSON.stringify(meta)}`
+            : '';
+          const rawMessage = `[${timestamp}] [${level.toUpperCase()}]: ${message}${metaString}`;
+
+          // Manually apply color colorizer wrapper around the completely built line
+          return winston.format.colorize().colorize(level, rawMessage);
+        })
       ),
     })
   );
