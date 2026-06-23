@@ -10,6 +10,7 @@ import {
   getFileSystemBasePath,
   extractZip,
   clearTempDirectory,
+  generateFolder,
 } from '../fileSystem.mjs';
 import { executeMatlabFiles, extractGrade } from '../matlabFunctions.mjs';
 const FILESYSTEM_PATH = getFileSystemBasePath();
@@ -118,6 +119,23 @@ export const postPracticeCreate = async (req, res, params) => {
           'INSERT INTO practice (subject_id, name, description, deadline) VALUES (?, ?, ?, ?)',
           [subject_id_practices, data.name, data.description, data.deadline]
         );
+        if (practice.results.affectedRows === 0) {
+          res.statusCode = 500;
+          return res.end(JSON.stringify({ error: 'Internal server error' }));
+        }
+        const practiceUrl = path.join(
+          String(subject_id_practices),
+          String(practice.results.insertId)
+        );
+        try {
+          await generateFolder(practiceUrl);
+          await generateFolder(path.join(practiceUrl, 'evaluator'));
+          await generateFolder(path.join(practiceUrl, 'submissions'));
+        } catch (err) {
+          console.error(err);
+          res.statusCode = 500;
+          return res.end(JSON.stringify({ error: 'Internal server error' }));
+        }
         res.statusCode = 201;
         return res.end(JSON.stringify(practice.results));
       } catch (error) {
@@ -687,6 +705,17 @@ export const postSubjectCreate = async (req, res, params) => {
           'INSERT INTO subject (name, course, degree_id) VALUES (?, ?, ?)',
           [data.name, data.course, data.degree]
         );
+        if (subject.results.affectedRows === 0) {
+          res.statusCode = 500;
+          return res.end(JSON.stringify({ error: 'Internal server error' }));
+        }
+        const createSubjectFolder = await generateFolder(
+          `${subject.results.insertId}`
+        );
+        if (createSubjectFolder === 500) {
+          res.statusCode = 500;
+          return res.end(JSON.stringify({ error: 'Internal server error' }));
+        }
         res.statusCode = 201;
         return res.end(JSON.stringify(subject.results));
       } catch (err) {
