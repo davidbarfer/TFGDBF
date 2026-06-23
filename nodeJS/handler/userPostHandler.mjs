@@ -126,8 +126,8 @@ export const postPracticeCreate = async (req, res, params) => {
         const practiceUrl = `${subject_id_practices}/${practice.results.insertId}`;
         try {
           await generateFolder(practiceUrl);
-          await generateFolder(`${practiceUrl}/evaluator`);
-          await generateFolder(`${practiceUrl}/submissions`);
+          await generateFolder(path.join(practiceUrl, 'evaluator'));
+          await generateFolder(path.join(practiceUrl, 'submissions'));
         } catch (err) {
           console.error(err);
           res.statusCode = 500;
