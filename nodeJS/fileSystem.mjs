@@ -34,6 +34,7 @@ export const generateFileSystem = async (options = { isProduction: false }) => {
   });
   try {
     await fs.mkdir(`${path}/temp`, { recursive: true });
+    await fs.mkdir(`${path}/logs`, { recursive: true });
     const subjects = await query('SELECT id FROM subject');
     subjects.results.forEach(async subject => {
       const practices = await query(
