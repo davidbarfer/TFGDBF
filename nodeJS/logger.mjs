@@ -25,21 +25,23 @@ export const logger = winston.createLogger({
   transports: [
     // 1. ROTATING ERROR LOGS
     new winston.transports.DailyRotateFile({
-      filename: path.join(BASE_PATH, 'logs', 'error-%DATE%.log'),
+      filename: path.join(BASE_PATH, 'logs', 'error-%DATE%'),
+      extension: '.log',
       datePattern: 'YYYY-MM-DD',
       level: 'error',
-      zippedArchive: true, // Compresses old files into .gz to save massive disk space
-      maxSize: '20m', // Forces rotation early if a file hits 20 Megabytes
-      maxFiles: '14d', // AUTOMATICALLY REMOVES FILES OLDER THAN 14 DAYS
+      zippedArchive: true,
+      maxSize: '20m',
+      maxFiles: '14d',
     }),
 
     // 2. ROTATING COMBINED LOGS
     new winston.transports.DailyRotateFile({
-      filename: path.join(BASE_PATH, 'logs', 'combined-%DATE%.log'),
+      filename: path.join(BASE_PATH, 'logs', 'combined-%DATE%'),
+      extension: '.log',
       datePattern: 'YYYY-MM-DD',
       zippedArchive: true,
       maxSize: '50m',
-      maxFiles: '14d', // Keeps two weeks of history
+      maxFiles: '14d',
     }),
   ],
 });
