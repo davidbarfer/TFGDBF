@@ -23,10 +23,10 @@ const matlabServer = net.createServer(processMatlabRequest);
 
 // Start listening on a port
 matlabServer.listen(Number(process.env.MATLAB_PORT), () => {
-  logger.info(`TCP server listening on: ${matlabServer.address()}`);
+  logger.info(`TCP server listening on: ${process.env.MATLAB_PORT}`);
   // Check if MATLAB client is connected
   if (activeConnections.size === 0) {
-    logger.info('No MATLAB connection found, launching client...');
+    logger.warn('No MATLAB connection found, launching client...');
     try {
       launchMatlabClient();
     } catch (matlabError) {
@@ -34,7 +34,6 @@ matlabServer.listen(Number(process.env.MATLAB_PORT), () => {
     }
   }
 });
-
 generateFileSystem({ isProduction })
   .then(() => logger.info('File system generated sucessfully'))
   .catch(error => {

@@ -1,5 +1,6 @@
 import { exec } from 'child_process';
 import path from 'path';
+import { logger } from './logger.mjs';
 export const matlabPath = path.resolve(process.env.MATLAB_PATH);
 export function connectHandshake(request) {
   const response = {
@@ -24,12 +25,17 @@ export const launchMatlabClient = () => {
       `${matlabPath} -batch "run('${matlabClientPath}')"`,
       (error, stdout, stderr) => {
         if (error) {
-          console.error('MATLAB launch error:', error);
+          logger.error('MATLAB launch error on launchMatlabClient:', {
+            error: error.message,
+            stack: error.stack,
+          });
           reject(error);
           return;
         }
-        console.log('MATLAB output:', stdout);
-        if (stderr) console.error('MATLAB errors:', stderr);
+        logger.info('MATLAB output on launchMatlabClient:', stdout);
+        if (stderr) {
+          logger.error('MATLAB errors on launchMatlabClient:', stderr);
+        }
       }
     );
 
