@@ -1,6 +1,7 @@
 import mysql from 'mysql2/promise';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { logger } from './logger.mjs';
 // Create the connection to database
 export const connection = await mysql.createConnection({
   host: process.env.DB_HOST,
@@ -62,7 +63,10 @@ export async function authenticate(req, res, student = false) {
     }
     return decoded;
   } catch (error) {
-    console.error('Authentication error:', error);
+    logger.error('Authentication error on authenticate:', {
+      error: error.message,
+      stack: error.stack,
+    });
     res.statusCode = 500;
     return res.end(JSON.stringify({ error: 'Internal server error' }));
   }

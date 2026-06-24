@@ -6,7 +6,7 @@ import {
   hashPassword,
   authProviders,
 } from '../database.mjs';
-import { error } from 'node:console';
+import { logger } from '../logger.mjs';
 export const login = async (req, res, params) => {
   let body = '';
   let requestComplete = false;
@@ -22,6 +22,7 @@ export const login = async (req, res, params) => {
     requestComplete = true;
 
     try {
+      logger.info('Authenticating process start');
       // Parse and validate request body
       let data;
       try {
@@ -51,6 +52,10 @@ export const login = async (req, res, params) => {
       const user = users.results[0];
 
       if (!user) {
+        logger.warn('Invalid credentials', {
+          user,
+          error: 'User not found in database',
+        });
         res.statusCode = 401;
         return res.end(JSON.stringify({ error: 'Invalid credentials' }));
       }
@@ -61,12 +66,17 @@ export const login = async (req, res, params) => {
         user.password
       );
       if (!isPasswordValid) {
+        logger.warn('Invalid credentials', {
+          user,
+          error: 'Password is invalid',
+        });
         res.statusCode = 401;
         return res.end(JSON.stringify({ error: 'Invalid credentials' }));
       }
 
       // Account active
       if (!user.is_active) {
+        logger.warn('Account pending approval by an administrator.', { user });
         res.statusCode = 403; // Forbidden
         return res.end(
           JSON.stringify({
@@ -98,6 +108,7 @@ export const login = async (req, res, params) => {
       };
 
       // Send successful response
+      logger.info('Login sucessful', user);
       res.writeHead(200, headers);
       return res.end(
         JSON.stringify({
@@ -109,7 +120,10 @@ export const login = async (req, res, params) => {
         })
       );
     } catch (error) {
-      console.error('Login error:', error);
+      logger.error('Login error:', {
+        error: error.message,
+        stack: error.stack,
+      });
       if (!res.headersSent) {
         res.statusCode = 500;
         res.end(JSON.stringify({ error: 'Internal server error' }));
@@ -121,7 +135,10 @@ export const login = async (req, res, params) => {
   req.on('error', error => {
     if (requestComplete) return;
     requestComplete = true;
-    console.error('Request error:', error);
+    logger.error('Request error:', {
+      error: error.message,
+      stack: error.stack,
+    });
     if (!res.headersSent) {
       res.statusCode = 500;
       res.end(JSON.stringify({ error: 'Error processing request' }));
@@ -137,6 +154,7 @@ export const logout = async (req, res, params) => {
     'Content-Type': 'application/json',
     'Set-Cookie': `token=; HttpOnly; Max-Age=0; Path=/`,
   });
+  logger.info('Logout successful');
   return res.end(JSON.stringify({ message: 'Logout successful' }));
 };
 export const signup = async (req, res, params) => {
@@ -148,6 +166,7 @@ export const signup = async (req, res, params) => {
   });
 
   req.on('end', async () => {
+    logger.info('Auth signup process start');
     try {
       // Parse and validate request body
       const data = JSON.parse(body);
@@ -175,6 +194,7 @@ export const signup = async (req, res, params) => {
         [data.username]
       );
       if (existingUsers.results && existingUsers.results.length > 0) {
+        logger.warn('User already exists', existingUsers.results);
         res.statusCode = 409;
         return res.end(JSON.stringify({ error: 'User already exists' }));
       }
@@ -199,6 +219,7 @@ export const signup = async (req, res, params) => {
       );
 
       // Registration successful
+      logger.info('Registration successful', data);
       res.statusCode = 201;
       return res.end(
         JSON.stringify({
@@ -213,7 +234,10 @@ export const signup = async (req, res, params) => {
         })
       );
     } catch (error) {
-      console.error('Registration error:', error);
+      logger.error('Registration error:', {
+        error: error.message,
+        stack: error.stack,
+      });
       res.statusCode = 500;
       return res.end(JSON.stringify({ error: 'Internal server error' }));
     }

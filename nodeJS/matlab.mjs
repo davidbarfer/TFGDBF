@@ -1,8 +1,9 @@
+import { logger } from './logger.mjs';
 import { connectHandshake, errorHandshake } from './matlabFunctions.mjs';
 export const activeConnections = new Set();
 const handshakeMethods = new Set(['connect', 'evaluate']);
 export const processMatlabRequest = socket => {
-  console.log('MATLAB client connected');
+  logger.info('MATLAB client connected');
   activeConnections.add(socket);
 
   // Set encoding to utf8
@@ -13,7 +14,10 @@ export const processMatlabRequest = socket => {
 
   // Handle data from MATLAB
   socket.on('error', error => {
-    console.error('MATLAB client error:', error.message);
+    logger.error('MATLAB client error:', {
+      error: error.message,
+      stack: error.stack,
+    });
     activeConnections.delete(socket);
   });
 
@@ -30,7 +34,7 @@ export const processMatlabRequest = socket => {
 
         try {
           const request = JSON.parse(msg);
-          console.log('Received from MATLAB:', request);
+          logger.info('Received from MATLAB:', request);
           // Handle different methods
           if (handshakeMethods.has(request.method)) {
             const response = connectHandshake(request);
@@ -38,18 +42,24 @@ export const processMatlabRequest = socket => {
           }
           // Add more method handlers as needed
         } catch (parseError) {
-          console.error('Error parsing message:', msg, 'Error:', parseError);
+          logger.error(`Error parsing message: ${msg}`, {
+            error: parseError.message,
+            stack: parseError.stack,
+          });
           const errorResponse = errorHandshake;
           socket.write(JSON.stringify(errorResponse) + '\n');
         }
       }
     } catch (error) {
-      console.error('Error processing data:', error);
+      logger.error('Error processing data:', {
+        error: error.message,
+        stack: error.stack,
+      });
     }
   });
 
   socket.on('end', () => {
-    console.log('MATLAB client disconnected');
+    logger.info('MATLAB client disconnected');
     activeConnections.delete(socket);
   });
 };

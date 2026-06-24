@@ -1,4 +1,5 @@
 import { routes } from './router/routes.mjs';
+import { logger } from './logger.mjs';
 export const FRONTEND_URL = `http://${process.env.BASE_IP}:${process.env.FRONTEND_PORT}`;
 export const BACKEND_URL = `http://${process.env.BASE_IP}:${process.env.BACKEND_PORT}`;
 // CORS headers configuration
@@ -28,18 +29,28 @@ export const processRequest = async (req, res) => {
   });
   // Set respose
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
+
+  logger.info(`HTTP Request Received`, { method, url });
   // Find matching route
   const route = routes.find(r => r.method === method && r.regex.test(url));
   if (!route) {
-    res.statuscode = 404;
+    res.statusCode = 404;
+    logger.warn(`Route not found for target matching`, { method, url });
     return res.end(JSON.stringify({ error: 'Route not found' }));
   }
   try {
     const params = url.match(route.regex);
     await route.handler(req, res, params);
   } catch (err) {
-    console.error(`[Router error]: ${err}`);
-    res.statuscode = 500;
+    // Write full execution context to error logs
+    logger.error(`Router processing execution error`, {
+      route: route.regex.toString(),
+      method,
+      url,
+      error: err.message,
+      stack: err.stack,
+    });
+    res.statusCode = 500;
     return res.end(JSON.stringify({ error: 'Internal Server Error' }));
   }
 };

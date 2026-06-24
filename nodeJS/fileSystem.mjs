@@ -6,6 +6,7 @@ import unzipper from 'unzipper';
 import { query } from './database.mjs';
 import { executeMatlabFile } from './matlabFunctions.mjs';
 import { pipeline } from 'node:stream/promises';
+import { logger } from './logger.mjs';
 
 const ERROR_MAP = util.getSystemErrorMap();
 const ERROR_CODES = {
@@ -24,16 +25,23 @@ export const generateFileSystem = async (options = { isProduction: false }) => {
     // Remove existing directory and its contents for development purposes
     await fs.rm(path, { recursive: true }).catch(err => {
       if (err.code !== 'ENOENT') {
-        console.error('Error removing directory:', err);
+        logger.error('Error removing directory on generateFileSystem:', {
+          error: err.message,
+          stack: err.stack,
+        });
       }
     });
   }
   // Generate file system structure
   await fs.mkdir(path, { recursive: true }).catch(err => {
-    console.error('Error creating base directory:', err);
+    logger.error('Error creating base directory on generateFileSystem:', {
+      error: err.message,
+      stack: err.stack,
+    });
   });
   try {
     await fs.mkdir(`${path}/temp`, { recursive: true });
+    await fs.mkdir(`${path}/logs`, { recursive: true });
     const subjects = await query('SELECT id FROM subject');
     subjects.results.forEach(async subject => {
       const practices = await query(
@@ -58,7 +66,10 @@ export const generateFileSystem = async (options = { isProduction: false }) => {
       });
     });
   } catch (error) {
-    console.error('Error generating file system:', error);
+    logger.error('Error generating file system on generateFileSystem:', {
+      error: error.message,
+      stack: error.stack,
+    });
   }
 };
 export async function generateFolder(folderPath) {
@@ -66,8 +77,11 @@ export async function generateFolder(folderPath) {
   const folderFullPath = path.join(basePath, folderPath);
   try {
     await fs.mkdir(folderFullPath);
-  } catch (err) {
-    console.error('generateFolder: ', err);
+  } catch (error) {
+    logger.error('Error on generateFolder: ', {
+      error: error.message,
+      stack: error.stack,
+    });
     return 500;
   }
 }
@@ -91,15 +105,24 @@ export async function getFileSubmission(url, file_params) {
           await query('UPDATE submissions SET file_url = NULL WHERE id = ?', [
             file_params.submission_id,
           ]);
-          console.error('File does not exist:', error);
+          logger.error('File does not exist on getFileSubmission:', {
+            error: error.message,
+            stack: error.stack,
+          });
         } else {
-          console.error('Error reading submission file:', error);
+          logger.error('Error reading submission file on getFileSubmission:', {
+            error: error.message,
+            stack: error.stack,
+          });
           return null;
         }
       }
     }
   } catch (error) {
-    console.error('Error querying database for file URL:', error);
+    logger.error('Error querying database for file URL on getFileSubmission:', {
+      error: error.message,
+      stack: error.stack,
+    });
   }
   if (url) {
     const templateFilePath = `${path}/${url}`;
@@ -107,7 +130,10 @@ export async function getFileSubmission(url, file_params) {
       const templateFile = await fs.readFile(templateFilePath, 'utf-8');
       return templateFile;
     } catch (error) {
-      console.error('Error reading template file:', error);
+      logger.error('Error reading template file on getFileSubmission:', {
+        error: error.message,
+        stack: error.stack,
+      });
       return null;
     }
   } else return null;
@@ -118,13 +144,19 @@ export async function saveFileSubmission(url, content, submission_id) {
   try {
     await fs.writeFile(filePath, content, 'utf-8');
   } catch (error) {
-    console.error('Error writing file:', error);
+    logger.error('Error writing file on saveFileSubmission:', {
+      error: error.message,
+      stack: error.stack,
+    });
     return 500;
   }
   try {
     await executeMatlabFile(filePath);
   } catch (error) {
-    console.error('Error executing student submision:', error);
+    logger.error('Error executing student submision on saveFileSubmission:', {
+      error: error.message,
+      stack: error.stack,
+    });
     fs.unlink(filePath);
     return 400;
   }
@@ -134,13 +166,18 @@ export async function saveFileSubmission(url, content, submission_id) {
       [url, submission_id]
     );
     if (fileUrlResponse.results.affectedRows === 0) {
-      console.error('No rows were updated in the database.');
+      logger.error(
+        'No rows were updated in the database on saveFileSubmission.'
+      );
       fs.unlink(filePath);
       return 500;
     }
     return 201;
   } catch (error) {
-    console.error('Error updating database:', error);
+    logger.error('Error updating database on saveFileSubmission:', {
+      error: error.message,
+      stack: error.stack,
+    });
     fs.unlink(filePath);
     return 500;
   }
@@ -151,13 +188,22 @@ export async function saveFileSubmissionTemplate(url, content, practice_id) {
   try {
     await fs.writeFile(filePath, content, 'utf-8');
   } catch (error) {
-    console.error('Error writing file:', error);
+    logger.error('Error writing file on saveFileSubmissionTemplate:', {
+      error: error.message,
+      stack: error.stack,
+    });
     return 500;
   }
   try {
     await executeMatlabFile(filePath);
   } catch (error) {
-    console.error('Error executing student submision:', error);
+    logger.error(
+      'Error executing student submision on saveFileSubmissionTemplate:',
+      {
+        error: error.message,
+        stack: error.stack,
+      }
+    );
     fs.unlink(filePath);
     return 400;
   }
@@ -167,13 +213,18 @@ export async function saveFileSubmissionTemplate(url, content, practice_id) {
       [url, practice_id]
     );
     if (fileUrlResponse.results.affectedRows === 0) {
-      console.error('No rows were updated in the database.');
+      logger.error(
+        'No rows were updated in the database on saveFileSubmissionTemplate.'
+      );
       fs.unlink(filePath);
       return 500;
     }
     return 201;
   } catch (error) {
-    console.error('Error updating database:', error);
+    logger.error('Error updating database on saveFileSubmissionTemplate:', {
+      error: error.message,
+      stack: error.stack,
+    });
     fs.unlink(filePath);
     return 500;
   }
@@ -230,7 +281,10 @@ export async function clearTempDirectory(tempPath) {
     if (err.code === 'ENOENT') {
       return true;
     }
-    console.error('Error clearing TEMP directory:', err);
+    logger.error('Error clearing TEMP directory:', {
+      error: err.message,
+      stack: err.stack,
+    });
     return false;
   }
 }
