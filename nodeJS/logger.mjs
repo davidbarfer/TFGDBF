@@ -1,11 +1,11 @@
 // logger.mjs
-import winston from 'winston';
 import path from 'node:path';
+import winston from 'winston';
+import 'winston-daily-rotate-file';
 import { getFileSystemBasePath } from './fileSystem.mjs';
 
 const BASE_PATH = getFileSystemBasePath();
 
-// Formato base para los archivos (sin colores ANSI para que no ensucien los archivos .log)
 const logFormat = winston.format.printf(
   ({ timestamp, level, message, stack, ...meta }) => {
     const metaString = Object.keys(meta).length
@@ -23,20 +23,30 @@ export const logger = winston.createLogger({
     logFormat
   ),
   transports: [
-    new winston.transports.File({
-      filename: path.join(BASE_PATH, 'logs', 'error.log'),
+    // 1. ROTATING ERROR LOGS
+    new winston.transports.DailyRotateFile({
+      filename: path.join(BASE_PATH, 'logs', 'error-%DATE%.log'),
+      datePattern: 'YYYY-MM-DD',
       level: 'error',
+      zippedArchive: true, // Compresses old files into .gz to save massive disk space
+      maxSize: '20m', // Forces rotation early if a file hits 20 Megabytes
+      maxFiles: '14d', // AUTOMATICALLY REMOVES FILES OLDER THAN 14 DAYS
     }),
-    new winston.transports.File({
-      filename: path.join(BASE_PATH, 'logs', 'combined.log'),
+
+    // 2. ROTATING COMBINED LOGS
+    new winston.transports.DailyRotateFile({
+      filename: path.join(BASE_PATH, 'logs', 'combined-%DATE%.log'),
+      datePattern: 'YYYY-MM-DD',
+      zippedArchive: true,
+      maxSize: '50m',
+      maxFiles: '14d', // Keeps two weeks of history
     }),
   ],
 });
 
+// Console transport condition for development...
 if (process.env.NODE_ENV !== 'production' && !process.argv.includes('--prod')) {
-  // Instanciamos el colorizador de Winston para usarlo manualmente dentro del printf
   const colorizer = winston.format.colorize();
-
   logger.add(
     new winston.transports.Console({
       format: winston.format.combine(
@@ -47,12 +57,7 @@ if (process.env.NODE_ENV !== 'production' && !process.argv.includes('--prod')) {
               ? ` | Meta: ${JSON.stringify(meta)}`
               : '';
             const stackString = stack ? `\n${stack}` : '';
-
-            // 1. Creamos la línea de log estándar en texto plano
             const rawMessage = `[${timestamp}] [${level.toUpperCase()}]: ${message}${metaString}${stackString}`;
-
-            // 2. Le pasamos el nivel actual ('info', 'error', 'warn') al colorizer
-            // para que envuelva TODO el mensaje en el color correcto
             return colorizer.colorize(level, rawMessage);
           }
         )
