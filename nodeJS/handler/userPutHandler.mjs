@@ -1,4 +1,9 @@
-import { authenticate, query, unhandledUserDefinedException } from '../database.mjs';
+import {
+  authenticate,
+  query,
+  unhandledUserDefinedException,
+} from '../database.mjs';
+import { logger } from '../logger.mjs';
 export const putStudentSubmissionGrade = async (req, res, params) => {
   const student_id_submission_id_grade = {
     student_id: params[0].split('/')[2],
@@ -41,13 +46,19 @@ export const putStudentSubmissionGrade = async (req, res, params) => {
           JSON.stringify({ message: 'Submission updated successfully' })
         );
       } catch (error) {
-        console.error('Database query error on create submissions:', error);
+        logger.error('Database query error on putStudentSubmissionGrade:', {
+          error: error.message,
+          stack: error.stack,
+        });
         res.statusCode = 500;
         return res.end(JSON.stringify({ error: 'Internal server error' }));
       }
     });
   } catch (error) {
-    console.error('Database query error on update grade:', error);
+    logger.error('Database query error on putStudentSubmissionGrade:', {
+      error: error.message,
+      stack: error.stack,
+    });
     res.statusCode = 500;
     return res.end(JSON.stringify({ error: 'Internal server error' }));
   }
@@ -57,7 +68,10 @@ export const putPracticeSubmissionsGrade = async (req, res, params) => {
     await authenticate(req, res);
     throw new Error('API ENDPOINT PENDING TO BE DEVELOPED');
   } catch (error) {
-    console.error('Database query error on update grade:', error);
+    logger.error('Database query error on putPracticeSubmissionsGrade:', {
+      error: error.message,
+      stack: error.stack,
+    });
     res.statusCode = 500;
     return res.end(JSON.stringify({ error: 'Internal server error' }));
   }
@@ -99,17 +113,23 @@ export const updateGroup = async (req, res, params) => {
         res.statusCode = 200;
         res.end(JSON.stringify({ message: 'Group have been updated' }));
       } catch (error) {
+        logger.error('Database query error on updateGroup:', {
+          error: error.message,
+          stack: error.stack,
+        });
         if (error.sqlState === unhandledUserDefinedException) {
           res.statusCode = 400;
           return res.end(JSON.stringify({ error: error.sqlMessage }));
         }
-        console.error('ERROR ON GROUP:', error);
         res.statusCode = 500;
         return res.end(JSON.stringify({ error: 'Internal server error' }));
       }
     });
   } catch (error) {
-    console.error('ERROR ON GROUP:', error);
+    logger.error('Database query error on updateGroup:', {
+      error: error.message,
+      stack: error.stack,
+    });
     res.statusCode = 500;
     return res.end(JSON.stringify({ error: 'Internal server error' }));
   }
@@ -154,17 +174,23 @@ export const updateUserStatus = async (req, res, params) => {
         res.statusCode = 200;
         res.end(JSON.stringify({ message: 'User status have been updated' }));
       } catch (error) {
+        logger.error('Database query error on updateUserStatus:', {
+          error: error.message,
+          stack: error.stack,
+        });
         if (error.sqlState === unhandledUserDefinedException) {
           res.statusCode = 400;
           return res.end(JSON.stringify({ error: error.sqlMessage }));
         }
-        console.error(error);
         res.statusCode = 500;
         return res.end(JSON.stringify({ error: 'Internal server error' }));
       }
     });
   } catch (error) {
-    console.error(error);
+    logger.error('Database query error on updateUserStatus:', {
+      error: error.message,
+      stack: error.stack,
+    });
     res.statusCode = 500;
     return res.end(JSON.stringify({ error: 'Internal server error' }));
   }

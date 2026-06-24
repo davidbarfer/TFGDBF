@@ -13,6 +13,7 @@ import {
   generateFolder,
 } from '../fileSystem.mjs';
 import { executeMatlabFiles, extractGrade } from '../matlabFunctions.mjs';
+import { logger } from '../logger.mjs';
 const FILESYSTEM_PATH = getFileSystemBasePath();
 export const postStudentSubmissionFile = async (req, res, params) => {
   try {
@@ -83,7 +84,10 @@ export const postStudentSubmissionFile = async (req, res, params) => {
           }
         }
       } catch (error) {
-        console.error('Database query error on submit file:', error);
+        logger.error('Database query error on postStudentSubmissionFile:', {
+          error: error.message,
+          stack: error.stack,
+        });
         res.statusCode = 500;
         return res.end(JSON.stringify({ error: 'Internal server error' }));
       }
@@ -131,21 +135,30 @@ export const postPracticeCreate = async (req, res, params) => {
           await generateFolder(practiceUrl);
           await generateFolder(path.join(practiceUrl, 'evaluator'));
           await generateFolder(path.join(practiceUrl, 'submissions'));
-        } catch (err) {
-          console.error(err);
+        } catch (error) {
+          logger.error('Generate Folder Error on postPracticeCreate:', {
+            error: error.message,
+            stack: error.stack,
+          });
           res.statusCode = 500;
           return res.end(JSON.stringify({ error: 'Internal server error' }));
         }
         res.statusCode = 201;
         return res.end(JSON.stringify(practice.results));
       } catch (error) {
-        console.error('Database query error on create practice:', error);
+        logger.error('Database query error on postPracticeCreate:', {
+          error: error.message,
+          stack: error.stack,
+        });
         res.statusCode = 500;
         return res.end(JSON.stringify({ error: 'Internal server error' }));
       }
     });
   } catch (error) {
-    console.error('Error checking subject ID:', error);
+    logger.error('Error checking subject ID on postPracticeCreate:', {
+      error: error.message,
+      stack: error.stack,
+    });
     res.statusCode = 500;
     return res.end(JSON.stringify({ error: 'Internal server error' }));
   }
@@ -188,11 +201,14 @@ export const postPracticeGroupsCreate = async (req, res, params) => {
         );
         res.statusCode = 201;
         return res.end(JSON.stringify(group.results));
-      } catch (err) {
-        console.error('Database query error on create group:', err);
-        if (err.sqlState === unhandledUserDefinedException) {
+      } catch (error) {
+        logger.error('Database query error on postPracticeGroupsCreate:', {
+          error: error.message,
+          stack: error.stack,
+        });
+        if (error.sqlState === unhandledUserDefinedException) {
           res.statusCode = 400;
-          return res.end(JSON.stringify({ error: err.sqlMessage }));
+          return res.end(JSON.stringify({ error: error.sqlMessage }));
         }
         res.statusCode = 500;
         return res.end(JSON.stringify({ error: 'Internal server error' }));
@@ -228,7 +244,10 @@ export const postGroupStudent = async (req, res, params) => {
         res.statusCode = 201;
         return res.end(JSON.stringify(result.results));
       } catch (error) {
-        console.error('Database query error on create group:', error);
+        logger.error('Database query error on postGroupStudent:', {
+          error: error.message,
+          stack: error.stack,
+        });
         res.statusCode = 500;
         return res.end(JSON.stringify({ error: 'Internal server error' }));
       }
@@ -324,17 +343,23 @@ export const postPracticeGroupSubmissions = async (req, res, params) => {
         res.statusCode = 201;
         return res.end(JSON.stringify(result));
       } catch (error) {
+        logger.error('Database query error on postPracticeGroupSubmissions:', {
+          error: error.message,
+          stack: error.stack,
+        });
         if (error.sqlState === unhandledUserDefinedException) {
           res.statusCode = 400;
           return res.end(JSON.stringify({ error: error.sqlMessage }));
         }
-        console.error('Database query error on create submissions:', error);
         res.statusCode = 500;
         return res.end(JSON.stringify({ error: 'Internal server error' }));
       }
     });
   } catch (error) {
-    console.error('Database query error on get submissions:', error);
+    logger.error('Database query error on postPracticeGroupSubmissions:', {
+      error: error.message,
+      stack: error.stack,
+    });
     res.statusCode = 500;
     return res.end(JSON.stringify({ error: 'Internal server error' }));
   }
@@ -390,13 +415,19 @@ export const postPracticeSubmissionEdit = async (req, res, params) => {
           JSON.stringify({ message: 'Submission updated successfully' })
         );
       } catch (error) {
-        console.error('Database query error on edit submissions:', error);
+        logger.error('Database query error on postPracticeSubmissionEdit:', {
+          error: error.message,
+          stack: error.stack,
+        });
         res.statusCode = 500;
         return res.end(JSON.stringify({ error: 'Internal server error' }));
       }
     });
   } catch (error) {
-    console.error('Database query error on edit the submission', error);
+    logger.error('Database query error on postPracticeSubmissionEdit:', {
+      error: error.message,
+      stack: error.stack,
+    });
     res.statusCode = 500;
     return res.end(JSON.stringify({ error: 'Internal server error' }));
   }
@@ -438,8 +469,11 @@ export const postPracticeEvaluatorCreate = async (req, res, params) => {
             uploadedFile.filepath,
             `${FILESYSTEM_PATH}/${newPath}`
           );
-        } catch (renameError) {
-          console.error('Error renaming file:', renameError);
+        } catch (error) {
+          logger.error('Error renaming file on postPracticeEvaluatorCreate:', {
+            error: error.message,
+            stack: error.stack,
+          });
           // Fallback: if rename fails, we still have the temp file
         }
         try {
@@ -448,7 +482,9 @@ export const postPracticeEvaluatorCreate = async (req, res, params) => {
             [newPath, practiceId]
           );
           if (fileUrlResponse.results.affectedRows === 0) {
-            console.error('No rows were updated in the database.');
+            logger.error(
+              'No rows were updated in the database on postPracticeEvaluatorCreate.'
+            );
             res.statusCode = 500;
             return res.end(
               JSON.stringify({
@@ -457,7 +493,10 @@ export const postPracticeEvaluatorCreate = async (req, res, params) => {
             );
           }
         } catch (error) {
-          console.error('Error updating database:', error);
+          logger.error('Database query error on postPracticeEvaluatorCreate:', {
+            error: error.message,
+            stack: error.stack,
+          });
           res.statusCode = 500;
           return res.end(
             JSON.stringify({
@@ -489,7 +528,7 @@ export const postPracticeEvaluatorCreate = async (req, res, params) => {
             );
           }
           case 201: {
-            console.log('Submission template file saved succesfully');
+            logger.info('Submission template file saved succesfully');
           }
         }
       }
@@ -502,12 +541,18 @@ export const postPracticeEvaluatorCreate = async (req, res, params) => {
         })
       );
     } catch (error) {
-      console.error('Database query error on edit submissions:', error);
+      logger.error('Database query error on postPracticeEvaluatorCreate:', {
+        error: error.message,
+        stack: error.stack,
+      });
       res.statusCode = 500;
       return res.end(JSON.stringify({ error: 'Internal server error' }));
     }
   } catch (error) {
-    console.error('Database query error on edit the submission', error);
+    logger.error('Database query error on postPracticeEvaluatorCreate:', {
+      error: error.message,
+      stack: error.stack,
+    });
     res.statusCode = 500;
     return res.end(JSON.stringify({ error: 'Internal server error' }));
   }
@@ -570,7 +615,9 @@ export const postStudentSubmissionEvaluate = async (req, res, params) => {
         // Eliminar los archivos descomprimidos
         const DeleteTempFiles = await clearTempDirectory(outputPath);
         if (!DeleteTempFiles) {
-          console.log('Error deleteing temp files');
+          logger.error(
+            'Error deleteing temp files on postStudentSubmissionEvaluate'
+          );
         }
         // Send response
         res.statusCode = 204;
@@ -581,7 +628,10 @@ export const postStudentSubmissionEvaluate = async (req, res, params) => {
           })
         );
       } catch (error) {
-        console.error('Database query error on executing evaluator:', error);
+        logger.error('Database query error on postStudentSubmissionEvaluate:', {
+          error: error.message,
+          stack: error.stack,
+        });
         res.statusCode = 500;
         return res.end(JSON.stringify({ error: 'Internal server error' }));
       }
@@ -671,7 +721,10 @@ export const postPracticeSubmissions = async (req, res, params) => {
         res.statusCode = 201;
         return res.end(JSON.stringify(result));
       } catch (error) {
-        console.error('Database query error on create submissions:', error);
+        logger.error('Database query error on postPracticeSubmissions:', {
+          error: error.message,
+          stack: error.stack,
+        });
         if (error.sqlState === unhandledUserDefinedException) {
           res.statusCode = 400;
           return res.end(JSON.stringify({ error: error.sqlMessage }));
@@ -718,11 +771,14 @@ export const postSubjectCreate = async (req, res, params) => {
         }
         res.statusCode = 201;
         return res.end(JSON.stringify(subject.results));
-      } catch (err) {
-        console.error('Database query error on create subject:', err);
-        if (err.sqlState === unhandledUserDefinedException) {
+      } catch (error) {
+        logger.error('Database query error on postSubjectCreate:', {
+          error: error.message,
+          stack: error.stack,
+        });
+        if (error.sqlState === unhandledUserDefinedException) {
           res.statusCode = 400;
-          return res.end(JSON.stringify({ error: err.sqlMessage }));
+          return res.end(JSON.stringify({ error: error.sqlMessage }));
         }
         res.statusCode = 500;
         return res.end(JSON.stringify({ error: 'Internal server error' }));
@@ -754,8 +810,11 @@ export const postUserSubject = async (req, res, params) => {
       return res.end(
         JSON.stringify({ message: 'Subject assign succesfully ' })
       );
-    } catch (err) {
-      console.log(err);
+    } catch (error) {
+      logger.error('Database query error on postUserSubject:', {
+        error: error.message,
+        stack: error.stack,
+      });
       res.statusCode = 500;
       return res.end(JSON.stringify({ error: 'Internal server error' }));
     }

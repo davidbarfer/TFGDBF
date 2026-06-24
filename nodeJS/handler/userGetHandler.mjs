@@ -1,7 +1,7 @@
-import { error } from 'node:console';
 import { authenticate } from '../database.mjs';
 import { query } from '../database.mjs';
 import { getFileSubmission } from '../fileSystem.mjs';
+import { logger } from '../logger.mjs';
 import { roles } from '../utils.mjs';
 
 export const getSubjects = async (req, res, params) => {
@@ -14,7 +14,10 @@ export const getSubjects = async (req, res, params) => {
     }
     return res.end(JSON.stringify(subjects.results));
   } catch (error) {
-    console.error('Database query error:', error);
+    logger.error('Database query error on getSubjects:', {
+      error: error.message,
+      stack: error.stack,
+    });
     res.statusCode = 500;
     return res.end(JSON.stringify({ error: 'Internal server error' }));
   }
@@ -37,7 +40,10 @@ export const getSubjectsUser = async (req, res, params) => {
     ]);
     return res.end(JSON.stringify(subjects.results));
   } catch (error) {
-    console.error('Database query error:', error);
+    logger.error('Database query error on getSubjectsUser:', {
+      error: error.message,
+      stack: error.stack,
+    });
     res.statusCode = 500;
     return res.end(JSON.stringify({ error: 'Internal server error' }));
   }
@@ -47,7 +53,10 @@ export const getUsers = async (req, res, params) => {
     const users = await query('SELECT * FROM users');
     return res.end(JSON.stringify(users.results));
   } catch (error) {
-    console.error('Database query error:', error);
+    logger.error('Database query error on getUsers:', {
+      error: error.message,
+      stack: error.stack,
+    });
     res.statusCode = 500;
     return res.end(JSON.stringify({ error: 'Internal server error' }));
   }
@@ -85,7 +94,10 @@ export const getUsersByRole = async (req, res, params) => {
     res.statusCode = 200;
     res.end(JSON.stringify(UsersByRole.results));
   } catch (error) {
-    console.error('Database query error:', error);
+    logger.error('Database query error on getUsersByRole:', {
+      error: error.message,
+      stack: error.stack,
+    });
     res.statusCode = 500;
     return res.end(JSON.stringify({ error: 'Internal server error' }));
   }
@@ -103,7 +115,10 @@ export const getUserCurrent = async (req, res, params) => {
     }
     return res.end(JSON.stringify(currentUser.results[0]));
   } catch (error) {
-    console.error('Database query error:', error);
+    logger.error('Database query error on getUserCurrent:', {
+      error: error.message,
+      stack: error.stack,
+    });
     res.statusCode = 500;
     return res.end(JSON.stringify({ error: 'Internal server error' }));
   }
@@ -121,7 +136,10 @@ export const getSubject = async (req, res, params) => {
     }
     return res.end(JSON.stringify(subject.results[0]));
   } catch (error) {
-    console.error('Database query error:', error);
+    logger.error('Database query error on getSubject:', {
+      error: error.message,
+      stack: error.stack,
+    });
     res.statusCode = 500;
     return res.end(JSON.stringify({ error: 'Internal server error' }));
   }
@@ -162,7 +180,10 @@ export const getSubjectStudents = async (req, res, params) => {
     });
     return res.end(JSON.stringify(students.results));
   } catch (error) {
-    console.error('Database query error on get students:', error);
+    logger.error('Database query error on getSubjectStudents:', {
+      error: error.message,
+      stack: error.stack,
+    });
     res.statusCode = 500;
     return res.end(JSON.stringify({ error: 'Internal server error' }));
   }
@@ -181,7 +202,10 @@ export const getSubjectPractices = async (req, res, params) => {
     }
     return res.end(JSON.stringify(practices.results));
   } catch (error) {
-    console.error('Database query error:', error);
+    logger.error('Database query error on getSubjectPractices:', {
+      error: error.message,
+      stack: error.stack,
+    });
     res.statusCode = 500;
     return res.end(JSON.stringify({ error: 'Internal server error' }));
   }
@@ -199,7 +223,10 @@ export const getPractice = async (req, res, params) => {
     }
     return res.end(JSON.stringify(practice.results[0]));
   } catch (error) {
-    console.error('Database query error on get practice:', error);
+    logger.error('Database query error on getPractice:', {
+      error: error.message,
+      stack: error.stack,
+    });
     res.statusCode = 500;
     return res.end(JSON.stringify({ error: 'Internal server error' }));
   }
@@ -230,8 +257,11 @@ export const getPracticeSubmissions = async (req, res, params) => {
     );
     res.statusCode = 200;
     return res.end(JSON.stringify(submissions.results));
-  } catch (err) {
-    console.error('Database query error on get submissions:', err);
+  } catch (error) {
+    logger.error('Database query error on getPracticeSubmissions:', {
+      error: error.message,
+      stack: error.stack,
+    });
     res.statusCode = 500;
     return res.end(JSON.stringify({ error: 'Internal Server Error' }));
   }
@@ -256,7 +286,10 @@ export const getSubjectPracticesGroups = async (req, res, params) => {
     }
     return res.end(JSON.stringify(groups.results));
   } catch (error) {
-    console.error('Database query error on get groups:', error);
+    logger.error('Database query error on getSubjectPracticesGroups:', {
+      error: error.message,
+      stack: error.stack,
+    });
     res.statusCode = 500;
     return res.end(JSON.stringify({ error: 'Internal server error' }));
   }
@@ -274,7 +307,10 @@ export const getGroup = async (req, res, params) => {
     }
     return res.end(JSON.stringify(group.results[0]));
   } catch (error) {
-    console.error('Database query error on get group:', error);
+    logger.error('Database query error on getGroup:', {
+      error: error.message,
+      stack: error.stack,
+    });
     res.statusCode = 500;
     return res.end(JSON.stringify({ error: 'Internal server error' }));
   }
@@ -302,7 +338,10 @@ export const getGroupStudents = async (req, res, params) => {
     }
     return res.end(JSON.stringify(students.results));
   } catch (error) {
-    console.error('Database query error on get students:', error);
+    logger.error('Database query error on getGroupStudents:', {
+      error: error.message,
+      stack: error.stack,
+    });
     res.statusCode = 500;
     return res.end(JSON.stringify({ error: 'Internal server error' }));
   }
@@ -329,7 +368,10 @@ export const getStudentGroups = async (req, res, params) => {
     }
     return res.end(JSON.stringify(groups.results));
   } catch (error) {
-    console.error('Database query error on get groups:', error);
+    logger.error('Database query error on getStudentGroups:', {
+      error: error.message,
+      stack: error.stack,
+    });
     res.statusCode = 500;
     return res.end(JSON.stringify({ error: 'Internal server error' }));
   }
@@ -359,7 +401,10 @@ export const getStudentSubmissions = async (req, res, params) => {
     );
     return res.end(JSON.stringify(submissions.results));
   } catch (error) {
-    console.error('Database query error on get submissions:', error);
+    logger.error('Database query error on getStudentSubmissions:', {
+      error: error.message,
+      stack: error.stack,
+    });
     res.statusCode = 500;
     return res.end(JSON.stringify({ error: 'Internal server error' }));
   }
@@ -390,7 +435,10 @@ export const getStudentSubmission = async (req, res, params) => {
     submission.results[0].subject_id = practice.results[0].subject_id;
     return res.end(JSON.stringify(submission.results[0]));
   } catch (error) {
-    console.error('Database query error on get submission:', error);
+    logger.error('Database query error on getStudentSubmission:', {
+      error: error.message,
+      stack: error.stack,
+    });
     res.statusCode = 500;
     return res.end(JSON.stringify({ error: 'Internal server error' }));
   }
@@ -432,7 +480,10 @@ export const getStudentSubmissionFile = async (req, res, params) => {
     }
     return res.end(JSON.stringify(submissionFile));
   } catch (error) {
-    console.error('Database query error on get submission:', error);
+    logger.error('Database query error on getStudentSubmissionFile:', {
+      error: error.message,
+      stack: error.stack,
+    });
     res.statusCode = 500;
     return res.end(JSON.stringify({ error: 'Internal server error' }));
   }
@@ -450,7 +501,10 @@ export const getSubmission = async (req, res, params) => {
     }
     return res.end(JSON.stringify(submission.results[0]));
   } catch (error) {
-    console.error('Database query error on get submission:', error);
+    logger.error('Database query error on getSubmission:', {
+      error: error.message,
+      stack: error.stack,
+    });
     res.statusCode = 500;
     return res.end(JSON.stringify({ error: 'Internal server error' }));
   }
