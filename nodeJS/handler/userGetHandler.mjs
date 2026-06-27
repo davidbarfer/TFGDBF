@@ -266,6 +266,59 @@ export const getPracticeSubmissions = async (req, res, params) => {
     return res.end(JSON.stringify({ error: 'Internal Server Error' }));
   }
 };
+export const getGroupSubmissions = async (req, res, params) => {
+  const group_id = params[0].split('/')[2];
+  try {
+    await authenticate(req, res);
+    const group = await query(
+      'SELECT id, practice_id FROM practice_groups WHERE id = ?',
+      [group_id]
+    );
+    const usersGroup = await query(
+      'SELECT user_id FROM practice_groups_users WHERE group_id = ?',
+      [group_id]
+    );
+    if (usersGroup.results.length === 0) {
+      res.statusCode = 404;
+      return res.end(
+        JSON.stringify({ error: 'There are no student on this group' })
+      );
+    }
+    const usersId = usersGroup.results.map(user => user.user_id).flat();
+    const usersIdQuery = usersId.map(() => '?').join(',');
+    const queryParams = [...usersId, group.results[0].practice_id];
+    const submissions = await query(
+      `SELECT id, user_id, practice_id, file_url, delivery_date, feedback, grade, evaluator_grade FROM submissions WHERE user_id IN (${usersIdQuery}) AND practice_id = ?`,
+      queryParams
+    );
+    if (submissions.results.length === 0) {
+      res.statusCode = 404;
+      return res.end(
+        JSON.stringify({ error: 'There are no submissions for that practice' })
+      );
+    }
+    await Promise.all(
+      submissions.results.map(async (submission, idx) => {
+        const user = await query(
+          'SELECT id, username, name, surname FROM users WHERE id = ?',
+          [submission.user_id]
+        );
+        submission.user = user.results[0];
+        submissions.results[idx] = submission;
+      })
+    );
+    console.log(submissions.results);
+    res.statusCode = 200;
+    return res.end(JSON.stringify(submissions.results));
+  } catch (error) {
+    logger.error('Database query error on getGroupSubmissions:', {
+      error: error.message,
+      stack: error.stack,
+    });
+    res.statusCode = 500;
+    return res.end(JSON.stringify({ error: 'Internal Server Error' }));
+  }
+};
 export const getSubjectPracticesGroups = async (req, res, params) => {
   const subject_id_practices_id_groups = {
     subject_id: params[0].split('/')[2],

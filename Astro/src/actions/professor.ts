@@ -160,6 +160,25 @@ export const professor = {
       return response.json();
     },
   }),
+  getGroupSubmissions: defineAction({
+    input: z.object({
+      token: z.string(),
+      group_id: z.string(),
+    }),
+    handler: async (input) => {
+      const response = await fetch(
+        `${API_URL}/groups/${input.group_id}/submissions`,
+        {
+          headers: {
+            Authorization: input.token,
+          },
+        }
+      );
+      if (response.status === 404) return [];
+      if (!response.ok) await handleActionError(response);
+      return response.json();
+    },
+  }),
   getSubmission: defineAction({
     input: z.object({
       token: z.string(),
