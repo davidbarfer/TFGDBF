@@ -307,7 +307,6 @@ export const getGroupSubmissions = async (req, res, params) => {
         submissions.results[idx] = submission;
       })
     );
-    console.log(submissions.results);
     res.statusCode = 200;
     return res.end(JSON.stringify(submissions.results));
   } catch (error) {
