@@ -3,6 +3,7 @@ import { actions } from "astro:actions";
 import Layout from "@/layouts/Layout.astro";
 import GroupInfoProfessor from "@/components/groups/groupInfoProfessor.astro";
 import GroupInfoStudent from "@/components/groups/groupInfoStudent.astro";
+import ProfessorSubmissions from "@/components/submissions/professorSubmissions.astro";
 import { parse } from 'cookie';
 import jwt from 'jsonwebtoken'
 import { roles } from "@/consts/users";
@@ -21,15 +22,29 @@ if (token) {
 
 const { data: group, error: groupError } = await Astro.callAction(actions.user.getGroup, { token: token as string, group_id: id as string });
 const { data: practice, error: practicesError } = await Astro.callAction(actions.user.getPractice, { token: token as string, practice_id: String(group?.practice_id) as string });
+const { data: submissions, error: submissionsError } = await Astro.callAction(actions.professor.getGroupSubmissions,{token: token as string, group_id: String(id)});
 ---
 
 <Layout>
-  {user?.role === roles.professor || user?.role === roles.admin ? (
-    <GroupInfoProfessor group={group} practice={practice} token={token} />
+  <article>
+    {user?.role === roles.professor || user?.role === roles.admin ? (
+      <GroupInfoProfessor group={group} practice={practice} token={token} />
+      <section>
+        <h1>Entregas</h1>
+        <ProfessorSubmissions token={token} submissions={submissions} subjectId={practice.subject_id}/>
+      </section>
   ) : ( user?.role === roles.student ? (
     <GroupInfoStudent group={group} practice={practice} token={token} />
   ) : (
     <p>No tienes permiso para ver esta página</p>
     <a href="/"><button>Volver al inicio</button></a>
   ))}
+  </article>
 </Layout>
+
+<style>
+  article {
+    display: flex;
+    flex-direction: column;
+  }
+</style>

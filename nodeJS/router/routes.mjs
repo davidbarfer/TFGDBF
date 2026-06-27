@@ -22,6 +22,7 @@ import {
   getSubjectsUser,
   getUsersByRole,
   getUserCurrent,
+  getGroupSubmissions,
 } from '../handler/userGetHandler.mjs';
 import {
   postPracticeCreate,
@@ -93,6 +94,11 @@ const getRoutes = [
     method: 'GET',
     regex: /^\/practice\/\d+\/submissions$/,
     handler: getPracticeSubmissions,
+  },
+  {
+    method: 'GET',
+    regex: /^\/groups\/\d+\/submissions$/,
+    handler: getGroupSubmissions,
   },
   {
     method: 'GET',
