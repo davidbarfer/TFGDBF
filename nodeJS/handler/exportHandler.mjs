@@ -17,6 +17,7 @@ export const exportPracticeGrades = async (req, res, params) => {
       u.id AS student_id,
       u.username AS student_username,
       u.name AS student_name,
+      u.surname AS student_surname,
       s.grade AS grade,
       s.delivery_date AS graded_at
     FROM users u
@@ -65,8 +66,9 @@ export const exportPracticeGrades = async (req, res, params) => {
         ID_Alumno: row.student_id,
         DNI: row.student_username,
         Nombre: row.student_name,
+        Apellido: row.student_surname,
         Nota: row.grade !== null ? row.grade : 'Sin evaluar',
-        Fecha_Evaluación: row.graded_at || 'N/A',
+        Fecha_Limite_Entrega: row.graded_at || 'N/A',
       });
     });
 
