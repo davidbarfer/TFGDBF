@@ -457,4 +457,23 @@ export const professor = {
       return response.json()
     }
   }),
+  downlaodGradesPractice: defineAction({
+    input: z.object({
+      token: z.string(),
+      practice_id: z.string(),
+    }),
+    handler: async (input) => {
+      const response = await fetch(
+        `${API_URL}/practices/${input.practice_id}/export`,
+        {
+          method: "Get",
+          headers: {
+            Authorization: input.token,
+          },
+        }
+      );
+      if (!response.ok) await handleActionError(response);
+      return response.text()
+    }
+  }),
 };
