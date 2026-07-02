@@ -66,7 +66,9 @@ INSERT INTO practice_groups_users (group_id, user_id) VALUES
 (1, 2),
 (2, 4),
 (5, 2),
-(5, 4);
+(5, 4),
+(4, 4),
+(4, 2);
 
 INSERT INTO submissions (user_id, practice_id, delivery_date, grade) VALUES
 (2, 1, '2023-01-01', 10),

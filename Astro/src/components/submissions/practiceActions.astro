@@ -29,13 +29,14 @@ const isEvaluator = !practice.evaluator_template_url;
   <button>
     <a href={`/asignaturas/${practice.subject_id}/practicas/${practice.id}/evauladores/crear`}>{isEvaluator ? 'Crear evaulador' : 'Editar Evaluador'}</a>
   </button>
+  <button id={`downloadPracticeGrades${practice.id}`} data-download-practice-grades-btn data-token={token} data-practice_id={practice.id}>Descargar Notas</button>
   <button disabled>Ejecutar evaluadores</button>
   <button disabled>Calificar Entregas</button>
 </section>
 
 <style scoped>
   section {
-    display: flex;
+    display: flex;json2csv
     flex-direction: row;
     gap: 1rem;
     justify-content: center;
@@ -52,6 +53,7 @@ const isEvaluator = !practice.evaluator_template_url;
   import { actions } from "astro:actions";
   import { showToast, showToastOnLoad, TOASTSTYLE } from "@/utils/toaster";
   const createSubmissionsBtns = document.querySelectorAll('[data-create-submissions-btn]');
+  const downloadPracticeGradesBtns = document.querySelectorAll('[data-download-practice-grades-btn]');
   createSubmissionsBtns?.forEach((createSubmissionsBtn) => {
     createSubmissionsBtn?.addEventListener('click',async () => {
       const token = createSubmissionsBtn?.dataset.token;
@@ -67,5 +69,28 @@ const isEvaluator = !practice.evaluator_template_url;
         window.location.reload();
       }
     });
+  })
+  downloadPracticeGradesBtns?.forEach((downloadGradesBtn) => {
+    downloadGradesBtn?.addEventListener('click', async () => {
+      const token = downloadGradesBtn?.dataset.token;
+      const practice_id = downloadGradesBtn?.dataset.practice_id;
+      const { data: response, error:  responseError } = await actions.professor.downloadPracticeGrades({ token: token as string, practice_id: String(practice_id)})
+      if(responseError) showToast(responseError.message, TOASTSTYLE.error)
+      if(response) {
+        // 1. Convertimos el string de texto plano a un objeto binario (Blob) indicando que es un CSV
+        const blob = new Blob([response as string], { type: 'text/csv;charset=utf-8;' });
+        // 2. Creamos el enlace temporal para forzar la descarga en el navegador
+        const url = window.URL.createObjectURL(blob);
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.href = url;
+        downloadAnchor.download = `practica_${practice_id}_notas.csv`;
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        // 3. Limpieza
+        document.body.removeChild(downloadAnchor);
+        window.URL.revokeObjectURL(url);
+        showToast('Descarga procesada', TOASTSTYLE.success);
+      }
+    })
   })
 </script>

@@ -12,6 +12,7 @@
 | `/subject/:id/practice/:id/groups` | Return all groups of the practice                 |
 | `/practice/:id`                    | Returns a practice                                |
 | `/practice/:id/submissions`        | Returns all submissions of the practice           |
+| `/practices/:id/export`            | Returns a CSV file with grades of the practice    |
 | `/group/:id`                       | Returns a group                                   |
 | `/group/:id/students`              | Returns all students of the group                 |
 | `/student/:id/groups`              | Returns all groups of the student                 |

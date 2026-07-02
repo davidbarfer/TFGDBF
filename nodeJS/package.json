@@ -19,6 +19,7 @@
   "dependencies": {
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
+    "fast-csv": "^5.0.7",
     "formidable": "^3.5.4",
     "jsonwebtoken": "^9.0.2",
     "mysql2": "^3.14.1",

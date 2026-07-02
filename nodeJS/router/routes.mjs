@@ -1,5 +1,9 @@
 import { login, logout, signup } from '../handler/authHandler.mjs';
 import {
+  exportPracticeGrades,
+  exportSubjectGrades,
+} from '../handler/exportHandler.mjs';
+import {
   deleteGroup,
   deleteStudentGroup,
 } from '../handler/userDeleteHandler.mjs';
@@ -139,6 +143,16 @@ const getRoutes = [
     method: 'GET',
     regex: /^\/submission\/\d+$/,
     handler: getSubmission,
+  },
+  {
+    method: 'GET',
+    regex: /^\/practices\/\d+\/export$/,
+    handler: exportPracticeGrades,
+  },
+  {
+    method: 'GET',
+    regex: /^\/subjects\/\d+\/export$/,
+    handler: exportSubjectGrades,
   },
 ];
 const postRoutes = [
