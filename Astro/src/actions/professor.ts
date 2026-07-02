@@ -457,7 +457,7 @@ export const professor = {
       return response.json()
     }
   }),
-  downlaodGradesPractice: defineAction({
+  downloadPracticeGrades: defineAction({
     input: z.object({
       token: z.string(),
       practice_id: z.string(),
@@ -466,7 +466,26 @@ export const professor = {
       const response = await fetch(
         `${API_URL}/practices/${input.practice_id}/export`,
         {
-          method: "Get",
+          method: "GET",
+          headers: {
+            Authorization: input.token,
+          },
+        }
+      );
+      if (!response.ok) await handleActionError(response);
+      return response.text()
+    }
+  }),
+  downloadSubjectGrades: defineAction({
+    input: z.object({
+      token: z.string(),
+      subject_id: z.string(),
+    }),
+    handler: async (input) => {
+      const response = await fetch(
+        `${API_URL}/subjects/${input.subject_id}/export`,
+        {
+          method: "GET",
           headers: {
             Authorization: input.token,
           },
