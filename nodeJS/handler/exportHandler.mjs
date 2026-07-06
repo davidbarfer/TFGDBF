@@ -235,9 +235,7 @@ export const exportGroupStudents = async (req, res, params) => {
         group_id,
       });
       res.statusCode = 404;
-      return res.end(
-        JSON.stringify({ error: 'No data found for this subkect' })
-      );
+      return res.end(JSON.stringify({ error: 'No data found for this group' }));
     }
 
     // 3. Configurar cabeceras de respuesta HTTP para forzar la descarga de un archivo binario
