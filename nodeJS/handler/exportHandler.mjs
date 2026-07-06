@@ -218,10 +218,15 @@ export const exportGroupStudents = async (req, res, params) => {
       u.id AS student_id,
       u.username AS student_username,
       u.name AS student_name,
-      u.surname AS student_surname
+      u.surname AS student_surname,
+      pg.name AS group_name,
+      pg.practice_group_date AS group_date,
+      pg.start_time,
+      pg.end_time
     FROM users u
     JOIN practice_groups_users pgu ON pgu.user_id = u.id
-    WHERE pgu.group_id = ?
+    JOIN practice_groups pg ON pgu.group_id = pg.id
+    WHERE pg.id = ?
     `;
     const dbResult = await query(sql, [group_id]);
     const rows = dbResult.results;
@@ -261,6 +266,10 @@ export const exportGroupStudents = async (req, res, params) => {
         DNI: row.student_username,
         Nombre: row.student_name,
         Apellidos: row.student_surname,
+        Grupo: row.group_name,
+        Fecha: row.group_date,
+        Hora_Inicio: row.start_time,
+        Hora_Fin: row.end_time,
       };
 
       csvStream.write(csvRow);
