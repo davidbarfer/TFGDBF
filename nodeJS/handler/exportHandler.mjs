@@ -206,3 +206,93 @@ export const exportSubjectGrades = async (req, res, params) => {
     res.end();
   }
 };
+export const exportGroupStudents = async (req, res, params) => {
+  const group_id = params[0].split('/')[2];
+  try {
+    await authenticate(req, res);
+    logger.info('Profesor solicitó exportación de alumnos con fast-csv', {
+      group_id,
+    });
+    const sql = `
+    SELECT 
+      u.id AS student_id,
+      u.username AS student_username,
+      u.name AS student_name,
+      u.surname AS student_surname,
+      pg.name AS group_name,
+      pg.practice_group_date AS group_date,
+      pg.start_time,
+      pg.end_time
+    FROM users u
+    JOIN practice_groups_users pgu ON pgu.user_id = u.id
+    JOIN practice_groups pg ON pgu.group_id = pg.id
+    WHERE pg.id = ?
+    `;
+    const dbResult = await query(sql, [group_id]);
+    const rows = dbResult.results;
+    if (!rows || rows.length === 0) {
+      logger.warn('Exportación vacía: No se encontraron alumnos', {
+        group_id,
+      });
+      res.statusCode = 404;
+      return res.end(JSON.stringify({ error: 'No data found for this group' }));
+    }
+
+    // 3. Configurar cabeceras de respuesta HTTP para forzar la descarga de un archivo binario
+    res.writeHead(200, {
+      'Content-Type': 'text/csv; charset=utf-8',
+      'Content-Disposition': `attachment; filename=grupo_${group_id}_alumnos.csv`,
+      Pragma: 'no-cache',
+      Expires: '0',
+    });
+
+    // 4. Configurar el formateador de fast-csv
+    // headers: true escribe la fila de cabecera automáticamente basándose en las llaves del objeto entregado en .write()
+    // BOM: true añade el Byte Order Mark para que Excel en Windows autodetecte los acentos perfectamente
+    const csvStream = fastcsv.format({
+      headers: true,
+      BOM: true,
+    });
+
+    // 5. Conectar (pipe) el flujo del CSV directamente a la respuesta HTTP de Node
+    csvStream.pipe(res);
+
+    // 6. Escribir los registros mapeados fila por fila en el stream
+    rows.forEach(row => {
+      const csvRow = {
+        ID_Alumno: row.student_id,
+        DNI: row.student_username,
+        Nombre: row.student_name,
+        Apellidos: row.student_surname,
+        Grupo: row.group_name,
+        Fecha: row.group_date,
+        Hora_Inicio: row.start_time,
+        Hora_Fin: row.end_time,
+      };
+
+      csvStream.write(csvRow);
+    });
+
+    // 7. Finalizar el stream para indicar a HTTP que el envío ha terminado
+    csvStream.end();
+    logger.info('Archivo CSV transmitido con éxito vía Streams', {
+      group_id,
+      total_rows: rows.length,
+    });
+  } catch (error) {
+    logger.error('Error al exportar grupo de la asignatura', {
+      group_id,
+      error: error.message,
+      stack: error.stack,
+    });
+
+    // Si las cabeceras HTTP ya se enviaron, no podemos responder con JSON de error, cerramos la conexión abruptamente
+    if (!res.headersSent) {
+      res.statusCode = 500;
+      return res.end(
+        JSON.stringify({ error: 'Internal server error during export' })
+      );
+    }
+    res.end();
+  }
+};

@@ -63,6 +63,7 @@ const { data: students, error: studentsError } = await Astro.callAction(
       </main>
       <button slot="closeModal">Cancelar</button>
     </Modal>
+    <button id="downloadGroupStudents" data-token={token} data-group_id={group?.id}>Descargar Lista Alumnos</button>
   </section>
   <section>
     <h2>Alumnos</h2>
@@ -123,6 +124,7 @@ const { data: students, error: studentsError } = await Astro.callAction(
     "createSubmissionsGroupBtn"
   );
   const deleteStudentBtn = document.getElementById("deleteStudentBtn");
+  const downloadGroupStudentsBtn = document.getElementById("downloadGroupStudents");
   deleteGroupBtn?.addEventListener("click", async () => {
     const id = deleteGroupBtn?.dataset.id;
     const token = deleteGroupBtn?.dataset.token;
@@ -175,6 +177,27 @@ const { data: students, error: studentsError } = await Astro.callAction(
     } else {
       showToastOnLoad("Entregas creadas", TOASTSTYLE.success);
       window.location.reload();
+    }
+  });
+  downloadGroupStudentsBtn?.addEventListener("click", async () => {
+    const token = downloadGroupStudentsBtn?.dataset.token;
+    const group_id = downloadGroupStudentsBtn?.dataset.group_id;
+    const { data: response, error:  responseError } = await actions.professor.downloadGroupStudents({ token: token as string, group_id: String(group_id)})
+    if(responseError) showToast(responseError.message, TOASTSTYLE.error)
+    if(response) {
+      // 1. Convertimos el string de texto plano a un objeto binario (Blob) indicando que es un CSV
+      const blob = new Blob([response as string], { type: 'text/csv;charset=utf-8;' });
+      // 2. Creamos el enlace temporal para forzar la descarga en el navegador
+      const url = window.URL.createObjectURL(blob);
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.href = url;
+      downloadAnchor.download = `grupo_${group_id}_alumnos.csv`;
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      // 3. Limpieza
+      document.body.removeChild(downloadAnchor);
+      window.URL.revokeObjectURL(url);
+      showToast('Descarga procesada', TOASTSTYLE.success);
     }
   });
 </script>

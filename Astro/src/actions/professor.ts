@@ -2,6 +2,7 @@ import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
 import { API_URL } from "@/utils/enviroment";
 import { handleActionError } from "@/utils/handler";
+import type { group } from "node:console";
 
 export const professor = {
   getSubjectsStudents: defineAction({
@@ -484,6 +485,25 @@ export const professor = {
     handler: async (input) => {
       const response = await fetch(
         `${API_URL}/subjects/${input.subject_id}/export`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: input.token,
+          },
+        }
+      );
+      if (!response.ok) await handleActionError(response);
+      return response.text()
+    }
+  }),
+  downloadGroupStudents: defineAction({
+    input: z.object({
+      token: z.string(),
+      group_id: z.string(),
+    }),
+    handler: async (input) => {
+      const response = await fetch(
+        `${API_URL}/groups/${input.group_id}/export`,
         {
           method: "GET",
           headers: {
