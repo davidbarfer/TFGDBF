@@ -163,7 +163,7 @@ export const postPracticeCreate = async (req, res, params) => {
     return res.end(JSON.stringify({ error: 'Internal server error' }));
   }
 };
-export const postPracticeGroupsCreate = async (req, res, params) => {
+export const createGroups = async (req, res, params) => {
   try {
     await authenticate(req, res);
     let body = '';

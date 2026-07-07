@@ -86,7 +86,7 @@ if (form) {
           start_time: formData.get(`start_time_${i}`)?.toString() || '',
           end_time: formData.get(`end_time_${i}`)?.toString() || ''
         };
-        groupPromises.push(actions.professor.createGroups({ token: token as string, subject_id: String(subject_id), group_data: groupData }));
+        groupPromises.push(actions.professor.createGroups({ token: token as string, group_data: groupData }));
       }
       
       const results = await Promise.all(groupPromises);

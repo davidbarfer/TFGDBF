@@ -116,7 +116,6 @@ export const professor = {
   createGroups: defineAction({
     input: z.object({
       token: z.string(),
-      subject_id: z.string(),
       group_data: z.object({
         practice_id: z.string(),
         group_name: z.string(),
@@ -128,7 +127,7 @@ export const professor = {
     }),
     handler: async (input) => {
       const response = await fetch(
-        `${API_URL}/subject/${input.subject_id}/practice/${input.group_data.practice_id}/groups/create`,
+        `${API_URL}/groups/create`,
         {
           method: "POST",
           headers: {
