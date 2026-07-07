@@ -116,26 +116,30 @@ export const professor = {
   createGroups: defineAction({
     input: z.object({
       token: z.string(),
-      subject_id: z.string(),
-      group_data: z.object({
-        practice_id: z.string(),
-        group_name: z.string(),
-        max_participants: z.number(),
-        group_date: z.string(),
-        start_time: z.string(),
-        end_time: z.string(),
-      }),
+      practice_id: z.string(),
+      groups: z.array(
+        z.object({
+          group_name: z.string(),
+          max_participants: z.number(),
+          group_date: z.string(),
+          start_time: z.string(),
+          end_time: z.string(),
+        })
+      ),
     }),
     handler: async (input) => {
       const response = await fetch(
-        `${API_URL}/subject/${input.subject_id}/practice/${input.group_data.practice_id}/groups/create`,
+        `${API_URL}/groups/create`,
         {
           method: "POST",
           headers: {
             Authorization: input.token,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(input.group_data),
+          body: JSON.stringify({
+            practice_id: input.practice_id,
+            groups: input.groups
+          }),
         }
       );
       if (!response.ok) await handleActionError(response);

@@ -14,8 +14,11 @@ const { data: practices, error } = await Astro.callAction(actions.user.getPracti
         <option value={practice.id}>{practice.name}</option>
       ))}
     </select>
-    <label for="groupsNumber">Numero de grupos</label>
-    <input type="number" id="groupsNumber" name="groupsNumber" required>
+    <section id="numberGroups">
+    <label for="groupsNumber">Número de grupos</label>
+      <input type="number" id="groupsNumber" name="groupsNumber" required>
+      <p>Cambiar el número de grupos borrara todos los datos introduccidos</p>
+    </section>
     <section id="groups"></section>
     <button type="submit">Crear</button>
   </form>
@@ -75,52 +78,34 @@ if (form) {
     }
 
     try {
-      const groupPromises = [];
+      const groupsPayload = [];
       
       for (let i = 0; i < Number(groupsNumberVal); i++) {
-        const groupData = {
-          practice_id: practice_id.toString(),
+        groupsPayload.push({
           group_name: formData.get(`group_name_${i}`)?.toString() || `${i + 1}`,
           max_participants: Number(formData.get(`max_participants_${i}`)),
           group_date: formData.get(`group_date_${i}`)?.toString() || '',
           start_time: formData.get(`start_time_${i}`)?.toString() || '',
           end_time: formData.get(`end_time_${i}`)?.toString() || ''
-        };
-        groupPromises.push(actions.professor.createGroups({ token: token as string, subject_id: String(subject_id), group_data: groupData }));
+        });
       }
-      
-      const results = await Promise.all(groupPromises);
-      
-      // Separamos los éxitos de los fallos mapeando con sus nombres reales
-      const successGroups: string[] = [];
-      const errorMessages: string[] = [];
 
-      results.forEach((result, index) => {
-        const groupName = formData.get(`group_name_${index}`)?.toString() || `${index + 1}`;
-        if (result.error) {
-          errorMessages.push(`Grupo ${groupName}: ${result.error?.message || 'Error al crear'}`);
-        } else {
-          successGroups.push(`Grupo ${groupName}`);
-        }
+      // ENVÍO ÚNICO: Mandamos todo el paquete en una sola petición HTTP
+      const { data , error } = await actions.professor.createGroups({
+        token: token as string,
+        practice_id: practice_id as string,
+        groups: groupsPayload 
       });
-
-      if (errorMessages.length > 0) {
-        // Al haber errores, notificamos qué se creó bien y qué falló usando showToastOnLoad antes del reload
-        if (successGroups.length > 0) {
-          showToastOnLoad(`Creados con éxito: ${successGroups.join(', ')}`, TOASTSTYLE.success);
-        }
-        showToastOnLoad(`No se pudieron crear:\n${errorMessages.join('\n')}`, TOASTSTYLE.error);
-        
-        // Forzamos la recarga de la página para limpiar el formulario
-        window.location.reload();
+      
+      if (error) {
+        showToast(error.message || 'Error al intentar generar el lote de grupos', TOASTSTYLE.error);
       } else {
-        // Todo fue perfecto, redirigimos a la asignatura
-        showToastOnLoad('Todos los grupos fueron creados exitosamente', TOASTSTYLE.success);
+        showToastOnLoad('Todos los grupos fueron creados exitosamente en bloque', TOASTSTYLE.success);
         window.location.href = `/asignaturas/${subject_id}`;
       }
+
     } catch (error: any) {
-      showToastOnLoad(`Error inesperado: ${error.message || error}`, TOASTSTYLE.error);
-      window.location.reload();
+      showToast(`Error inesperado al procesar la solicitud:\n${error.message || error}`, TOASTSTYLE.error);
     }
   });
 }
@@ -138,5 +123,16 @@ renderGroups(Number(groupsNumber?.value || 0));
     display: flex;
     flex-direction: column;
     gap: 1rem;
+  }
+  #numberGroups {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    align-items: center;
+  }
+  #numberGroups p {
+    font-style: italic;
+    font-weight: bold;
+    color: var(--color-error)
   }
 </style>

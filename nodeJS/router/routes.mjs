@@ -31,7 +31,6 @@ import {
 } from '../handler/userGetHandler.mjs';
 import {
   postPracticeCreate,
-  postPracticeGroupsCreate,
   postGroupStudent,
   postStudentSubmissionFile,
   postPracticeSubmissions,
@@ -41,6 +40,7 @@ import {
   postStudentSubmissionEvaluate,
   postSubjectCreate,
   postUserSubject,
+  createGroups,
 } from '../handler/userPostHandler.mjs';
 import {
   putPracticeSubmissionsGrade,
@@ -189,8 +189,8 @@ const postRoutes = [
   },
   {
     method: 'POST',
-    regex: /^\/subject\/\d+\/practice\/\d+\/groups\/create$/,
-    handler: postPracticeGroupsCreate,
+    regex: /^\/groups\/create$/,
+    handler: createGroups,
   },
   {
     method: 'POST',
