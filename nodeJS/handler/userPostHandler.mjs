@@ -174,35 +174,54 @@ export const createGroups = async (req, res, params) => {
       try {
         const data = JSON.parse(body);
         if (
-          !data.group_name ||
-          !data.max_participants ||
-          !data.group_date ||
-          !data.start_time ||
-          !data.end_time
+          !data.groups ||
+          !Array.isArray(data.groups) ||
+          data.groups.length === 0
         ) {
           res.statusCode = 400;
           return res.end(
-            JSON.stringify({
-              error:
-                'Group name, max participants, group date, start time and end time are required',
-            })
+            JSON.stringify({ error: 'Se requiere un array de grupos válido.' })
           );
         }
-        const group = await query(
-          'INSERT INTO practice_groups (practice_id, name, max_participants, practice_group_date, start_time, end_time) VALUES (?, ?, ?, ?, ?, ?)',
-          [
+        const valuesPlaceholder = [];
+        const flatValues = [];
+        for (const g of data.groups) {
+          if (
+            !g.group_name ||
+            !g.max_participants ||
+            !g.group_date ||
+            !g.start_time ||
+            !g.end_time
+          ) {
+            res.statusCode = 400;
+            return res.end(
+              JSON.stringify({
+                error: 'Todos los campos son obligatorios en cada grupo.',
+              })
+            );
+          }
+          valuesPlaceholder.push('(?, ?, ?, ?, ?, ?)');
+          flatValues.push(
             data.practice_id,
-            data.group_name,
-            data.max_participants,
-            data.group_date,
-            data.start_time,
-            data.end_time,
-          ]
-        );
+            g.group_name,
+            g.max_participants,
+            g.group_date,
+            g.start_time,
+            g.end_time
+          );
+        }
+        const rawQuery = `
+          INSERT INTO practice_groups 
+          (practice_id, name, max_participants, practice_group_date, start_time, end_time) 
+          VALUES ${valuesPlaceholder.join(', ')}
+        `;
+        const group = await query(rawQuery, flatValues);
         res.statusCode = 201;
-        return res.end(JSON.stringify(group.results));
+        return res.end(
+          JSON.stringify({ success: true, results: group.results })
+        );
       } catch (error) {
-        logger.error('Database query error on postPracticeGroupsCreate:', {
+        logger.error('Database query error on bulk postPracticeGroupsCreate:', {
           error: error.message,
           stack: error.stack,
         });
