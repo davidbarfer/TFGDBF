@@ -23,8 +23,9 @@ const { data: subjects, error: subjectsError } = await Astro.callAction(actions.
           <Modal id={`deleteSubjectModal${subject.id}`} btnText="Eliminar">
             <main slot="mainModal">
               <h1>Atención</h1>
-              <p>Va usted a elimnar la asignatura {subject.name}. Esta acción es irreversible.</p>
-              <p>Los alumnos podrán seguir teniendo visibilidad de las entregas de la asignatura</p>
+              <p>Va usted a elimnar la asignatura {subject.name}.</p>
+              <p>Esta acción es <strong>SOLAMENTE</strong> reversible por acceso directo a la base de datos</p>
+              <p>Los alumnos podrán seguir teniendo visibilidad de sus entregas previamente creadas</p>
               <button
                 id={`deleteSubjectBtn${subject.id}`}
                 data-delete-subject-btn
