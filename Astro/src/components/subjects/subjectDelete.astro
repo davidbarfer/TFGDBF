@@ -1,0 +1,72 @@
+---
+import { actions } from "astro:actions";
+import Modal from "@/components/utils/Modal.astro";
+const { token } = Astro.props;
+const { data: subjects, error: subjectsError } = await Astro.callAction(actions.user.getSubjects, {token})
+---
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Curso (Año)</th>
+      <th>Titulación</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    {subjects?.map((subject : any) => (
+      <tr>
+        <td>{subject.name}</td>
+        <td>{subject.course}</td>
+        <td>{subject.degree}</td>
+        <td>
+          <Modal id={`deleteSubjectModal${subject.id}`} btnText="Eliminar">
+            <main slot="mainModal">
+              <h1>Atención</h1>
+              <p>Va usted a elimnar la asignatura {subject.name}.</p>
+              <p>Esta acción es <strong>SOLAMENTE</strong> reversible por acceso directo a la base de datos</p>
+              <p>Los alumnos podrán seguir teniendo visibilidad de sus entregas previamente creadas</p>
+              <button
+                id={`deleteSubjectBtn${subject.id}`}
+                data-delete-subject-btn
+                data-subject_id={subject.id}
+                data-token={token}
+              >
+                Aceptar
+              </button>
+            </main>
+            <button slot="closeModal">Cancelar</button>
+          </Modal>
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
+
+<script>
+import { actions } from "astro:actions";
+import { showToast, showToastOnLoad, TOASTSTYLE } from "@/utils/toaster";
+const deleteSubjectBtns = document.querySelectorAll('[data-delete-subject-btn]');
+deleteSubjectBtns?.forEach((deleteSubjectBtn) => {
+  deleteSubjectBtn?.addEventListener('click', async() => {
+    const token = deleteSubjectBtn?.dataset.token;
+    const subject_id = deleteSubjectBtn?.dataset.subject_id;
+    const { data: response, error: responseError } = await actions.professor.deleteSubject({ token: token as string, subject_id: String(subject_id) });
+      if(responseError) {
+        const modal = document.getElementById(`deleteSubjectModal${subject_id}`) as HTMLDialogElement;
+        modal?.close()
+        showToast(responseError.message, TOASTSTYLE.error);
+      }
+      else {
+        showToastOnLoad('Asignatura Eliminada', TOASTSTYLE.success);
+        window.location.reload();
+      }
+  })
+})
+</script>
+
+<style>
+  table {
+    width: 100%;
+  }
+</style>

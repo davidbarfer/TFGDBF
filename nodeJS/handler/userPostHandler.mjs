@@ -2,7 +2,11 @@ import formidable from 'formidable';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { authenticate } from '../database.mjs';
-import { query, unhandledUserDefinedException } from '../database.mjs';
+import {
+  query,
+  unhandledUserDefinedException,
+  checkSubjectStatus,
+} from '../database.mjs';
 import { parseDateMatlab, add7days } from '../utils.mjs';
 import {
   saveFileSubmission,
@@ -49,6 +53,7 @@ export const postStudentSubmissionFile = async (req, res, params) => {
             })
           );
         }
+        await checkSubjectStatus(data.url_params.subject_id);
         data.url_params.creation_date = parseDateMatlab(
           data.url_params.creation_date
         );
@@ -88,8 +93,12 @@ export const postStudentSubmissionFile = async (req, res, params) => {
           error: error.message,
           stack: error.stack,
         });
-        res.statusCode = 500;
-        return res.end(JSON.stringify({ error: 'Internal server error' }));
+        res.statusCode = error.statusCode || 500;
+        return res.end(
+          JSON.stringify({
+            error: error.statusCode ? error.message : 'Internal server error',
+          })
+        );
       }
     });
   } catch {
@@ -110,6 +119,7 @@ export const postPracticeCreate = async (req, res, params) => {
 
     req.on('end', async () => {
       try {
+        await checkSubjectStatus(subject_id_practices);
         // Parse and validate request body
         const data = JSON.parse(body);
         // Simple validation
@@ -150,8 +160,12 @@ export const postPracticeCreate = async (req, res, params) => {
           error: error.message,
           stack: error.stack,
         });
-        res.statusCode = 500;
-        return res.end(JSON.stringify({ error: 'Internal server error' }));
+        res.statusCode = error.statusCode || 500;
+        return res.end(
+          JSON.stringify({
+            error: error.statusCode ? error.message : 'Internal server error',
+          })
+        );
       }
     });
   } catch (error) {
@@ -182,6 +196,13 @@ export const createGroups = async (req, res, params) => {
           return res.end(
             JSON.stringify({ error: 'Se requiere un array de grupos válido.' })
           );
+        }
+        const practiceCheck = await query(
+          'SELECT subject_id FROM practice WHERE id = ?',
+          [data.practice_id]
+        );
+        if (practiceCheck.results.length > 0) {
+          await checkSubjectStatus(practiceCheck.results[0].subject_id);
         }
         const valuesPlaceholder = [];
         const flatValues = [];
@@ -229,8 +250,12 @@ export const createGroups = async (req, res, params) => {
           res.statusCode = 400;
           return res.end(JSON.stringify({ error: error.sqlMessage }));
         }
-        res.statusCode = 500;
-        return res.end(JSON.stringify({ error: 'Internal server error' }));
+        res.statusCode = error.statusCode || 500;
+        return res.end(
+          JSON.stringify({
+            error: error.statusCode ? error.message : 'Internal server error',
+          })
+        );
       }
     });
   } catch {
@@ -256,6 +281,13 @@ export const postGroupStudent = async (req, res, params) => {
             })
           );
         }
+        const pathCheck = await query(
+          'SELECT p.subject_id FROM practice_groups pg JOIN practice p ON pg.practice_id = p.id WHERE pg.id = ?',
+          [data.group_id]
+        );
+        if (pathCheck.results.length > 0) {
+          await checkSubjectStatus(pathCheck.results[0].subject_id);
+        }
         const result = await query(
           'INSERT INTO practice_groups_users (group_id, user_id) VALUES (?, ?)',
           [data.group_id, data.student_id]
@@ -267,8 +299,12 @@ export const postGroupStudent = async (req, res, params) => {
           error: error.message,
           stack: error.stack,
         });
-        res.statusCode = 500;
-        return res.end(JSON.stringify({ error: 'Internal server error' }));
+        res.statusCode = error.statusCode || 500;
+        return res.end(
+          JSON.stringify({
+            error: error.statusCode ? error.message : 'Internal server error',
+          })
+        );
       }
     });
   } catch {
@@ -305,6 +341,13 @@ export const postPracticeGroupSubmissions = async (req, res, params) => {
               error: 'Group not found',
             })
           );
+        }
+        const practiceCheck = await query(
+          'SELECT subject_id FROM practice WHERE id = ?',
+          [group.results[0].practice_id]
+        );
+        if (practiceCheck.results.length > 0) {
+          await checkSubjectStatus(practiceCheck.results[0].subject_id);
         }
         if (Number(group.results[0].practice_id) !== Number(data.practice_id)) {
           res.statusCode = 400;
@@ -370,8 +413,12 @@ export const postPracticeGroupSubmissions = async (req, res, params) => {
           res.statusCode = 400;
           return res.end(JSON.stringify({ error: error.sqlMessage }));
         }
-        res.statusCode = 500;
-        return res.end(JSON.stringify({ error: 'Internal server error' }));
+        res.statusCode = error.statusCode || 500;
+        return res.end(
+          JSON.stringify({
+            error: error.statusCode ? error.message : 'Internal server error',
+          })
+        );
       }
     });
   } catch (error) {
@@ -477,6 +524,7 @@ export const postPracticeEvaluatorCreate = async (req, res, params) => {
           return res.end(JSON.stringify({ error: 'Internal server error' }));
         }
         const subject_id = result.results[0].subject_id;
+        await checkSubjectStatus(subject_id);
         // 2. Define your new name
         // Example: "practice_123_evaluator.zip"
         const newFileName = `evaluator_S${subject_id}_P${practiceId}${path.extname(uploadedFile.originalFilename || '.zip')}`;
@@ -564,8 +612,12 @@ export const postPracticeEvaluatorCreate = async (req, res, params) => {
         error: error.message,
         stack: error.stack,
       });
-      res.statusCode = 500;
-      return res.end(JSON.stringify({ error: 'Internal server error' }));
+      res.statusCode = error.statusCode || 500;
+      return res.end(
+        JSON.stringify({
+          error: error.statusCode ? error.message : 'Internal server error',
+        })
+      );
     }
   } catch (error) {
     logger.error('Database query error on postPracticeEvaluatorCreate:', {
@@ -817,6 +869,7 @@ export const postUserSubject = async (req, res, params) => {
   req.on('data', async () => {});
   req.on('end', async () => {
     try {
+      await checkSubjectStatus(user_id_subject_id.subject_id);
       const result = await query(
         'INSERT INTO users_subjects (user_id, subject_id) VALUES (?, ?)',
         [user_id_subject_id.user_id, user_id_subject_id.subject_id]
@@ -834,8 +887,12 @@ export const postUserSubject = async (req, res, params) => {
         error: error.message,
         stack: error.stack,
       });
-      res.statusCode = 500;
-      return res.end(JSON.stringify({ error: 'Internal server error' }));
+      res.statusCode = error.statusCode || 500;
+      return res.end(
+        JSON.stringify({
+          error: error.statusCode ? error.message : 'Internal server error',
+        })
+      );
     }
   });
 };

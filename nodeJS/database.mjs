@@ -72,3 +72,13 @@ export async function authenticate(req, res, student = false) {
   }
 }
 export const unhandledUserDefinedException = '45000';
+export const checkSubjectStatus = async subject_id => {
+  const check = await query('SELECT is_deleted FROM subject WHERE id = ?', [
+    subject_id,
+  ]);
+  if (check.results.length === 0 || check.results[0].is_deleted) {
+    const error = new Error('Subject is deleted or non-existent');
+    error.statusCode = 404;
+    throw error;
+  }
+};

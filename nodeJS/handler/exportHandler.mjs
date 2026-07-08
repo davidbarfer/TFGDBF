@@ -1,4 +1,4 @@
-import { authenticate, query } from '../database.mjs';
+import { authenticate, query, checkSubjectStatus } from '../database.mjs';
 import { logger } from '../logger.mjs';
 import * as fastcsv from 'fast-csv';
 
@@ -9,7 +9,13 @@ export const exportPracticeGrades = async (req, res, params) => {
     logger.info('Profesor solicitó exportación de notas con fast-csv', {
       practice_id,
     });
-
+    const practiceCheck = await query(
+      'SELECT subject_id FROM practice WHERE id = ?',
+      [practice_id]
+    );
+    if (practiceCheck.results.length > 0) {
+      await checkSubjectStatus(practiceCheck.results[0].subject_id);
+    }
     const sql = `
     SELECT 
       u.id AS student_id,
@@ -85,9 +91,13 @@ export const exportPracticeGrades = async (req, res, params) => {
 
     // Si las cabeceras HTTP ya se enviaron, no podemos responder con JSON de error, cerramos la conexión abruptamente
     if (!res.headersSent) {
-      res.statusCode = 500;
+      res.statusCode = error.statusCode || 500;
       return res.end(
-        JSON.stringify({ error: 'Internal server error during export' })
+        JSON.stringify({
+          error: error.statusCode
+            ? error.message
+            : 'Internal server error during export',
+        })
       );
     }
     res.end();
@@ -100,7 +110,7 @@ export const exportSubjectGrades = async (req, res, params) => {
     logger.info('Profesor solicitó exportación de notas con fast-csv', {
       subject_id,
     });
-
+    await checkSubjectStatus(subject_id);
     const practicesSql = `SELECT id, name FROM practice WHERE subject_id = ? ORDER BY id`;
     const dbPractices = await query(practicesSql, [subject_id]);
     const practices = dbPractices.results || [];
@@ -198,9 +208,13 @@ export const exportSubjectGrades = async (req, res, params) => {
 
     // Si las cabeceras HTTP ya se enviaron, no podemos responder con JSON de error, cerramos la conexión abruptamente
     if (!res.headersSent) {
-      res.statusCode = 500;
+      res.statusCode = error.statusCode || 500;
       return res.end(
-        JSON.stringify({ error: 'Internal server error during export' })
+        JSON.stringify({
+          error: error.statusCode
+            ? error.message
+            : 'Internal server error during export',
+        })
       );
     }
     res.end();
@@ -213,6 +227,13 @@ export const exportGroupStudents = async (req, res, params) => {
     logger.info('Profesor solicitó exportación de alumnos con fast-csv', {
       group_id,
     });
+    const pathCheck = await query(
+      'SELECT p.subject_id FROM practice_groups pg JOIN practice p ON pg.practice_id = p.id WHERE pg.id = ?',
+      [group_id]
+    );
+    if (pathCheck.results.length > 0) {
+      await checkSubjectStatus(pathCheck.results[0].subject_id);
+    }
     const sql = `
     SELECT 
       u.id AS student_id,
@@ -288,9 +309,13 @@ export const exportGroupStudents = async (req, res, params) => {
 
     // Si las cabeceras HTTP ya se enviaron, no podemos responder con JSON de error, cerramos la conexión abruptamente
     if (!res.headersSent) {
-      res.statusCode = 500;
+      res.statusCode = error.statusCode || 500;
       return res.end(
-        JSON.stringify({ error: 'Internal server error during export' })
+        JSON.stringify({
+          error: error.statusCode
+            ? error.message
+            : 'Internal server error during export',
+        })
       );
     }
     res.end();

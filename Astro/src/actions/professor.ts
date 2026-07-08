@@ -87,6 +87,22 @@ export const professor = {
       return response.json();
     },
   }),
+  deleteSubject: defineAction({
+    input: z.object({
+      token: z.string(),
+      subject_id: z.string(),
+    }),
+    handler: async (input) => {
+      const response = await fetch(`${API_URL}/subjects/${input.subject_id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: input.token,
+        },
+      });
+      if (!response.ok) await handleActionError(response);
+      return response.json();
+    },
+  }),
   createPractice: defineAction({
     input: z.object({
       token: z.string(),

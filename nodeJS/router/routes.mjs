@@ -7,6 +7,7 @@ import {
 import {
   deleteGroup,
   deleteStudentGroup,
+  deleteSubject,
 } from '../handler/userDeleteHandler.mjs';
 import {
   getSubject,
@@ -265,6 +266,11 @@ const deleteRoutes = [
     method: 'DELETE',
     regex: /^\/group\/\d+\/student\/\d+$/,
     handler: deleteStudentGroup,
+  },
+  {
+    method: 'DELETE',
+    regex: /^\/subjects\/\d+$/,
+    handler: deleteSubject,
   },
 ];
 export const routes = [

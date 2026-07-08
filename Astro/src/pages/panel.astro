@@ -21,22 +21,44 @@ const isProfessor = user?.role === roles.professor;
 ---
 
 <Layout>
- { (isAdmin || isProfessor) ? (
-  <section>
-  <h1>Profesores pendientes de aprobación</h1>
-  <UserStatusList token = {token} role = {roles.professor} />
-  </section>
- ) : (
-  <p>No tienes permiso para ver esta página</p>
- )}
+  <article>
+    { (isAdmin || isProfessor) ? (
+    <h1>Gestionar Asignaturas</h1>
+    <section class="btnSection">
+        <a href="/asignaturas/asignar" class="btn-primary">Asignar Asignaturas</a>
+        <a href="/asignaturas/crear" class="btn-primary">Crear asignatura</a>
+        <a href="/asignaturas/eliminar" class="btn-primary">Eliminar asignatura</a>
+    </section>
+    <section>
+      <h1>Profesores pendientes de aprobación</h1>
+      <UserStatusList token = {token} role = {roles.professor} />
+    </section>
+    ) : (
+      <p>No tienes permiso para ver esta página</p>
+    )}
+  </article>
 </Layout>
 
 <style>
-  section {
+  article {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 1 rem;
+    gap: 1rem;
+    width: 100%;
+  }
+  .btnSection {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+  }
+  a {
+    text-decoration: none;
+    color: var(--color-tertiary);
+    text-transform: uppercase;
+    font-weight: bold;
+    padding: 0.5rem;
+    cursor: pointer;
   }
 </style>
