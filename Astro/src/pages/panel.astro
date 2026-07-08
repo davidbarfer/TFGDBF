@@ -23,9 +23,11 @@ const isProfessor = user?.role === roles.professor;
 <Layout>
   <article>
     { (isAdmin || isProfessor) ? (
+    <h1>Gestionar Asignaturas</h1>
     <section class="btnSection">
-        <a href="/asignaturas/gestionar" class="btn-primary">Gestionar Asignaturas</a>
+        <a href="/asignaturas/asignar" class="btn-primary">Asignar Asignaturas</a>
         <a href="/asignaturas/crear" class="btn-primary">Crear asignatura</a>
+        <a href="/asignaturas/eliminar" class="btn-primary">Eliminar asignatura</a>
     </section>
     <section>
       <h1>Profesores pendientes de aprobación</h1>
