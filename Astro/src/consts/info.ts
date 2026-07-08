@@ -11,11 +11,11 @@ const PROJECT_FRAMEWORKS = {
 const PROJECT_DESCRIPTION = 'Este proyecto consiste en una aplicación de gestión de grupos de práctica cuyas entregas se evalúan a través de un evaluador diseñado en MATLAB';
 const ROLES_FUNCTIONS = {
   PROFESSOR: [
-    'Pestaña Asignaturas: Acceder a tus asignaturas',
-    'Pestaña Asignaturas: Crear y eliminar asignaturas del sistema',
-    'Pestaña Asignaturas: Asignar asignaturas a profesore y alumnos',
-    'Pestaña Entregas: Acceder y gestionar a todas las entregas de tus prácticas',
+    'Pestaña Asignaturas: Acceder a tus asignaturas gestionando practicas y grupos',
+    'Pestaña Entregas: Acceder y gestionar a todas las entregas de las prácticas',
     'Pestaña Panel Administrador: Activar usuarios de otros profesores',
+    'Pestaña Panel Administrador: Asignar asignaturas a profesores y alumnos',
+    'Pestaña Panel Administrador: Crear y eliminar asignaturas del sistema',
   ],
   STUDENT: [
     'Pestaña Asignaturas: Acceder a tus asignaturas',
