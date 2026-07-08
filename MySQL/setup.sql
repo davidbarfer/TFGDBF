@@ -50,6 +50,7 @@ CREATE TABLE IF NOT EXISTS subject (
   name VARCHAR(100) NOT NULL,
   course NUMERIC NOT NULL,
   degree_id INT NOT NULL,
+  is_deleted BOOLEAN DEFAULT FALSE,
   FOREIGN KEY (degree_id) REFERENCES degrees(id)
 );
 

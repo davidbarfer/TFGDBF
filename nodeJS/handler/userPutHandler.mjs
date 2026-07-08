@@ -2,6 +2,7 @@ import {
   authenticate,
   query,
   unhandledUserDefinedException,
+  checkSubjectStatus,
 } from '../database.mjs';
 import { logger } from '../logger.mjs';
 export const putStudentSubmissionGrade = async (req, res, params) => {
@@ -33,6 +34,13 @@ export const putStudentSubmissionGrade = async (req, res, params) => {
           res.statusCode = 500;
           return res.end(JSON.stringify({ error: 'Internal server error' }));
         }
+        const subCheck = await query(
+          'SELECT p.subject_id FROM submissions s JOIN practice p ON s.practice_id = p.id WHERE s.id = ?',
+          [data.submission_id]
+        );
+        if (subCheck.results.length > 0) {
+          await checkSubjectStatus(subCheck.results[0].subject_id);
+        }
         const result = await query(
           'UPDATE submissions set grade = ? WHERE id = ? AND user_id = ?',
           [data.evaluator_grade, data.submission_id, data.user_id]
@@ -50,8 +58,12 @@ export const putStudentSubmissionGrade = async (req, res, params) => {
           error: error.message,
           stack: error.stack,
         });
-        res.statusCode = 500;
-        return res.end(JSON.stringify({ error: 'Internal server error' }));
+        res.statusCode = error.statusCode || 500;
+        return res.end(
+          JSON.stringify({
+            error: error.statusCode ? error.message : 'Internal server error',
+          })
+        );
       }
     });
   } catch (error) {
@@ -95,6 +107,13 @@ export const updateGroup = async (req, res, params) => {
             })
           );
         }
+        const pathCheck = await query(
+          'SELECT p.subject_id FROM practice_groups pg JOIN practice p ON pg.practice_id = p.id WHERE pg.id = ?',
+          [group_id]
+        );
+        if (pathCheck.results.length > 0) {
+          await checkSubjectStatus(pathCheck.results[0].subject_id);
+        }
         const result = await query(
           'UPDATE practice_groups SET name = ?, max_participants = ?, practice_group_date = ?, start_time = ?, end_time = ? WHERE id = ?',
           [
@@ -121,8 +140,12 @@ export const updateGroup = async (req, res, params) => {
           res.statusCode = 400;
           return res.end(JSON.stringify({ error: error.sqlMessage }));
         }
-        res.statusCode = 500;
-        return res.end(JSON.stringify({ error: 'Internal server error' }));
+        res.statusCode = error.statusCode || 500;
+        return res.end(
+          JSON.stringify({
+            error: error.statusCode ? error.message : 'Internal server error',
+          })
+        );
       }
     });
   } catch (error) {

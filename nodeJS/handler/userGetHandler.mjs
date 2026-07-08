@@ -1,4 +1,4 @@
-import { authenticate } from '../database.mjs';
+import { authenticate, checkSubjectStatus } from '../database.mjs';
 import { query } from '../database.mjs';
 import { getFileSubmission } from '../fileSystem.mjs';
 import { logger } from '../logger.mjs';
@@ -127,6 +127,7 @@ export const getSubject = async (req, res, params) => {
   const subject_id = params[0].split('/').pop();
   try {
     await authenticate(req, res, true);
+    await checkSubjectStatus(subject_id);
     const subject = await query('SELECT * FROM v_subject WHERE id = ?', [
       subject_id,
     ]);
@@ -140,14 +141,19 @@ export const getSubject = async (req, res, params) => {
       error: error.message,
       stack: error.stack,
     });
-    res.statusCode = 500;
-    return res.end(JSON.stringify({ error: 'Internal server error' }));
+    res.statusCode = error.statusCode || 500;
+    return res.end(
+      JSON.stringify({
+        error: error.statusCode ? error.message : 'Internal server error',
+      })
+    );
   }
 };
 export const getSubjectStudents = async (req, res, params) => {
   const subject_id_students = params[0].split('/')[2];
   try {
     await authenticate(req, res);
+    await checkSubjectStatus(subject_id_students);
     const users_ids = await query(
       'SELECT user_id FROM users_subjects WHERE subject_id = ?',
       [subject_id_students]
@@ -184,14 +190,19 @@ export const getSubjectStudents = async (req, res, params) => {
       error: error.message,
       stack: error.stack,
     });
-    res.statusCode = 500;
-    return res.end(JSON.stringify({ error: 'Internal server error' }));
+    res.statusCode = error.statusCode || 500;
+    return res.end(
+      JSON.stringify({
+        error: error.statusCode ? error.message : 'Internal server error',
+      })
+    );
   }
 };
 export const getSubjectPractices = async (req, res, params) => {
   const subject_id_practices = params[0].split('/')[2];
   try {
     await authenticate(req, res, true);
+    await checkSubjectStatus(subject_id_practices);
     const practices = await query(
       'SELECT * FROM practice WHERE subject_id = ?',
       [subject_id_practices]
@@ -206,8 +217,12 @@ export const getSubjectPractices = async (req, res, params) => {
       error: error.message,
       stack: error.stack,
     });
-    res.statusCode = 500;
-    return res.end(JSON.stringify({ error: 'Internal server error' }));
+    res.statusCode = error.statusCode || 500;
+    return res.end(
+      JSON.stringify({
+        error: error.statusCode ? error.message : 'Internal server error',
+      })
+    );
   }
 };
 export const getPractice = async (req, res, params) => {
@@ -221,14 +236,19 @@ export const getPractice = async (req, res, params) => {
       res.statusCode = 404;
       return res.end(JSON.stringify({ error: 'Practice not found' }));
     }
+    await checkSubjectStatus(practice.results[0].subject_id);
     return res.end(JSON.stringify(practice.results[0]));
   } catch (error) {
     logger.error('Database query error on getPractice:', {
       error: error.message,
       stack: error.stack,
     });
-    res.statusCode = 500;
-    return res.end(JSON.stringify({ error: 'Internal server error' }));
+    res.statusCode = error.statusCode || 500;
+    return res.end(
+      JSON.stringify({
+        error: error.statusCode ? error.message : 'Internal server error',
+      })
+    );
   }
 };
 export const getPracticeSubmissions = async (req, res, params) => {
@@ -325,6 +345,7 @@ export const getSubjectPracticesGroups = async (req, res, params) => {
   };
   try {
     await authenticate(req, res, true);
+    await checkSubjectStatus(subject_id_practices_id_groups.subject_id);
     const groups = await query(
       'SELECT pg.* FROM practice_groups pg JOIN practice p ON pg.practice_id = p.id WHERE pg.practice_id = ? AND p.subject_id = ?',
       [
@@ -342,8 +363,12 @@ export const getSubjectPracticesGroups = async (req, res, params) => {
       error: error.message,
       stack: error.stack,
     });
-    res.statusCode = 500;
-    return res.end(JSON.stringify({ error: 'Internal server error' }));
+    res.statusCode = error.statusCode || 500;
+    return res.end(
+      JSON.stringify({
+        error: error.statusCode ? error.message : 'Internal server error',
+      })
+    );
   }
 };
 export const getGroup = async (req, res, params) => {
@@ -357,14 +382,25 @@ export const getGroup = async (req, res, params) => {
       res.statusCode = 404;
       return res.end(JSON.stringify({ error: 'Group not found' }));
     }
+    const practice = await query(
+      'SELECT subject_id FROM practice WHERE id = ?',
+      [group.results[0].practice_id]
+    );
+    if (practice.results.length > 0) {
+      await checkSubjectStatus(practice.results[0].subject_id);
+    }
     return res.end(JSON.stringify(group.results[0]));
   } catch (error) {
     logger.error('Database query error on getGroup:', {
       error: error.message,
       stack: error.stack,
     });
-    res.statusCode = 500;
-    return res.end(JSON.stringify({ error: 'Internal server error' }));
+    res.statusCode = error.statusCode || 500;
+    return res.end(
+      JSON.stringify({
+        error: error.statusCode ? error.message : 'Internal server error',
+      })
+    );
   }
 };
 export const getGroupStudents = async (req, res, params) => {

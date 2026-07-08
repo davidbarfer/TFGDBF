@@ -1,5 +1,8 @@
 -- Drop View if exist
 DROP VIEW IF EXISTS v_subject;
+-- Drop Procedures if exist
+DROP PROCEDURE IF EXISTS validate_group_date;
+DROP PROCEDURE IF EXISTS validate_group_time_compatibility;
 -- Drop Triggers if exist
 DROP TRIGGER IF EXISTS create_group;
 DROP TRIGGER IF EXISTS delete_group;
