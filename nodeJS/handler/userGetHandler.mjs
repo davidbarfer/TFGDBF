@@ -50,6 +50,7 @@ export const getSubjectsUser = async (req, res, params) => {
 };
 export const getUsers = async (req, res, params) => {
   try {
+    await authenticate(req, res);
     const users = await query('SELECT * FROM users');
     return res.end(JSON.stringify(users.results));
   } catch (error) {
