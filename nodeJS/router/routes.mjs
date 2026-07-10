@@ -1,55 +1,56 @@
-import { login, logout, signup } from '../handler/authHandler.mjs';
+import { login, logout, signup } from '../handlers/auth.mjs';
+import {
+  getGroupStudents,
+  getSubjectStudents,
+  getUserCurrent,
+  getUsers,
+  getUsersByRole,
+  updateUserStatus,
+} from '../handlers/users.mjs';
+import {
+  deleteSubject,
+  getSubject,
+  getSubjects,
+  getSubjectsUser,
+  postSubjectCreate,
+  postUserSubject,
+} from '../handlers/subjects.mjs';
+import {
+  getPractice,
+  getSubjectPractices,
+  postPracticeCreate,
+} from '../handlers/practices.mjs';
+import {
+  createGroups,
+  deleteGroup,
+  deleteStudentGroup,
+  getGroup,
+  getStudentGroups,
+  getSubjectPracticesGroups,
+  postGroupStudent,
+  updateGroup,
+} from '../handlers/groups.mjs';
+import {
+  getGroupSubmissions,
+  getPracticeSubmissions,
+  getStudentSubmission,
+  getStudentSubmissionFile,
+  getStudentSubmissions,
+  getSubmission,
+  postPracticeEvaluatorCreate,
+  postPracticeGroupSubmissions,
+  postPracticeSubmissionEdit,
+  postPracticeSubmissions,
+  postStudentSubmissionEvaluate,
+  postStudentSubmissionFile,
+  putPracticeSubmissionsGrade,
+  putStudentSubmissionGrade,
+} from '../handlers/submissions.mjs';
 import {
   exportGroupStudents,
   exportPracticeGrades,
   exportSubjectGrades,
-} from '../handler/exportHandler.mjs';
-import {
-  deleteGroup,
-  deleteStudentGroup,
-  deleteSubject,
-} from '../handler/userDeleteHandler.mjs';
-import {
-  getSubject,
-  getSubjectPractices,
-  getSubjectPracticesGroups,
-  getGroup,
-  getGroupStudents,
-  getSubjectStudents,
-  getPractice,
-  getPracticeSubmissions,
-  getStudentGroups,
-  getStudentSubmissions,
-  getStudentSubmission,
-  getStudentSubmissionFile,
-  getSubmission,
-  getSubjects,
-  getUsers,
-  getSubjectsUser,
-  getUsersByRole,
-  getUserCurrent,
-  getGroupSubmissions,
-} from '../handler/userGetHandler.mjs';
-import {
-  postPracticeCreate,
-  postGroupStudent,
-  postStudentSubmissionFile,
-  postPracticeSubmissions,
-  postPracticeGroupSubmissions,
-  postPracticeSubmissionEdit,
-  postPracticeEvaluatorCreate,
-  postStudentSubmissionEvaluate,
-  postSubjectCreate,
-  postUserSubject,
-  createGroups,
-} from '../handler/userPostHandler.mjs';
-import {
-  putPracticeSubmissionsGrade,
-  putStudentSubmissionGrade,
-  updateGroup,
-  updateUserStatus,
-} from '../handler/userPutHandler.mjs';
-
+} from '../handlers/export.mjs';
 const getRoutes = [
   {
     method: 'GET',
