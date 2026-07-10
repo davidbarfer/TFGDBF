@@ -1,4 +1,4 @@
-import { routes } from './router/routes.mjs';
+import { router } from './router/router.mjs';
 import { logger } from './logger.mjs';
 export const FRONTEND_URL = `http://${process.env.BASE_IP}:${process.env.FRONTEND_PORT}`;
 export const BACKEND_URL = `http://${process.env.BASE_IP}:${process.env.BACKEND_PORT}`;
@@ -32,7 +32,7 @@ export const processRequest = async (req, res) => {
 
   logger.info(`HTTP Request Received`, { method, url });
   // Find matching route
-  const route = routes.find(r => r.method === method && r.regex.test(url));
+  const route = router.find(r => r.method === method && r.regex.test(url));
   if (!route) {
     res.statusCode = 404;
     logger.warn(`Route not found for target matching`, { method, url });
