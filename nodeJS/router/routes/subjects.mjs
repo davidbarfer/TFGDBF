@@ -9,7 +9,7 @@ import {
 export const subjectsRoutes = [
   {
     method: 'GET',
-    regex: /^\/subject\/\d+$/,
+    regex: /^\/subject\/(\d+)$/,
     handler: getSubject,
   },
   {
@@ -29,12 +29,12 @@ export const subjectsRoutes = [
   },
   {
     method: 'POST',
-    regex: /^\/user\/\d+\/subject\/\d+$/,
+    regex: /^\/user\/(\d+)\/subject\/(\d+)$/,
     handler: postUserSubject,
   },
   {
     method: 'DELETE',
-    regex: /^\/subjects\/\d+$/,
+    regex: /^\/subjects\/(\d+)$/,
     handler: deleteSubject,
   },
 ];

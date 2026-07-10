@@ -14,12 +14,12 @@ export const usersRoutes = [
   },
   {
     method: 'GET',
-    regex: /^\/group\/\d+\/students$/,
+    regex: /^\/group\/(\d+)\/students$/,
     handler: getGroupStudents,
   },
   {
     method: 'GET',
-    regex: /^\/subject\/\d+\/students$/,
+    regex: /^\/subject\/(\d+)\/students$/,
     handler: getSubjectStudents,
   },
   {
@@ -34,7 +34,7 @@ export const usersRoutes = [
   },
   {
     method: 'PUT',
-    regex: /^\/users\/\d+\/status$/,
+    regex: /^\/users\/(\d+)\/status$/,
     handler: updateUserStatus,
   },
 ];
