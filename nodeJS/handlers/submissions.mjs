@@ -929,19 +929,3 @@ export const putStudentSubmissionGrade = async (req, res, params) => {
     return res.end(JSON.stringify({ error: 'Internal server error' }));
   }
 };
-/**
- * Califica todas las entregas de una practica en base a la nota del evaluador
- */
-export const putPracticeSubmissionsGrade = async (req, res, params) => {
-  try {
-    await authenticate(req, res);
-    throw new Error('API ENDPOINT PENDING TO BE DEVELOPED');
-  } catch (error) {
-    logger.error('Database query error on putPracticeSubmissionsGrade:', {
-      error: error.message,
-      stack: error.stack,
-    });
-    res.statusCode = 500;
-    return res.end(JSON.stringify({ error: 'Internal server error' }));
-  }
-};

@@ -67,7 +67,6 @@
 | `/practices/:id/submissions/:id/edit`       | Edit a submission                         | POST |
 | `/practices/:id/evaluator/create`          | Create an evaluator for the practice      | POST |
 | `/users/:id/submissions/:id/evaluate`    | Execute an evaluator on the practice      | POST |
-| `/practices/:id/submissions/grade`         | Grade all submisions for the practice     | PUT |
 | `/users/:id/submissions/:id/grade`       | Grade a student submission                | PUT |
 
 ## Endpoints EXPORT

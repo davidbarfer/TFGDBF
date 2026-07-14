@@ -11,7 +11,6 @@ import {
   postPracticeSubmissions,
   postStudentSubmissionEvaluate,
   postStudentSubmissionFile,
-  putPracticeSubmissionsGrade,
   putStudentSubmissionGrade,
 } from '../../handlers/submissions.mjs';
 export const submissionsRoutes = [
@@ -74,11 +73,6 @@ export const submissionsRoutes = [
     method: 'POST',
     regex: /^\/users\/(\d+)\/submissions\/(\d+)\/evaluate$/,
     handler: postStudentSubmissionEvaluate,
-  },
-  {
-    method: 'PUT',
-    regex: /^\/practices\/(\d+)\/submissions\/grade$/,
-    handler: putPracticeSubmissionsGrade,
   },
   {
     method: 'PUT',
