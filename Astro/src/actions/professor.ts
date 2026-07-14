@@ -1,8 +1,7 @@
 import { defineAction } from "astro:actions";
-import { z } from "astro:schema";
+import { z } from "astro/zod";
 import { API_URL } from "@/utils/enviroment";
 import { handleActionError } from "@/utils/handler";
-import type { group } from "node:console";
 
 export const professor = {
   getSubjectsStudents: defineAction({
