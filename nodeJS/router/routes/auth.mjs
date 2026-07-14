@@ -2,17 +2,17 @@ import { login, logout, signup } from '../../handlers/auth.mjs';
 export const authRoutes = [
   {
     method: 'POST',
-    regex: /^\/login/,
+    regex: /^\/auth\/login/,
     handler: login,
   },
   {
     method: 'POST',
-    regex: /^\/logout/,
+    regex: /^\/auth\/logout/,
     handler: logout,
   },
   {
     method: 'POST',
-    regex: /^\/signup/,
+    regex: /^\/auth\/signup/,
     handler: signup,
   },
 ];

@@ -11,22 +11,22 @@ import {
 export const groupsRoutes = [
   {
     method: 'GET',
-    regex: /^\/group\/(\d+)$/,
+    regex: /^\/groups\/(\d+)$/,
     handler: getGroup,
   },
   {
     method: 'GET',
-    regex: /^\/student\/(\d+)\/groups$/,
+    regex: /^\/users\/(\d+)\/groups$/,
     handler: getStudentGroups,
   },
   {
     method: 'GET',
-    regex: /^\/subject\/(\d+)\/practice\/(\d+)\/groups$/,
+    regex: /^\/subjects\/(\d+)\/practices\/(\d+)\/groups$/,
     handler: getSubjectPracticesGroups,
   },
   {
     method: 'POST',
-    regex: /^\/group\/(\d+)\/student\/(\d+)$/,
+    regex: /^\/groups\/(\d+)\/users\/(\d+)$/,
     handler: postGroupStudent,
   },
   {
@@ -41,12 +41,12 @@ export const groupsRoutes = [
   },
   {
     method: 'DELETE',
-    regex: /^\/group\/(\d+)$/,
+    regex: /^\/groups\/(\d+)$/,
     handler: deleteGroup,
   },
   {
     method: 'DELETE',
-    regex: /^\/group\/(\d+)\/student\/(\d+)$/,
+    regex: /^\/groups\/(\d+)\/users\/(\d+)$/,
     handler: deleteStudentGroup,
   },
 ];

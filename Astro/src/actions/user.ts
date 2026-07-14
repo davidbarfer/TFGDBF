@@ -24,7 +24,7 @@ export const user = {
       token: z.string(),
     }),
     handler: async (input) => {
-      const response = await fetch(`${API_URL}/subject/${input.id}`, {
+      const response = await fetch(`${API_URL}/subjects/${input.id}`, {
         headers: {
           Authorization: input.token,
         },
@@ -52,7 +52,7 @@ export const user = {
       token: z.string(),
     }),
     handler: async (input) => {
-      const response = await fetch(`${API_URL}/subjects/user`, {
+      const response = await fetch(`${API_URL}/subjects/users/current`, {
         headers: {
           Authorization: input.token,
         },
@@ -68,7 +68,7 @@ export const user = {
     }),
     handler: async (input) => {
       const response = await fetch(
-        `${API_URL}/subject/${input.subject_id}/practices`,
+        `${API_URL}/subjects/${input.subject_id}/practices`,
         {
           headers: {
             Authorization: input.token,
@@ -85,7 +85,7 @@ export const user = {
       practice_id: z.string(),
     }),
     handler: async (input) => {
-      const response = await fetch(`${API_URL}/practice/${input.practice_id}`, {
+      const response = await fetch(`${API_URL}/practices/${input.practice_id}`, {
         headers: {
           Authorization: input.token,
         },
@@ -102,7 +102,7 @@ export const user = {
     }),
     handler: async (input) => {
       const response = await fetch(
-        `${API_URL}/subject/${input.subject_id}/practice/${input.practice_id}/groups`,
+        `${API_URL}/subjects/${input.subject_id}/practices/${input.practice_id}/groups`,
         {
           headers: {
             Authorization: input.token,
@@ -120,7 +120,7 @@ export const user = {
     }),
     handler: async (input) => {
       const response = await fetch(
-        `${API_URL}/student/${input.user_id}/groups`,
+        `${API_URL}/users/${input.user_id}/groups`,
         {
           headers: {
             Authorization: input.token,
@@ -142,7 +142,7 @@ export const user = {
     }),
     handler: async (input) => {
       const response = await fetch(
-        `${API_URL}/group/${input.group_id}/student/${input.student_id}`,
+        `${API_URL}/groups/${input.group_id}/users/${input.student_id}`,
         {
           method: "POST",
           headers: {
@@ -164,7 +164,7 @@ export const user = {
       group_id: z.string(),
     }),
     handler: async (input) => {
-      const response = await fetch(`${API_URL}/group/${input.group_id}`, {
+      const response = await fetch(`${API_URL}/groups/${input.group_id}`, {
         headers: {
           Authorization: input.token,
         },
@@ -180,7 +180,7 @@ export const user = {
     }),
     handler: async (input) => {
       const response = await fetch(
-        `${API_URL}/group/${input.group_id}/students`,
+        `${API_URL}/groups/${input.group_id}/users`,
         {
           headers: {
             Authorization: input.token,
@@ -201,7 +201,7 @@ export const user = {
     }),
     handler: async (input) => {
       const response = await fetch(
-        `${API_URL}/student/${input.user_id}/submissions`,
+        `${API_URL}/users/${input.user_id}/submissions`,
         {
           method: "GET",
           headers: {
@@ -221,7 +221,7 @@ export const user = {
     }),
     handler: async (input) => {
       const response = await fetch(
-        `${API_URL}/student/${input.student_id}/submission/${input.submission_id}`,
+        `${API_URL}/users/${input.student_id}/submissions/${input.submission_id}`,
         {
           method: "GET",
           headers: {
@@ -241,7 +241,7 @@ export const user = {
     }),
     handler: async (input) => {
       const response = await fetch(
-        `${API_URL}/student/${input.student_id}/submission/${input.submission_id}/file`,
+        `${API_URL}/users/${input.student_id}/submissions/${input.submission_id}/file`,
         {
           method: "GET",
           headers: {
@@ -269,7 +269,7 @@ export const user = {
     }),
     handler: async (input) => {
       const response = await fetch(
-        `${API_URL}/student/${input.url_params.user_id}/submission/${input.url_params.submission_id}/file`,
+        `${API_URL}/users/${input.url_params.user_id}/submissions/${input.url_params.submission_id}/file`,
         {
           method: "POST",
           headers: {

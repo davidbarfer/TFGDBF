@@ -9,7 +9,7 @@ import {
 export const subjectsRoutes = [
   {
     method: 'GET',
-    regex: /^\/subject\/(\d+)$/,
+    regex: /^\/subjects\/(\d+)$/,
     handler: getSubject,
   },
   {
@@ -19,17 +19,17 @@ export const subjectsRoutes = [
   },
   {
     method: 'GET',
-    regex: /^\/subjects\/user$/,
+    regex: /^\/subjects\/users\/current$/,
     handler: getSubjectsUser,
   },
   {
     method: 'POST',
-    regex: /^\/subject\/create$/,
+    regex: /^\/subjects\/create$/,
     handler: postSubjectCreate,
   },
   {
     method: 'POST',
-    regex: /^\/user\/(\d+)\/subject\/(\d+)$/,
+    regex: /^\/users\/(\d+)\/subjects\/(\d+)$/,
     handler: postUserSubject,
   },
   {

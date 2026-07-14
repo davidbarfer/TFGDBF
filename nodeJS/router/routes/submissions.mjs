@@ -17,7 +17,7 @@ import {
 export const submissionsRoutes = [
   {
     method: 'GET',
-    regex: /^\/practice\/(\d+)\/submissions$/,
+    regex: /^\/practices\/(\d+)\/submissions$/,
     handler: getPracticeSubmissions,
   },
   {
@@ -27,62 +27,62 @@ export const submissionsRoutes = [
   },
   {
     method: 'GET',
-    regex: /^\/student\/(\d+)\/submissions$/,
+    regex: /^\/users\/(\d+)\/submissions$/,
     handler: getStudentSubmissions,
   },
   {
     method: 'GET',
-    regex: /^\/student\/(\d+)\/submission\/(\d+)$/,
+    regex: /^\/users\/(\d+)\/submissions\/(\d+)$/,
     handler: getStudentSubmission,
   },
   {
     method: 'GET',
-    regex: /^\/student\/(\d+)\/submission\/(\d+)\/file$/,
+    regex: /^\/users\/(\d+)\/submissions\/(\d+)\/file$/,
     handler: getStudentSubmissionFile,
   },
   {
     method: 'GET',
-    regex: /^\/submission\/(\d+)$/,
+    regex: /^\/submissions\/(\d+)$/,
     handler: getSubmission,
   },
   {
     method: 'POST',
-    regex: /^\/student\/(\d+)\/submission\/(\d+)\/file$/,
+    regex: /^\/users\/(\d+)\/submissions\/(\d+)\/file$/,
     handler: postStudentSubmissionFile,
   },
   {
     method: 'POST',
-    regex: /^\/practice\/(\d+)\/submissions$/,
+    regex: /^\/practices\/(\d+)\/submissions$/,
     handler: postPracticeSubmissions,
   },
   {
     method: 'POST',
-    regex: /^\/practice\/(\d+)\/group\/(\d+)\/submissions$/,
+    regex: /^\/practices\/(\d+)\/groups\/(\d+)\/submissions$/,
     handler: postPracticeGroupSubmissions,
   },
   {
     method: 'POST',
-    regex: /^\/practice\/(\d+)\/submission\/(\d+)\/edit$/,
+    regex: /^\/practices\/(\d+)\/submissions\/(\d+)\/edit$/,
     handler: postPracticeSubmissionEdit,
   },
   {
     method: 'POST',
-    regex: /^\/practice\/(\d+)\/evaluator\/create$/,
+    regex: /^\/practices\/(\d+)\/evaluator\/create$/,
     handler: postPracticeEvaluatorCreate,
   },
   {
     method: 'POST',
-    regex: /^\/student\/(\d+)\/submission\/(\d+)\/evaluate$/,
+    regex: /^\/users\/(\d+)\/submissions\/(\d+)\/evaluate$/,
     handler: postStudentSubmissionEvaluate,
   },
   {
     method: 'PUT',
-    regex: /^\/practice\/(\d+)\/submissions\/grade$/,
+    regex: /^\/practices\/(\d+)\/submissions\/grade$/,
     handler: putPracticeSubmissionsGrade,
   },
   {
     method: 'PUT',
-    regex: /^\/student\/(\d+)\/submission\/(\d+)\/grade$/,
+    regex: /^\/users\/(\d+)\/submissions\/(\d+)\/grade$/,
     handler: putStudentSubmissionGrade,
   },
 ];

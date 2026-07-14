@@ -6,17 +6,17 @@ import {
 export const practicesRoutes = [
   {
     method: 'GET',
-    regex: /^\/practice\/(\d+)$/,
+    regex: /^\/practices\/(\d+)$/,
     handler: getPractice,
   },
   {
     method: 'GET',
-    regex: /^\/subject\/(\d+)\/practices$/,
+    regex: /^\/subjects\/(\d+)\/practices$/,
     handler: getSubjectPractices,
   },
   {
     method: 'POST',
-    regex: /^\/subject\/(\d+)\/create$/,
+    regex: /^\/subjects\/(\d+)\/create$/,
     handler: postPracticeCreate,
   },
 ];

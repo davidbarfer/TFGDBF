@@ -14,12 +14,12 @@ export const usersRoutes = [
   },
   {
     method: 'GET',
-    regex: /^\/group\/(\d+)\/students$/,
+    regex: /^\/groups\/(\d+)\/users$/,
     handler: getGroupStudents,
   },
   {
     method: 'GET',
-    regex: /^\/subject\/(\d+)\/students$/,
+    regex: /^\/subjects\/(\d+)\/users$/,
     handler: getSubjectStudents,
   },
   {
