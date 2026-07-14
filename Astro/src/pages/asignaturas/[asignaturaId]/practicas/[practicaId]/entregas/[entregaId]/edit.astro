@@ -1,6 +1,8 @@
 ---
 import { actions } from "astro:actions";
 import Layout from "@/layouts/Layout.astro";
+import Modal from "@/components/utils/Modal.astro";
+import Spinner from "@/components/utils/Spinner.astro";
 import jwt from 'jsonwebtoken'
 import { parse } from 'cookie';
 import { roles } from "@/consts/users";
@@ -31,6 +33,28 @@ if(submission.file_url) {
     user?.role === roles.admin || user?.role === roles.professor ? (
       <section>
         <h1>Editar entrega {submission.id}</h1>
+        <div id="evaluator-grade-section">
+            <p>La nota del evaluador no puede ser editada</p>
+            <Modal id={`evaluatorModal${submission.id}`} btnText="Ejecutar evaluador">
+              <main slot="mainModal">
+                <p>Está acción ejecutara el evaluador y si no hay ningun error generara una nota en Nota del evaluador</p>
+                <p>Ejecuta el evaluador consume recursos del sistema, por favor tengalo en cuenta</p>
+                <section>
+                  <Spinner id={`evaluatorSpinner${submission.id}`}/>
+                  <button 
+                    id = {`evaluatorBtn${submission.id}`} 
+                    data-evaluatorBtn
+                    data-token={token} 
+                    data-user_id={submission.user_id} 
+                    data-submission_id={submission.id} 
+                  >
+                    Aceptar
+                  </button>
+                </section>
+              </main>
+              <button slot="closeModal">Cancelar</button>
+            </Modal>
+        </div>
         <form id="submissionForm" data-token={token} data-submissionid={submission.id} data-practiceid={submission.practice_id}>
           <label for="delivery_date">Fecha de entrega</label>
           <input 
@@ -41,16 +65,12 @@ if(submission.file_url) {
             required
           />
           <label for="evaluator_grade">Nota del evaluador</label>
-          <div id="evaluator-grade-section">
-            <p>La nota del evaluador no puede ser editada</p>
-            <button type="button" disabled>Ejecutar evaluador</button>
-          </div>
           <input 
             type="number" 
             id="evaluator_grade" 
             name="evaluator_grade" 
             value={submission.evaluator_grade} 
-            max="10" 
+            max="10"
             min="0" 
             step="0.1" 
             readonly
@@ -90,6 +110,7 @@ if(submission.file_url) {
 <script>
   import { actions } from "astro:actions";
   import { showToastOnLoad, TOASTSTYLE } from "@/utils/toaster";
+  const evaluatorBtns = document.querySelectorAll('[data-evaluatorBtn]')
   const submissionForm = document.getElementById('submissionForm');
   if(submissionForm) {
     const token = submissionForm?.dataset.token;
@@ -123,9 +144,41 @@ if(submission.file_url) {
       }
     });
   }
+  evaluatorBtns?.forEach(evaluatorBtn => evaluatorBtn.addEventListener('click', async() => {
+    const submissionId = evaluatorBtn?.dataset.submission_id;
+    const spinner = document.getElementById(`evaluatorSpinner${submissionId}`)
+    evaluatorBtn?.classList.toggle('toggleSendBtn');
+    spinner?.classList.toggle('toggleVisiblity');
+    const token = evaluatorBtn?.dataset.token;
+    const url_data = {
+      user_id: evaluatorBtn?.dataset.user_id as string,
+      submission_id: submissionId as string,
+    }
+    const { data, error } = await actions.professor.executeSubmssionEvaluator({
+      token: token as string,
+      url_data: url_data
+    })
+    try {
+      if(error) {
+        showToastOnLoad(error.message, TOASTSTYLE.error);
+      } else {
+        showToastOnLoad('Evaluador ejecutado', TOASTSTYLE.success);
+      }
+      const lastOpenedSubjectId = localStorage.getItem('openSubject');
+      if (lastOpenedSubjectId) {
+        window.location.href = `${window.location.pathname}#subject-${lastOpenedSubjectId}`;
+        window.location.reload();
+      } else {
+        window.location.reload();
+      }
+    } finally {
+      spinner?.classList.toggle('toggleVisiblity');
+      evaluatorBtn?.classList.toggle('toggleSendBtn');
+    }
+  }))
 </script>
 
-<style>
+<style scoped>
   form {
     display: flex;
     flex-direction: column;
@@ -147,5 +200,8 @@ if(submission.file_url) {
     padding: 1rem;
     resize: none;
     outline: none;
+  }
+  .toggleSendBtn {
+    display: none !important;
   }
 </style>
