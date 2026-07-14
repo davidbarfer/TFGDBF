@@ -12,7 +12,7 @@ export const professor = {
     }),
     handler: async (input) => {
       const response = await fetch(
-        `${API_URL}/subject/${input.subject_id}/students`,
+        `${API_URL}/subjects/${input.subject_id}/users`,
         {
           headers: {
             Authorization: input.token,
@@ -59,7 +59,7 @@ export const professor = {
     }),
     handler: async (input) => {
       const response = await fetch(
-        `${API_URL}/group/${input.group_id}/student/${input.student_id}`,
+        `${API_URL}/groups/${input.group_id}/users/${input.student_id}`,
         {
           method: "DELETE",
           headers: {
@@ -77,7 +77,7 @@ export const professor = {
       group_id: z.string(),
     }),
     handler: async (input) => {
-      const response = await fetch(`${API_URL}/group/${input.group_id}`, {
+      const response = await fetch(`${API_URL}/groups/${input.group_id}`, {
         method: "DELETE",
         headers: {
           Authorization: input.token,
@@ -115,7 +115,7 @@ export const professor = {
     }),
     handler: async (input) => {
       const response = await fetch(
-        `${API_URL}/subject/${input.subject_id}/create`,
+        `${API_URL}/subjects/${input.subject_id}/create`,
         {
           method: "POST",
           headers: {
@@ -169,7 +169,7 @@ export const professor = {
     }),
     handler: async (input) => {
       const response = await fetch(
-        `${API_URL}/practice/${input.practice_id}/submissions`,
+        `${API_URL}/practices/${input.practice_id}/submissions`,
         {
           headers: {
             Authorization: input.token,
@@ -207,7 +207,7 @@ export const professor = {
     }),
     handler: async (input) => {
       const response = await fetch(
-        `${API_URL}/submission/${input.submission_id}`,
+        `${API_URL}/submissions/${input.submission_id}`,
         {
           headers: {
             Authorization: input.token,
@@ -225,7 +225,7 @@ export const professor = {
     }),
     handler: async (input) => {
       const response = await fetch(
-        `${API_URL}/practice/${input.practice_id}/submissions`,
+        `${API_URL}/practices/${input.practice_id}/submissions`,
         {
           method: "POST",
           headers: {
@@ -249,7 +249,7 @@ export const professor = {
     }),
     handler: async (input) => {
       const response = await fetch(
-        `${API_URL}/practice/${input.url_data.practice_id}/group/${input.url_data.group_id}/submissions`,
+        `${API_URL}/practices/${input.url_data.practice_id}/groups/${input.url_data.group_id}/submissions`,
         {
           method: "POST",
           headers: {
@@ -274,7 +274,7 @@ export const professor = {
     }),
     handler: async(input) => {
       const response = await fetch(        
-        `${API_URL}/student/${input.url_data.user_id}/submission/${input.url_data.submission_id}/grade`,
+        `${API_URL}/users/${input.url_data.user_id}/submissions/${input.url_data.submission_id}/grade`,
         {
           method: "PUT",
           headers: {
@@ -304,7 +304,7 @@ export const professor = {
     }),
     handler: async(input) => {
       const response = await fetch(        
-        `${API_URL}/practice/${input.url_data.practice_id}/submission/${input.url_data.submission_id}/edit`,
+        `${API_URL}/practices/${input.url_data.practice_id}/submissions/${input.url_data.submission_id}/edit`,
         {
           method: "POST",
           headers: {
@@ -347,7 +347,7 @@ export const professor = {
       formData.append('evaluatorFiles', input.evaluatorFiles);
       formData.append('practice_id', input.practice_id);
       const response = await fetch(
-        `${API_URL}/practice/${input.practice_id}/evaluator/create`,
+        `${API_URL}/practices/${input.practice_id}/evaluator/create`,
         {
           method: "POST",
           headers: {
@@ -370,7 +370,7 @@ export const professor = {
     }),
     handler: async(input) => {
       const response = await fetch(        
-        `${API_URL}/student/${input.url_data.user_id}/submission/${input.url_data.submission_id}/evaluate`,
+        `${API_URL}/users/${input.url_data.user_id}/submissions/${input.url_data.submission_id}/evaluate`,
         {
           method: "POST",
           headers: {
@@ -394,7 +394,7 @@ export const professor = {
     }),
     handler: async(input) => {
       const response = await fetch(
-        `${API_URL}/subject/create`,
+        `${API_URL}/subjects/create`,
         {
           method: "POST",
           headers: {
@@ -415,7 +415,7 @@ export const professor = {
     }),
     handler: async(input) => {
       const response = await fetch(
-        `${API_URL}/user/${input.user_id}/subject/${input.subject_id}`,
+        `${API_URL}/users/${input.user_id}/subjects/${input.subject_id}`,
         {
           method: "POST",
           headers: {

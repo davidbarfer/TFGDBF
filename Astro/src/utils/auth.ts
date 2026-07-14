@@ -1,7 +1,7 @@
 import { API_URL } from "@/utils/enviroment";
 import { showToast, showToastOnLoad, TOASTSTYLE } from "./toaster";
 export async function login(data: { username: string; password: string }){
-  const response = await fetch(`${API_URL}/login`, {
+  const response = await fetch(`${API_URL}/auth/login`, {
     method: "POST",
     credentials: "include",
     headers: {
@@ -19,7 +19,7 @@ export async function login(data: { username: string; password: string }){
   }
 }
 export function logout() {
-  fetch(`${API_URL}/logout`, {
+  fetch(`${API_URL}/auth/logout`, {
     method: 'POST',
     credentials: 'include',
   })
@@ -32,7 +32,7 @@ export function logout() {
     });
 }
 export async function signup(data: { username: string; password: string; role: string }) {
-  const response = await fetch(`${API_URL}/signup`, {
+  const response = await fetch(`${API_URL}/auth/signup`, {
     method: 'POST',
     credentials: 'include',
     headers: {

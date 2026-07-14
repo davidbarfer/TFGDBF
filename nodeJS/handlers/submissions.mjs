@@ -1,24 +1,262 @@
-import formidable from 'formidable';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { authenticate } from '../database.mjs';
+import formidable from 'formidable';
 import {
+  authenticate,
   query,
-  unhandledUserDefinedException,
   checkSubjectStatus,
+  unhandledUserDefinedException,
 } from '../database.mjs';
-import { parseDateMatlab, add7days } from '../utils.mjs';
 import {
+  clearTempDirectory,
+  extractZip,
+  getFileSubmission,
+  getFileSystemBasePath,
   saveFileSubmission,
   saveFileSubmissionTemplate,
-  getFileSystemBasePath,
-  extractZip,
-  clearTempDirectory,
-  generateFolder,
 } from '../fileSystem.mjs';
-import { executeMatlabFiles, extractGrade } from '../matlabFunctions.mjs';
 import { logger } from '../logger.mjs';
+import { executeMatlabFiles, extractGrade } from '../matlabFunctions.mjs';
+import { add7days, parseDateMatlab } from '../utils.mjs';
 const FILESYSTEM_PATH = getFileSystemBasePath();
+/**
+ * Return a submission
+ */
+export const getSubmission = async (req, res, params) => {
+  const submission_id = params[1];
+  try {
+    await authenticate(req, res, false);
+    const submission = await query('SELECT * FROM submissions WHERE id = ?', [
+      submission_id,
+    ]);
+    if (submission.results.length === 0) {
+      res.statusCode = 404;
+      return res.end(JSON.stringify({ error: 'Submission not found' }));
+    }
+    return res.end(JSON.stringify(submission.results[0]));
+  } catch (error) {
+    logger.error('Database query error on getSubmission:', {
+      error: error.message,
+      stack: error.stack,
+    });
+    res.statusCode = 500;
+    return res.end(JSON.stringify({ error: 'Internal server error' }));
+  }
+};
+/**
+ * Return all submissions from a practice
+ */
+export const getPracticeSubmissions = async (req, res, params) => {
+  const practice_id_submissions = params[1];
+  try {
+    await authenticate(req, res);
+    const submissions = await query(
+      'SELECT id, user_id, practice_id, file_url, delivery_date, feedback, grade, evaluator_grade FROM submissions WHERE practice_id = ?',
+      [practice_id_submissions]
+    );
+    if (submissions.results.length === 0) {
+      res.statusCode = 404;
+      return res.end(
+        JSON.stringify({ error: 'There are no submissions for that practice' })
+      );
+    }
+    await Promise.all(
+      submissions.results.map(async (submission, idx) => {
+        const user = await query(
+          'SELECT id, username, name, surname FROM users WHERE id = ?',
+          [submission.user_id]
+        );
+        submission.user = user.results[0];
+        submissions.results[idx] = submission;
+      })
+    );
+    res.statusCode = 200;
+    return res.end(JSON.stringify(submissions.results));
+  } catch (error) {
+    logger.error('Database query error on getPracticeSubmissions:', {
+      error: error.message,
+      stack: error.stack,
+    });
+    res.statusCode = 500;
+    return res.end(JSON.stringify({ error: 'Internal Server Error' }));
+  }
+};
+/**
+ * Return all submissions from a group
+ */
+export const getGroupSubmissions = async (req, res, params) => {
+  const group_id = params[1];
+  try {
+    await authenticate(req, res);
+    const group = await query(
+      'SELECT id, practice_id FROM practice_groups WHERE id = ?',
+      [group_id]
+    );
+    const usersGroup = await query(
+      'SELECT user_id FROM practice_groups_users WHERE group_id = ?',
+      [group_id]
+    );
+    if (usersGroup.results.length === 0) {
+      res.statusCode = 404;
+      return res.end(
+        JSON.stringify({ error: 'There are no student on this group' })
+      );
+    }
+    const usersId = usersGroup.results.map(user => user.user_id).flat();
+    const usersIdQuery = usersId.map(() => '?').join(',');
+    const queryParams = [...usersId, group.results[0].practice_id];
+    const submissions = await query(
+      `SELECT id, user_id, practice_id, file_url, delivery_date, feedback, grade, evaluator_grade FROM submissions WHERE user_id IN (${usersIdQuery}) AND practice_id = ?`,
+      queryParams
+    );
+    if (submissions.results.length === 0) {
+      res.statusCode = 404;
+      return res.end(
+        JSON.stringify({ error: 'There are no submissions for that practice' })
+      );
+    }
+    await Promise.all(
+      submissions.results.map(async (submission, idx) => {
+        const user = await query(
+          'SELECT id, username, name, surname FROM users WHERE id = ?',
+          [submission.user_id]
+        );
+        submission.user = user.results[0];
+        submissions.results[idx] = submission;
+      })
+    );
+    res.statusCode = 200;
+    return res.end(JSON.stringify(submissions.results));
+  } catch (error) {
+    logger.error('Database query error on getGroupSubmissions:', {
+      error: error.message,
+      stack: error.stack,
+    });
+    res.statusCode = 500;
+    return res.end(JSON.stringify({ error: 'Internal Server Error' }));
+  }
+};
+/**
+ * Return all submssions of a student
+ */
+export const getStudentSubmissions = async (req, res, params) => {
+  const student_id_submissions = params[1];
+  try {
+    await authenticate(req, res, true);
+    const submissions = await query(
+      'SELECT * FROM submissions WHERE user_id = ?',
+      [student_id_submissions]
+    );
+    if (submissions.results.length === 0) {
+      res.statusCode = 404;
+      return res.end(JSON.stringify({ error: 'User submissions not found' }));
+    }
+    await Promise.all(
+      submissions.results.map(async (submission, idx) => {
+        const practice = await query(
+          'SELECT name, subject_id FROM practice WHERE id = ?',
+          [submission.practice_id]
+        );
+        submission.practice_name = practice.results[0].name;
+        submission.subject_id = practice.results[0].subject_id;
+        submissions.results[idx] = submission;
+      })
+    );
+    return res.end(JSON.stringify(submissions.results));
+  } catch (error) {
+    logger.error('Database query error on getStudentSubmissions:', {
+      error: error.message,
+      stack: error.stack,
+    });
+    res.statusCode = 500;
+    return res.end(JSON.stringify({ error: 'Internal server error' }));
+  }
+};
+/**
+ * Return a submissions of a student including practice data
+ */
+export const getStudentSubmission = async (req, res, params) => {
+  const student_id_submission_id = {
+    student_id: params[1],
+    submission_id: params[2],
+  };
+  try {
+    await authenticate(req, res, true);
+    const submission = await query(
+      'SELECT * FROM submissions WHERE user_id = ? AND id = ?',
+      [
+        student_id_submission_id.student_id,
+        student_id_submission_id.submission_id,
+      ]
+    );
+    if (submission.results.length === 0) {
+      res.statusCode = 404;
+      return res.end(JSON.stringify({ error: 'Submission not found' }));
+    }
+    const practice = await query(
+      'SELECT name, subject_id FROM practice WHERE id = ?',
+      [submission.results[0].practice_id]
+    );
+    submission.results[0].practice_name = practice.results[0].name;
+    submission.results[0].subject_id = practice.results[0].subject_id;
+    return res.end(JSON.stringify(submission.results[0]));
+  } catch (error) {
+    logger.error('Database query error on getStudentSubmission:', {
+      error: error.message,
+      stack: error.stack,
+    });
+    res.statusCode = 500;
+    return res.end(JSON.stringify({ error: 'Internal server error' }));
+  }
+};
+/**
+ * Return the submission file of a student
+ */
+export const getStudentSubmissionFile = async (req, res, params) => {
+  const student_id_submission_id_file = {
+    student_id: params[1],
+    submission_id: params[2],
+  };
+  try {
+    await authenticate(req, res, true);
+    const practice_id = await query(
+      'SELECT practice_id FROM submissions WHERE id = ? AND user_id = ?',
+      [
+        student_id_submission_id_file.submission_id,
+        student_id_submission_id_file.student_id,
+      ]
+    );
+    if (practice_id.results[0].length === 0) {
+      res.statusCode = 404;
+      return res.end(JSON.stringify({ error: 'Practice not found' }));
+    }
+    const practice = await query(
+      'SELECT subject_id, submissions_template_url FROM practice WHERE id = ?',
+      [practice_id.results[0].practice_id]
+    );
+    if (practice.results.length === 0) {
+      res.statusCode = 404;
+      return res.end(JSON.stringify({ error: 'Subject not found' }));
+    }
+    const url = practice.results[0].submissions_template_url;
+    const submissionFile = await getFileSubmission(
+      url,
+      student_id_submission_id_file
+    );
+    if (!submissionFile) {
+      res.statusCode = 404;
+      return res.end(JSON.stringify({ error: 'Submission file not found' }));
+    }
+    return res.end(JSON.stringify(submissionFile));
+  } catch (error) {
+    logger.error('Database query error on getStudentSubmissionFile:', {
+      error: error.message,
+      stack: error.stack,
+    });
+    res.statusCode = 500;
+    return res.end(JSON.stringify({ error: 'Internal server error' }));
+  }
+};
 export const postStudentSubmissionFile = async (req, res, params) => {
   try {
     await authenticate(req, res, true);
@@ -106,212 +344,9 @@ export const postStudentSubmissionFile = async (req, res, params) => {
     return res.end(JSON.stringify({ error: 'Internal server error' }));
   }
 };
-export const postPracticeCreate = async (req, res, params) => {
-  const subject_id_practices = params[0].split('/')[2];
-  try {
-    await authenticate(req, res);
-    let body = '';
-
-    // Collect request data
-    req.on('data', chunk => {
-      body += chunk.toString();
-    });
-
-    req.on('end', async () => {
-      try {
-        await checkSubjectStatus(subject_id_practices);
-        // Parse and validate request body
-        const data = JSON.parse(body);
-        // Simple validation
-        if (!data.name || !data.description) {
-          res.statusCode = 400;
-          return res.end(
-            JSON.stringify({ error: 'Name and description are required' })
-          );
-        }
-        const practice = await query(
-          'INSERT INTO practice (subject_id, name, description, deadline) VALUES (?, ?, ?, ?)',
-          [subject_id_practices, data.name, data.description, data.deadline]
-        );
-        if (practice.results.affectedRows === 0) {
-          res.statusCode = 500;
-          return res.end(JSON.stringify({ error: 'Internal server error' }));
-        }
-        const practiceUrl = path.join(
-          String(subject_id_practices),
-          String(practice.results.insertId)
-        );
-        try {
-          await generateFolder(practiceUrl);
-          await generateFolder(path.join(practiceUrl, 'evaluator'));
-          await generateFolder(path.join(practiceUrl, 'submissions'));
-        } catch (error) {
-          logger.error('Generate Folder Error on postPracticeCreate:', {
-            error: error.message,
-            stack: error.stack,
-          });
-          res.statusCode = 500;
-          return res.end(JSON.stringify({ error: 'Internal server error' }));
-        }
-        res.statusCode = 201;
-        return res.end(JSON.stringify(practice.results));
-      } catch (error) {
-        logger.error('Database query error on postPracticeCreate:', {
-          error: error.message,
-          stack: error.stack,
-        });
-        res.statusCode = error.statusCode || 500;
-        return res.end(
-          JSON.stringify({
-            error: error.statusCode ? error.message : 'Internal server error',
-          })
-        );
-      }
-    });
-  } catch (error) {
-    logger.error('Error checking subject ID on postPracticeCreate:', {
-      error: error.message,
-      stack: error.stack,
-    });
-    res.statusCode = 500;
-    return res.end(JSON.stringify({ error: 'Internal server error' }));
-  }
-};
-export const createGroups = async (req, res, params) => {
-  try {
-    await authenticate(req, res);
-    let body = '';
-    req.on('data', chunk => {
-      body += chunk.toString();
-    });
-    req.on('end', async () => {
-      try {
-        const data = JSON.parse(body);
-        if (
-          !data.groups ||
-          !Array.isArray(data.groups) ||
-          data.groups.length === 0
-        ) {
-          res.statusCode = 400;
-          return res.end(
-            JSON.stringify({ error: 'Se requiere un array de grupos válido.' })
-          );
-        }
-        const practiceCheck = await query(
-          'SELECT subject_id FROM practice WHERE id = ?',
-          [data.practice_id]
-        );
-        if (practiceCheck.results.length > 0) {
-          await checkSubjectStatus(practiceCheck.results[0].subject_id);
-        }
-        const valuesPlaceholder = [];
-        const flatValues = [];
-        for (const g of data.groups) {
-          if (
-            !g.group_name ||
-            !g.max_participants ||
-            !g.group_date ||
-            !g.start_time ||
-            !g.end_time
-          ) {
-            res.statusCode = 400;
-            return res.end(
-              JSON.stringify({
-                error: 'Todos los campos son obligatorios en cada grupo.',
-              })
-            );
-          }
-          valuesPlaceholder.push('(?, ?, ?, ?, ?, ?)');
-          flatValues.push(
-            data.practice_id,
-            g.group_name,
-            g.max_participants,
-            g.group_date,
-            g.start_time,
-            g.end_time
-          );
-        }
-        const rawQuery = `
-          INSERT INTO practice_groups 
-          (practice_id, name, max_participants, practice_group_date, start_time, end_time) 
-          VALUES ${valuesPlaceholder.join(', ')}
-        `;
-        const group = await query(rawQuery, flatValues);
-        res.statusCode = 201;
-        return res.end(
-          JSON.stringify({ success: true, results: group.results })
-        );
-      } catch (error) {
-        logger.error('Database query error on bulk postPracticeGroupsCreate:', {
-          error: error.message,
-          stack: error.stack,
-        });
-        if (error.sqlState === unhandledUserDefinedException) {
-          res.statusCode = 400;
-          return res.end(JSON.stringify({ error: error.sqlMessage }));
-        }
-        res.statusCode = error.statusCode || 500;
-        return res.end(
-          JSON.stringify({
-            error: error.statusCode ? error.message : 'Internal server error',
-          })
-        );
-      }
-    });
-  } catch {
-    res.statusCode = 500;
-    return res.end(JSON.stringify({ error: 'Internal server error' }));
-  }
-};
-export const postGroupStudent = async (req, res, params) => {
-  try {
-    await authenticate(req, res, true);
-    let body = '';
-    req.on('data', chunk => {
-      body += chunk.toString();
-    });
-    req.on('end', async () => {
-      try {
-        const data = JSON.parse(body);
-        if (!data.group_id || !data.student_id) {
-          res.statusCode = 400;
-          return res.end(
-            JSON.stringify({
-              error: 'Group ID and student ID are required',
-            })
-          );
-        }
-        const pathCheck = await query(
-          'SELECT p.subject_id FROM practice_groups pg JOIN practice p ON pg.practice_id = p.id WHERE pg.id = ?',
-          [data.group_id]
-        );
-        if (pathCheck.results.length > 0) {
-          await checkSubjectStatus(pathCheck.results[0].subject_id);
-        }
-        const result = await query(
-          'INSERT INTO practice_groups_users (group_id, user_id) VALUES (?, ?)',
-          [data.group_id, data.student_id]
-        );
-        res.statusCode = 201;
-        return res.end(JSON.stringify(result.results));
-      } catch (error) {
-        logger.error('Database query error on postGroupStudent:', {
-          error: error.message,
-          stack: error.stack,
-        });
-        res.statusCode = error.statusCode || 500;
-        return res.end(
-          JSON.stringify({
-            error: error.statusCode ? error.message : 'Internal server error',
-          })
-        );
-      }
-    });
-  } catch {
-    res.statusCode = 500;
-    return res.end(JSON.stringify({ error: 'Internal server error' }));
-  }
-};
+/**
+ * Crea todas las entregas de los alumnos perteniencientes a un grupo
+ */
 export const postPracticeGroupSubmissions = async (req, res, params) => {
   try {
     await authenticate(req, res);
@@ -430,10 +465,13 @@ export const postPracticeGroupSubmissions = async (req, res, params) => {
     return res.end(JSON.stringify({ error: 'Internal server error' }));
   }
 };
+/**
+ * Edita una entrega
+ */
 export const postPracticeSubmissionEdit = async (req, res, params) => {
   const practice_id_submission_id_edit = {
-    practice_id: params[0].split('/')[2],
-    submission_id: params[0].split('/')[4],
+    practice_id: params[1],
+    submission_id: params[2],
   };
   try {
     await authenticate(req, res);
@@ -498,6 +536,9 @@ export const postPracticeSubmissionEdit = async (req, res, params) => {
     return res.end(JSON.stringify({ error: 'Internal server error' }));
   }
 };
+/**
+ * Crea el evaluador de una práctica
+ */
 export const postPracticeEvaluatorCreate = async (req, res, params) => {
   try {
     await authenticate(req, res);
@@ -628,10 +669,13 @@ export const postPracticeEvaluatorCreate = async (req, res, params) => {
     return res.end(JSON.stringify({ error: 'Internal server error' }));
   }
 };
+/**
+ * Ejecuta la entrega de un alumno en base al evaluador
+ */
 export const postStudentSubmissionEvaluate = async (req, res, params) => {
   const student_id_submission_id_evaluate = {
-    student_id: params[0].split('/')[2],
-    submission_id: params[0].split('/')[4],
+    student_id: params[1],
+    submission_id: params[2],
   };
   try {
     await authenticate(req, res, false);
@@ -712,6 +756,9 @@ export const postStudentSubmissionEvaluate = async (req, res, params) => {
     return res.end(JSON.stringify({ error: 'Internal server error' }));
   }
 };
+/**
+ * Crea todas las entregas de una practica (todos los alumnos que pertencen a todos los grupos)
+ */
 export const postPracticeSubmissions = async (req, res, params) => {
   try {
     await authenticate(req, res);
@@ -809,90 +856,92 @@ export const postPracticeSubmissions = async (req, res, params) => {
     return res.end(JSON.stringify({ error: 'Internal server error' }));
   }
 };
-export const postSubjectCreate = async (req, res, params) => {
-  await authenticate(req, res);
-  let body = '';
-  req.on('data', chunk => {
-    body += chunk.toString();
-  });
-  req.on('end', async () => {
-    try {
-      const data = JSON.parse(body);
-      if (!data.name || !data.course || !data.degree) {
-        res.statusCode = 400;
-        return res.end(
-          JSON.stringify({ error: 'Name, course and degree are required.' })
-        );
-      }
+/**
+ * Califica la entega de un alumno en base a la nota del evaluador
+ */
+export const putStudentSubmissionGrade = async (req, res, params) => {
+  const student_id_submission_id_grade = {
+    student_id: params[1],
+    submission_id: params[2],
+  };
+  try {
+    await authenticate(req, res);
+    let body = '';
+    req.on('data', chunk => {
+      body += chunk.toString();
+    });
+    req.on('end', async () => {
       try {
-        const subject = await query(
-          'INSERT INTO subject (name, course, degree_id) VALUES (?, ?, ?)',
-          [data.name, data.course, data.degree]
-        );
-        if (subject.results.affectedRows === 0) {
+        const data = JSON.parse(body);
+        if (!data.submission_id || !data.evaluator_grade || !data.user_id) {
+          res.statusCode = 400;
+          return res.end(
+            JSON.stringify({
+              error: 'Submission ID or evaluator grade or user ID is missing',
+            })
+          );
+        }
+        if (
+          Number(data.submission_id) !==
+          Number(student_id_submission_id_grade.submission_id)
+        ) {
           res.statusCode = 500;
           return res.end(JSON.stringify({ error: 'Internal server error' }));
         }
-        const createSubjectFolder = await generateFolder(
-          `${subject.results.insertId}`
+        const subCheck = await query(
+          'SELECT p.subject_id FROM submissions s JOIN practice p ON s.practice_id = p.id WHERE s.id = ?',
+          [data.submission_id]
         );
-        if (createSubjectFolder === 500) {
-          res.statusCode = 500;
-          return res.end(JSON.stringify({ error: 'Internal server error' }));
+        if (subCheck.results.length > 0) {
+          await checkSubjectStatus(subCheck.results[0].subject_id);
         }
-        res.statusCode = 201;
-        return res.end(JSON.stringify(subject.results));
+        const result = await query(
+          'UPDATE submissions set grade = ? WHERE id = ? AND user_id = ?',
+          [data.evaluator_grade, data.submission_id, data.user_id]
+        );
+        if (result.results.affectedRows === 0) {
+          res.statusCode = 404;
+          return res.end(JSON.stringify({ error: 'No submissions affected' }));
+        }
+        res.statusCode = 204;
+        return res.end(
+          JSON.stringify({ message: 'Submission updated successfully' })
+        );
       } catch (error) {
-        logger.error('Database query error on postSubjectCreate:', {
+        logger.error('Database query error on putStudentSubmissionGrade:', {
           error: error.message,
           stack: error.stack,
         });
-        if (error.sqlState === unhandledUserDefinedException) {
-          res.statusCode = 400;
-          return res.end(JSON.stringify({ error: error.sqlMessage }));
-        }
-        res.statusCode = 500;
-        return res.end(JSON.stringify({ error: 'Internal server error' }));
+        res.statusCode = error.statusCode || 500;
+        return res.end(
+          JSON.stringify({
+            error: error.statusCode ? error.message : 'Internal server error',
+          })
+        );
       }
-    } catch {
-      res.statusCode = 500;
-      return res.end(JSON.stringify({ error: 'Internal server error' }));
-    }
-  });
+    });
+  } catch (error) {
+    logger.error('Database query error on putStudentSubmissionGrade:', {
+      error: error.message,
+      stack: error.stack,
+    });
+    res.statusCode = 500;
+    return res.end(JSON.stringify({ error: 'Internal server error' }));
+  }
 };
-export const postUserSubject = async (req, res, params) => {
-  await authenticate(req, res, false);
-  const user_id_subject_id = {
-    user_id: params[0].split('/')[2],
-    subject_id: params[0].split('/')[4],
-  };
-  req.on('data', async () => {});
-  req.on('end', async () => {
-    try {
-      await checkSubjectStatus(user_id_subject_id.subject_id);
-      const result = await query(
-        'INSERT INTO users_subjects (user_id, subject_id) VALUES (?, ?)',
-        [user_id_subject_id.user_id, user_id_subject_id.subject_id]
-      );
-      if (result.results.affectedRows === 0) {
-        res.statusCode = 404;
-        return res.end({ error: 'Failed to assign subject' });
-      }
-      res.statusCode = 201;
-      return res.end(
-        JSON.stringify({ message: 'Subject assign succesfully ' })
-      );
-    } catch (error) {
-      logger.error('Database query error on postUserSubject:', {
-        error: error.message,
-        stack: error.stack,
-      });
-      res.statusCode = error.statusCode || 500;
-      return res.end(
-        JSON.stringify({
-          error: error.statusCode ? error.message : 'Internal server error',
-        })
-      );
-    }
-  });
+/**
+ * Califica todas las entregas de una practica en base a la nota del evaluador
+ */
+export const putPracticeSubmissionsGrade = async (req, res, params) => {
+  try {
+    await authenticate(req, res);
+    throw new Error('API ENDPOINT PENDING TO BE DEVELOPED');
+  } catch (error) {
+    logger.error('Database query error on putPracticeSubmissionsGrade:', {
+      error: error.message,
+      stack: error.stack,
+    });
+    res.statusCode = 500;
+    return res.end(JSON.stringify({ error: 'Internal server error' }));
+  }
 };
