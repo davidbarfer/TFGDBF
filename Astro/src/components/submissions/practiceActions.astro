@@ -30,8 +30,6 @@ const isEvaluator = !practice.evaluator_template_url;
     <a href={`/asignaturas/${practice.subject_id}/practicas/${practice.id}/evauladores/crear`}>{isEvaluator ? 'Crear evaulador' : 'Editar Evaluador'}</a>
   </button>
   <button id={`downloadPracticeGrades${practice.id}`} data-download-practice-grades-btn data-token={token} data-practice_id={practice.id}>Descargar Notas</button>
-  <button disabled>Ejecutar evaluadores</button>
-  <button disabled>Calificar Entregas</button>
 </section>
 
 <style scoped>
