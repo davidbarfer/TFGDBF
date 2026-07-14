@@ -9,7 +9,7 @@ import { logger } from '../logger.mjs';
  * Return a group
  */
 export const getGroup = async (req, res, params) => {
-  const group_id = params[0].split('/').pop();
+  const group_id = params[1];
   try {
     await authenticate(req, res, true);
     const group = await query('SELECT * FROM practice_groups WHERE id = ?', [
@@ -45,8 +45,8 @@ export const getGroup = async (req, res, params) => {
  */
 export const getSubjectPracticesGroups = async (req, res, params) => {
   const subject_id_practices_id_groups = {
-    subject_id: params[0].split('/')[2],
-    practice_id: params[0].split('/')[4],
+    subject_id: params[1],
+    practice_id: params[2],
   };
   try {
     await authenticate(req, res, true);
@@ -80,7 +80,7 @@ export const getSubjectPracticesGroups = async (req, res, params) => {
  * Return all groups of a user
  */
 export const getStudentGroups = async (req, res, params) => {
-  const student_id_groups = params[0].split('/')[2];
+  const student_id_groups = params[1];
   try {
     await authenticate(req, res, true);
     const groups_ids = await query(
@@ -254,7 +254,7 @@ export const postGroupStudent = async (req, res, params) => {
  * Delete a group
  */
 export const deleteGroup = async (req, res, params) => {
-  const group_id = params[0].split('/').pop();
+  const group_id = params[1];
   try {
     await authenticate(req, res);
     logger.info('Attempting to delete group', { group_id });
@@ -296,8 +296,8 @@ export const deleteGroup = async (req, res, params) => {
  */
 export const deleteStudentGroup = async (req, res, params) => {
   const group_id_student_id = {
-    group_id: params[0].split('/')[2],
-    student_id: params[0].split('/')[4],
+    group_id: params[1],
+    student_id: params[2],
   };
   try {
     await authenticate(req, res);
@@ -350,7 +350,7 @@ export const deleteStudentGroup = async (req, res, params) => {
  * Edit a group
  */
 export const updateGroup = async (req, res, params) => {
-  const group_id = params[0].split('/')[2];
+  const group_id = params[1];
   try {
     await authenticate(req, res);
     let body = '';

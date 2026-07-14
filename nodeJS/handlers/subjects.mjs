@@ -60,7 +60,7 @@ export const getSubjectsUser = async (req, res, params) => {
  * Return a subject
  */
 export const getSubject = async (req, res, params) => {
-  const subject_id = params[0].split('/').pop();
+  const subject_id = params[1];
   try {
     await authenticate(req, res, true);
     await checkSubjectStatus(subject_id);
@@ -143,7 +143,7 @@ export const postSubjectCreate = async (req, res, params) => {
  * Delete a subject
  */
 export const deleteSubject = async (req, res, params) => {
-  const subject_id = params[0].split('/').pop();
+  const subject_id = params[1];
   try {
     await authenticate(req, res);
     logger.info('Attempting to delete subject', { subject_id });
@@ -180,8 +180,8 @@ export const deleteSubject = async (req, res, params) => {
 export const postUserSubject = async (req, res, params) => {
   await authenticate(req, res, false);
   const user_id_subject_id = {
-    user_id: params[0].split('/')[2],
-    subject_id: params[0].split('/')[4],
+    user_id: params[1],
+    subject_id: params[2],
   };
   req.on('data', async () => {});
   req.on('end', async () => {

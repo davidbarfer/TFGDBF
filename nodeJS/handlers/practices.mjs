@@ -7,7 +7,7 @@ import { logger } from '../logger.mjs';
  * Return all practices from a subject
  */
 export const getSubjectPractices = async (req, res, params) => {
-  const subject_id_practices = params[0].split('/')[2];
+  const subject_id_practices = params[1];
   try {
     await authenticate(req, res, true);
     await checkSubjectStatus(subject_id_practices);
@@ -37,7 +37,7 @@ export const getSubjectPractices = async (req, res, params) => {
  * Return a practice
  */
 export const getPractice = async (req, res, params) => {
-  const practice_id = params[0].split('/').pop();
+  const practice_id = params[1];
   try {
     await authenticate(req, res, true);
     const practice = await query('SELECT * FROM practice WHERE id = ?', [
@@ -66,7 +66,7 @@ export const getPractice = async (req, res, params) => {
  * Create a practice
  */
 export const postPracticeCreate = async (req, res, params) => {
-  const subject_id_practices = params[0].split('/')[2];
+  const subject_id_practices = params[1];
   try {
     await authenticate(req, res);
     let body = '';

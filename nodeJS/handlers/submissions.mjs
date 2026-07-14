@@ -23,7 +23,7 @@ const FILESYSTEM_PATH = getFileSystemBasePath();
  * Return a submission
  */
 export const getSubmission = async (req, res, params) => {
-  const submission_id = params[0].split('/').pop();
+  const submission_id = params[1];
   try {
     await authenticate(req, res, false);
     const submission = await query('SELECT * FROM submissions WHERE id = ?', [
@@ -47,7 +47,7 @@ export const getSubmission = async (req, res, params) => {
  * Return all submissions from a practice
  */
 export const getPracticeSubmissions = async (req, res, params) => {
-  const practice_id_submissions = params[0].split('/')[2];
+  const practice_id_submissions = params[1];
   try {
     await authenticate(req, res);
     const submissions = await query(
@@ -85,7 +85,7 @@ export const getPracticeSubmissions = async (req, res, params) => {
  * Return all submissions from a group
  */
 export const getGroupSubmissions = async (req, res, params) => {
-  const group_id = params[0].split('/')[2];
+  const group_id = params[1];
   try {
     await authenticate(req, res);
     const group = await query(
@@ -140,7 +140,7 @@ export const getGroupSubmissions = async (req, res, params) => {
  * Return all submssions of a student
  */
 export const getStudentSubmissions = async (req, res, params) => {
-  const student_id_submissions = params[0].split('/')[2];
+  const student_id_submissions = params[1];
   try {
     await authenticate(req, res, true);
     const submissions = await query(
@@ -177,8 +177,8 @@ export const getStudentSubmissions = async (req, res, params) => {
  */
 export const getStudentSubmission = async (req, res, params) => {
   const student_id_submission_id = {
-    student_id: params[0].split('/')[2],
-    submission_id: params[0].split('/')[4],
+    student_id: params[1],
+    submission_id: params[2],
   };
   try {
     await authenticate(req, res, true);
@@ -214,8 +214,8 @@ export const getStudentSubmission = async (req, res, params) => {
  */
 export const getStudentSubmissionFile = async (req, res, params) => {
   const student_id_submission_id_file = {
-    student_id: params[0].split('/')[2],
-    submission_id: params[0].split('/')[4],
+    student_id: params[1],
+    submission_id: params[2],
   };
   try {
     await authenticate(req, res, true);
@@ -470,8 +470,8 @@ export const postPracticeGroupSubmissions = async (req, res, params) => {
  */
 export const postPracticeSubmissionEdit = async (req, res, params) => {
   const practice_id_submission_id_edit = {
-    practice_id: params[0].split('/')[2],
-    submission_id: params[0].split('/')[4],
+    practice_id: params[1],
+    submission_id: params[2],
   };
   try {
     await authenticate(req, res);
@@ -674,8 +674,8 @@ export const postPracticeEvaluatorCreate = async (req, res, params) => {
  */
 export const postStudentSubmissionEvaluate = async (req, res, params) => {
   const student_id_submission_id_evaluate = {
-    student_id: params[0].split('/')[2],
-    submission_id: params[0].split('/')[4],
+    student_id: params[1],
+    submission_id: params[2],
   };
   try {
     await authenticate(req, res, false);
@@ -861,8 +861,8 @@ export const postPracticeSubmissions = async (req, res, params) => {
  */
 export const putStudentSubmissionGrade = async (req, res, params) => {
   const student_id_submission_id_grade = {
-    student_id: params[0].split('/')[2],
-    submission_id: params[0].split('/')[4],
+    student_id: params[1],
+    submission_id: params[2],
   };
   try {
     await authenticate(req, res);

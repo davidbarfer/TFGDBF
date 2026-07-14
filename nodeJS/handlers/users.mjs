@@ -95,7 +95,7 @@ export const getUserCurrent = async (req, res, params) => {
  * Returns all students of a subject
  */
 export const getSubjectStudents = async (req, res, params) => {
-  const subject_id_students = params[0].split('/')[2];
+  const subject_id_students = params[1];
   try {
     await authenticate(req, res);
     await checkSubjectStatus(subject_id_students);
@@ -147,7 +147,7 @@ export const getSubjectStudents = async (req, res, params) => {
  * Return all students from a group
  */
 export const getGroupStudents = async (req, res, params) => {
-  const group_id_students = params[0].split('/')[2];
+  const group_id_students = params[2];
   try {
     await authenticate(req, res, true);
     const users_ids = await query(
@@ -181,7 +181,7 @@ export const getGroupStudents = async (req, res, params) => {
  * Activate an user
  */
 export const updateUserStatus = async (req, res, params) => {
-  const user_id = params[0].split('/')[2];
+  const user_id = params[1];
   try {
     await authenticate(req, res);
     let body = '';

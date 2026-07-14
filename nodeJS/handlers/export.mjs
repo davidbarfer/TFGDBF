@@ -3,7 +3,7 @@ import { logger } from '../logger.mjs';
 import * as fastcsv from 'fast-csv';
 
 export const exportPracticeGrades = async (req, res, params) => {
-  const practice_id = params[0].split('/')[2];
+  const practice_id = params[1];
   try {
     await authenticate(req, res);
     logger.info('Profesor solicitó exportación de notas con fast-csv', {
@@ -104,7 +104,7 @@ export const exportPracticeGrades = async (req, res, params) => {
   }
 };
 export const exportSubjectGrades = async (req, res, params) => {
-  const subject_id = params[0].split('/')[2];
+  const subject_id = params[1];
   try {
     await authenticate(req, res);
     logger.info('Profesor solicitó exportación de notas con fast-csv', {
@@ -221,7 +221,7 @@ export const exportSubjectGrades = async (req, res, params) => {
   }
 };
 export const exportGroupStudents = async (req, res, params) => {
-  const group_id = params[0].split('/')[2];
+  const group_id = params[1];
   try {
     await authenticate(req, res);
     logger.info('Profesor solicitó exportación de alumnos con fast-csv', {
