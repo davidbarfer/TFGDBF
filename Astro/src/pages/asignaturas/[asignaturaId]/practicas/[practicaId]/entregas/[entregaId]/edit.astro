@@ -112,38 +112,36 @@ if(submission.file_url) {
   import { showToastOnLoad, TOASTSTYLE } from "@/utils/toaster";
   const evaluatorBtns = document.querySelectorAll('[data-evaluatorBtn]')
   const submissionForm = document.getElementById('submissionForm');
-  if(submissionForm) {
+  submissionForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
     const token = submissionForm?.dataset.token;
     const submission_id = submissionForm?.dataset.submissionid;
     const practice_id = submissionForm?.dataset.practiceid;
     const urlData = { practice_id: practice_id, submission_id: submission_id }
-    submissionForm?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const formData = new FormData(e.target);
-      const data = {
-        delivery_date: formData.get('delivery_date') as string,
-        evaluator_grade: formData.get('evaluator_grade') as string,
-        grade: formData.get('grade') as string,
-        feedback: formData.get('feedback') as string,
-      };
-      if(data.evaluator_grade === "") data.evaluator_grade = null;
-      if(data.grade === "") data.grade = null;
-      const {data: response, error: responseError} = await actions.professor.editSubmissionStudent({ token: token as string, url_data: urlData, submissionData: data });
-      if (responseError) {
-        showToastOnLoad(responseError.message, TOASTSTYLE.error);
-        window.location.reload();
-      } else {
-        showToastOnLoad('Entrega editada exitosamente', TOASTSTYLE.success);
-        const urlParams = new URLSearchParams(window.location.search);
-        let redirectTo = urlParams.get('redirect') || '/default-fallback-path';
-        const lastOpenedSubjectId = localStorage.getItem('openSubject');        
-        if (lastOpenedSubjectId) {
-          redirectTo = `${redirectTo}#subject-${lastOpenedSubjectId}`;
-        }
-        window.location.assign(redirectTo);
+    const formData = new FormData(e.target);
+    const data = {
+      delivery_date: formData.get('delivery_date') as string,
+      evaluator_grade: formData.get('evaluator_grade') as string,
+      grade: formData.get('grade') as string,
+      feedback: formData.get('feedback') as string,
+    };
+    if(data.evaluator_grade === "") data.evaluator_grade = null;
+    if(data.grade === "") data.grade = null;
+    const {data: response, error: responseError} = await actions.professor.editSubmissionStudent({ token: token as string, url_data: urlData, submissionData: data });
+    if (responseError) {
+      showToastOnLoad(responseError.message, TOASTSTYLE.error);
+      window.location.reload();
+    } else {
+      showToastOnLoad('Entrega editada exitosamente', TOASTSTYLE.success);
+      const urlParams = new URLSearchParams(window.location.search);
+      let redirectTo = urlParams.get('redirect') || '/default-fallback-path';
+      const lastOpenedSubjectId = localStorage.getItem('openSubject');        
+      if (lastOpenedSubjectId) {
+        redirectTo = `${redirectTo}#subject-${lastOpenedSubjectId}`;
       }
-    });
-  }
+      window.location.assign(redirectTo);
+    }
+  });
   evaluatorBtns?.forEach(evaluatorBtn => evaluatorBtn.addEventListener('click', async() => {
     const submissionId = evaluatorBtn?.dataset.submission_id;
     const spinner = document.getElementById(`evaluatorSpinner${submissionId}`)
