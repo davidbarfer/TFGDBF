@@ -1,8 +1,12 @@
-# DoctusLite
+# Sistema de gestión de prácticas informáticas en Matlab
+
+## Autor
+
+David Barrero Fernández
 
 ## Description
 
-DoctusLite is a simple and fast web application for managing students and teachers.
+Este proyecto es una simple y rapida aplicación web para la administracion de practicas universitarias
 
 ## Tech Stack
 
