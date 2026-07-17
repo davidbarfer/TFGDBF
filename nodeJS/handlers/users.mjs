@@ -147,7 +147,7 @@ export const getSubjectStudents = async (req, res, params) => {
  * Return all students from a group
  */
 export const getGroupStudents = async (req, res, params) => {
-  const group_id_students = params[2];
+  const group_id_students = params[1];
   try {
     await authenticate(req, res, true);
     const users_ids = await query(
