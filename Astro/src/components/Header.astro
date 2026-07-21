@@ -29,10 +29,14 @@ import { roles } from '@/consts/users';
 
 <style>
 	header {
+		position: sticky;
+	  top: 0;
+  	z-index: 1000;
+  	width: 100%;
 		display: flex;
 		justify-content: center;
+		align-items: center;
 		gap: 1rem;
-		width: 100%;
     height: fit-content;
 		background-color: var(--color-primary);
 		color: var(--color-tertiary);
