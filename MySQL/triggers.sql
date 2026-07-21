@@ -100,25 +100,11 @@ BEGIN
   CALL validate_group_date(NEW.practice_id, NEW.practice_group_date);
 END//
 
-CREATE TRIGGER practice_groups_before_insert_compatibility
-BEFORE INSERT ON practice_groups
-FOR EACH ROW
-BEGIN
-  CALL validate_group_time_compatibility(NEW.id, NEW.practice_id, NEW.practice_group_date, NEW.start_time, NEW.end_time);
-END//
-
 CREATE TRIGGER practice_groups_before_update_deadline
 BEFORE UPDATE ON practice_groups
 FOR EACH ROW
 BEGIN
   CALL validate_group_date(NEW.practice_id, NEW.practice_group_date);
-END//
-
-CREATE TRIGGER practice_groups_before_update_compatibility
-BEFORE UPDATE ON practice_groups
-FOR EACH ROW
-BEGIN
-  CALL validate_group_time_compatibility(NEW.id, NEW.practice_id, NEW.practice_group_date, NEW.start_time, NEW.end_time);
 END//
 
 CREATE TRIGGER submission_insert
