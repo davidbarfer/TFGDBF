@@ -20,6 +20,7 @@ const { data: students, error: studentsError } = await Astro.callAction(
 
 <div>
   <h1>Grupo {group?.name} - {practice?.name}</h1>
+  <h3>Descripción: {group?.description ? group?.description : 'Este grupo no tiene descripción' }</h3>
   <section class="group-info">
     <p>
       Participantes: {group?.current_participants} / {group?.max_participants}
