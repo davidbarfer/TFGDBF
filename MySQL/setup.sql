@@ -71,6 +71,7 @@ CREATE TABLE IF NOT EXISTS practice_groups (
   id INT AUTO_INCREMENT PRIMARY KEY,
   practice_id INT NOT NULL,
   name NUMERIC NOT NULL,
+  description TEXT DEFAULT NULL,
   max_participants NUMERIC NOT NULL,
   current_participants NUMERIC NOT NULL DEFAULT 0,
   practice_group_date DATE NOT NULL,

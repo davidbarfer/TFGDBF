@@ -92,6 +92,7 @@ ON DUPLICATE KEY UPDATE user_id = VALUES(user_id), practice_id = VALUES(practice
 
 UPDATE submissions SET feedback = 'Buen trabajo' WHERE id = 1;
 UPDATE submissions SET evaluator_grade = 8 WHERE id = 2;
+UPDATE practice_groups SET description = 'Aula 007' WHERE id = 5;
 
 -- 2. Volver a activar las restricciones de claves foráneas
 SET FOREIGN_KEY_CHECKS = 1;
