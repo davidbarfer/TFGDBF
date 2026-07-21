@@ -3,12 +3,14 @@ const { id, token } = Astro.props;
 ---
 <section>
   <h1>Crear práctica</h1>
+  <p class="warningMsg">Las prácticas no pueden ser eliminadas. Asegurese de que todos los datos son correctos</p>
   <form id="practiceForm" data-id={id} data-token={token}>
     <label for="name">Nombre</label>
     <input type="text" id="name" name="name" required>
     <label for="description">Descripción</label>
     <textarea id="description" name="description" required rows="8" cols="50"></textarea>
-    <label for="deadline">Fecha de vencimiento</label>
+    <label for="deadline">Fecha Límite Global</label>
+    <p class="warningMsg">Estas es la límitación de sistema a la hora de generar fechas (fechas de grupos de practicas y sus entregas). Lo recomendable es seleccionar la fecha de final del curso académico</p>
     <input type="date" id="deadline" name="deadline" required>
     <button type="submit">Crear</button>
   </form>
@@ -49,5 +51,10 @@ if (form) {
   }
   textarea {
     resize: none;
+  }
+  .warningMsg {
+    font-style: italic;
+    font-weight: bold;
+    color: var(--color-error)
   }
 </style>
