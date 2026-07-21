@@ -42,7 +42,7 @@ const { data: subjects, error: subjectsError } = await Astro.callAction(actions.
           <form id={`DeleteSubjectForm${user.id}`} data-userId = {user.id} data-token={token} data-delete-subject-form>
             {subjects.filter((subject: any) => user.subjects_id?.includes(subject.id)).length === 0 ? (
               <select name="subject_id" disabled>
-                <option>Ninguna asignaturas asignada</option>
+                <option>Ninguna asignatura asignada</option>
               </select>
                 <button type="submit" disabled>
                   Desasignar
