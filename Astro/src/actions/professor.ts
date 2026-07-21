@@ -428,6 +428,27 @@ export const professor = {
       return response.json()
     }
   }),
+    unassignUserSubject: defineAction({
+    input: z.object({
+      token: z.string(),
+      user_id: z.number(),
+      subject_id: z.number(),
+    }),
+    handler: async(input) => {
+      const response = await fetch(
+        `${API_URL}/users/${input.user_id}/subjects/${input.subject_id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: input.token,
+          },
+          body: null,
+        }
+      );
+      if (!response.ok) await handleActionError(response);
+      return response.json()
+    }
+  }),
   updateGroup: defineAction({
     input: z.object({
       token: z.string(),
