@@ -1,5 +1,6 @@
 ---
 import { actions } from "astro:actions";
+import { setLocalDateLanguage } from "@/utils/dates";
 const { id, token, subject } = Astro.props;
 const { data: practices, error } = await Astro.callAction(actions.user.getPractices, { token: token as string, subject_id: id as string });
 ---
@@ -11,7 +12,7 @@ const { data: practices, error } = await Astro.callAction(actions.user.getPracti
     <select name="practice_id" id="practice">
       <option value="">Selecciona una práctica</option>
       {practices?.map((practice: any) => (
-        <option value={practice.id}>{practice.name}</option>
+        <option value={practice.id}>{practice.name} | Fecha Limite Global: {setLocalDateLanguage(practice.deadline)}</option>
       ))}
     </select>
     <section id="numberGroups">
@@ -37,19 +38,38 @@ function renderGroups(count: number) {
     groups.innerHTML = '';
   }
   for (let i = 0; i < count; i++) {
-    const group = document.createElement('div');
+    const group = document.createElement('section');
     group.className = 'group-container';
     group.innerHTML = `
-      <label for="group_name_${i}">Grupo: </label>
-      <input type="text" id="group_name_${i}" name="group_name_${i}" value="${i + 1}" readonly required style="background-color: var(--color-primary);">
-      <label for="max_participants_${i}">Máximo de participantes</label>
-      <input type="number" id="max_participants_${i}" name="max_participants_${i}" min="1" required>
-      <label for="group_date_${i}">Fecha del grupo</label>
-      <input type="date" id="group_date_${i}" name="group_date_${i}" required>
-      <label for="start_time_${i}">Hora de inicio</label>
-      <input type="time" id="start_time_${i}" name="start_time_${i}" required>
-      <label for="end_time_${i}">Hora de fin</label>
-      <input type="time" id="end_time_${i}" name="end_time_${i}" required>
+      <div class="field">
+        <label for="group_name_${i}">Grupo</label>
+        <input type="text" id="group_name_${i}" name="group_name_${i}" value="${i + 1}" readonly required class="input-readonly" />
+      </div>
+
+      <div class="field">
+        <label for="max_participants_${i}">Máx. participantes</label>
+        <input type="number" id="max_participants_${i}" name="max_participants_${i}" min="1" placeholder="Ej: 5" required />
+      </div>
+
+      <div class="field">
+        <label for="group_date_${i}">Fecha</label>
+        <input type="date" id="group_date_${i}" name="group_date_${i}" required />
+      </div>
+
+      <div class="field">
+        <label for="start_time_${i}">Hora inicio</label>
+        <input type="time" id="start_time_${i}" name="start_time_${i}" required />
+      </div>
+
+      <div class="field">
+        <label for="end_time_${i}">Hora fin</label>
+        <input type="time" id="end_time_${i}" name="end_time_${i}" required />
+      </div>
+
+      <div class="field field-full">
+        <label for="description_${i}">Descripción del grupo (Aula, materiales, etc.)</label>
+        <textarea id="description_${i}" name="description_${i}" rows="3" placeholder="Ej: Aula 102, traer portátil..."></textarea>
+      </div>
     `;
     document.getElementById('groups')?.appendChild(group);
   }
@@ -83,6 +103,7 @@ if (form) {
       for (let i = 0; i < Number(groupsNumberVal); i++) {
         groupsPayload.push({
           group_name: formData.get(`group_name_${i}`)?.toString() || `${i + 1}`,
+          description: formData.get(`description_${i}`)?.toString() || '',
           max_participants: Number(formData.get(`max_participants_${i}`)),
           group_date: formData.get(`group_date_${i}`)?.toString() || '',
           start_time: formData.get(`start_time_${i}`)?.toString() || '',
@@ -113,7 +134,7 @@ if (form) {
 renderGroups(Number(groupsNumber?.value || 0));
 </script>
 
-<style>
+<style scoped>
   form {
     display: flex;
     flex-direction: column;
@@ -134,5 +155,79 @@ renderGroups(Number(groupsNumber?.value || 0));
     font-style: italic;
     font-weight: bold;
     color: var(--color-error)
+  }
+</style>
+
+<style is:global>
+/* Tarjeta compacta para cada grupo (.group-container) */
+  .group-container {
+    display: grid;
+    /* 5 columnas fijas e iguales para la primera fila */
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.5rem 0.75rem;
+    padding: 0.75rem 1rem;
+    background-color: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+
+  /* Agrupación vertical súper compacta */
+  .group-container .field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  /* La descripción se extiende a lo ancho de toda la segunda fila */
+  .group-container .field-full {
+    grid-column: 1 / -1;
+  }
+
+  /* Etiquetas reducidas */
+  .group-container label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Inputs comprimidos */
+  .group-container input,
+  .group-container textarea {
+    width: 100%;
+    padding: 0.35rem 0.5rem;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    font-size: 0.875rem;
+    background-color: #ffffff;
+    box-sizing: border-box;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  /* Enfoque / Focus */
+  .group-container input:focus,
+  .group-container textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+  }
+
+  /* Input de solo lectura para el Nombre del Grupo */
+  .group-container input.input-readonly,
+  .group-container input[readonly] {
+    background-color: var(--color-primary);
+    color: var(--color-tertiary);
+    font-weight: bold;
+    text-align: center;
+    border-color: var(--color-tertiary);
+  }
+
+  /* Descripción con altura mínima reducida */
+  .group-container textarea {
+    resize: none;
+    min-height: 48px;
+    height: 48px;
+    font-family: inherit;
   }
 </style>

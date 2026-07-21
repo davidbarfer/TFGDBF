@@ -7,6 +7,8 @@ const { group, token} = Astro.props;
   <form id="groupForm" data-id={group?.id} data-token={token}>
     <label for="name">Nombre del grupo</label>
     <input type="text" id="group_name" name="name" value={group?.name} required readonly>
+    <label for="description">Descripción del grupo (Aula, materiales, etc.)</label>
+    <textarea id="description" name="description" rows="4" cols="50">{group?.description}</textarea>
     <label for="max_participants">Máximo de participantes</label>
     <input type="number" id="max_participants" name="max_participants" value={group?.max_participants} required>
     <label for="group_date">Fecha del grupo</label>
@@ -23,13 +25,19 @@ const { group, token} = Astro.props;
 import { showToast, showToastOnLoad, TOASTSTYLE } from "@/utils/toaster";
 import { actions } from "astro:actions";
 const form = document.getElementById('groupForm');
-if (form) {
-  const group_id = Number(form?.dataset.id);
-  const token = form?.dataset.token as string;
-  form.addEventListener('submit', async (e) => {
+form?.addEventListener('submit', async (e) => {
+    const group_id = Number(form?.dataset.id);
+    const token = form?.dataset.token as string;
     e.preventDefault();
     const formData = new FormData(e.target);
-    const data = Object.fromEntries(formData);
+    const data = {
+      name: formData.get('name') as string,
+      description: formData.get('description') as string,
+      max_participants: formData.get('max_participants') as string,
+      group_date: formData.get('group_date') as string,
+      start_time: formData.get('start_time') as string,
+      end_time: formData.get('end_time') as string,
+    };
     const {data: response, error: responseError } = await actions.professor.updateGroup({ token: token, group_id: group_id, group: data})
     if(responseError) {
       showToast(responseError.message, TOASTSTYLE.error)
@@ -38,8 +46,7 @@ if (form) {
       const redirectTo = window.location.pathname.split('edit')[0];
       window.location.assign(redirectTo)
     }
-  });  
-}
+});
 </script>
 
 <style>
@@ -51,7 +58,10 @@ if (form) {
   input:read-only {
     background-color: var(--color-primary);
   }
-#groups {
+  textarea {
+    resize: none;
+  }
+  #groups {
     display: flex;
     flex-direction: column;
     gap: 1rem;

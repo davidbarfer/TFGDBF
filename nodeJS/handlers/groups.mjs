@@ -156,10 +156,14 @@ export const createGroups = async (req, res, params) => {
               })
             );
           }
-          valuesPlaceholder.push('(?, ?, ?, ?, ?, ?)');
+          if (g.description === '') {
+            g.description = null;
+          }
+          valuesPlaceholder.push('(?, ?, ?, ?, ?, ?, ?)');
           flatValues.push(
             data.practice_id,
             g.group_name,
+            g.description,
             g.max_participants,
             g.group_date,
             g.start_time,
@@ -168,7 +172,7 @@ export const createGroups = async (req, res, params) => {
         }
         const rawQuery = `
           INSERT INTO practice_groups 
-          (practice_id, name, max_participants, practice_group_date, start_time, end_time) 
+          (practice_id, name, description, max_participants, practice_group_date, start_time, end_time) 
           VALUES ${valuesPlaceholder.join(', ')}
         `;
         const group = await query(rawQuery, flatValues);
@@ -368,6 +372,9 @@ export const updateGroup = async (req, res, params) => {
             })
           );
         }
+        if (data.description === '') {
+          data.description = null;
+        }
         const pathCheck = await query(
           'SELECT p.subject_id FROM practice_groups pg JOIN practice p ON pg.practice_id = p.id WHERE pg.id = ?',
           [group_id]
@@ -376,9 +383,10 @@ export const updateGroup = async (req, res, params) => {
           await checkSubjectStatus(pathCheck.results[0].subject_id);
         }
         const result = await query(
-          'UPDATE practice_groups SET name = ?, max_participants = ?, practice_group_date = ?, start_time = ?, end_time = ? WHERE id = ?',
+          'UPDATE practice_groups SET name = ?, description = ?, max_participants = ?, practice_group_date = ?, start_time = ?, end_time = ? WHERE id = ?',
           [
             data.name,
+            data.description,
             data.max_participants,
             data.group_date,
             data.start_time,

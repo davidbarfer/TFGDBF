@@ -241,6 +241,7 @@ export const exportGroupStudents = async (req, res, params) => {
       u.name AS student_name,
       u.surname AS student_surname,
       pg.name AS group_name,
+      pg.description AS group_description,
       pg.practice_group_date AS group_date,
       pg.start_time,
       pg.end_time
@@ -286,6 +287,7 @@ export const exportGroupStudents = async (req, res, params) => {
         Nombre: row.student_name,
         Apellidos: row.student_surname,
         Grupo: row.group_name,
+        Descripcion: row.group_description,
         Fecha: row.group_date,
         Hora_Inicio: row.start_time,
         Hora_Fin: row.end_time,
