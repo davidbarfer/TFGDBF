@@ -3,8 +3,8 @@ import { actions } from "astro:actions";
 const {token, users} = Astro.props
 const { data: subjects, error: subjectsError } = await Astro.callAction(actions.user.getSubjects, {token})
 ---
-
-  <table>
+  <input type="text" id="searchNames" placeholder="Busca por nombres, DNI o apellidos.." data-search-names>
+  <table id="AssignTable" data-assign-table>
     <thead>
       <tr>
         <th>Nombre de Usuario (DNI)</th>
@@ -103,6 +103,29 @@ const { data: subjects, error: subjectsError } = await Astro.callAction(actions.
   })
 </script>
 
+<script>
+  const searchInput = document.getElementById("searchNames") as HTMLInputElement;
+  const table = document.getElementById("AssignTable") as HTMLTableElement;
+
+  searchInput?.addEventListener('input', () => {
+    const filter = searchInput.value.toLowerCase().trim();
+    const rows = table?.querySelectorAll("tbody tr");
+
+    rows?.forEach((row) => {
+      const cells = row.querySelectorAll("td");
+      // Check DNI (col 0), Name (col 1), and Surname (col 2)
+      const username = cells[0]?.textContent?.toLowerCase() || "";
+      const name = cells[1]?.textContent?.toLowerCase() || "";
+      const surname = cells[2]?.textContent?.toLowerCase() || "";
+
+      // Show row if query matches username, name, surname, or full name
+      const fullName = `${name} ${surname}`;
+      const matches = username.includes(filter) || name.includes(filter) || surname.includes(filter) || fullName.includes(filter);
+
+      (row as HTMLElement).style.display = matches ? "" : "none";
+    });
+  });
+</script>
 <style>
   table {
     width: 100%;
