@@ -175,7 +175,7 @@ export const deleteSubject = async (req, res, params) => {
   }
 };
 /**
- * Assign a subject to an user
+ * Asignar una asignatura a un usuario
  */
 export const postUserSubject = async (req, res, params) => {
   await authenticate(req, res, false);
@@ -193,11 +193,50 @@ export const postUserSubject = async (req, res, params) => {
       );
       if (result.results.affectedRows === 0) {
         res.statusCode = 404;
-        return res.end({ error: 'Failed to assign subject' });
+        return res.end({ error: 'Error al asignar asignatura' });
       }
       res.statusCode = 201;
       return res.end(
-        JSON.stringify({ message: 'Subject assign succesfully ' })
+        JSON.stringify({ message: 'Asignatura asignada con éxito ' })
+      );
+    } catch (error) {
+      logger.error('Database query error on postUserSubject:', {
+        error: error.message,
+        stack: error.stack,
+      });
+      res.statusCode = error.statusCode || 500;
+      return res.end(
+        JSON.stringify({
+          error: error.statusCode ? error.message : 'Internal server error',
+        })
+      );
+    }
+  });
+};
+/**
+ * Desasignar una asignatura a un usuario
+ */
+export const deleteUserSubject = async (req, res, params) => {
+  await authenticate(req, res, false);
+  const user_id_subject_id = {
+    user_id: params[1],
+    subject_id: params[2],
+  };
+  req.on('data', async () => {});
+  req.on('end', async () => {
+    try {
+      await checkSubjectStatus(user_id_subject_id.subject_id);
+      const result = await query(
+        'DELETE FROM users_subjects WHERE user_id = ? AND subject_id = ?',
+        [user_id_subject_id.user_id, user_id_subject_id.subject_id]
+      );
+      if (result.results.affectedRows === 0) {
+        res.statusCode = 404;
+        return res.end({ error: 'Error al desasignar asignatura' });
+      }
+      res.statusCode = 201;
+      return res.end(
+        JSON.stringify({ message: 'Asignatura desasignada con éxito' })
       );
     } catch (error) {
       logger.error('Database query error on postUserSubject:', {

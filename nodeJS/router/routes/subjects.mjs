@@ -4,6 +4,7 @@ import {
   getSubjectsUser,
   postSubjectCreate,
   postUserSubject,
+  deleteUserSubject,
   deleteSubject,
 } from '../../handlers/subjects.mjs';
 export const subjectsRoutes = [
@@ -31,6 +32,11 @@ export const subjectsRoutes = [
     method: 'POST',
     regex: /^\/users\/(\d+)\/subjects\/(\d+)$/,
     handler: postUserSubject,
+  },
+  {
+    method: 'DELETE',
+    regex: /^\/users\/(\d+)\/subjects\/(\d+)$/,
+    handler: deleteUserSubject,
   },
   {
     method: 'DELETE',
