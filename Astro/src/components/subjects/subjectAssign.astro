@@ -7,14 +7,16 @@ const { data: subjects, error: subjectsError } = await Astro.callAction(actions.
   <table>
     <thead>
       <tr>
-        <th>Name</th>
-        <th>Surname</th>
+        <th>Nombre de Usuario (DNI)</th>
+        <th>Nombre</th>
+        <th>Apellidos</th>
         <th>Acciones</th>
       </tr>
     </thead>
     <tbody>
       {users.map((user : any) => (
         <tr>
+        <td>{user.username}</td>
         <td>{user.name}</td>
         <td>{user.surname}</td>
         <td>

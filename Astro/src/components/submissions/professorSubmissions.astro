@@ -18,12 +18,13 @@ if (token) {
   <thead>
     <tr>
       <th>Entrega</th>
+      <th>DNI</th>
       <th>Alumno</th>
       <th>Estado de la entrega</th>
       <th>Fecha de entrega</th>
       <th>Nota del evaluador</th>
       <th>Nota del alumno</th>
-      <th>Feedback al alumno</th>
+      <th>Comentarios para el alumno</th>
       <th>Acciones</th>
     </tr>
   </thead>
@@ -31,6 +32,7 @@ if (token) {
     {submissions.map((submission : any) => (
       <tr>
         <td>{submission.id}</td>
+        <td>{submission.user.username}</td>
         <td>{submission.user.name} {submission.user.surname}</td>
         <td>{submissionStatus(submission.grade, submission.due_date, submission.file_url)}</td>
         <td>{new Date(submission.delivery_date).toLocaleDateString("es-ES", {

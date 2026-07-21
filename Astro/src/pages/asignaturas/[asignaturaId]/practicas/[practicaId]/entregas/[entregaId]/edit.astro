@@ -34,7 +34,7 @@ if(submission.file_url) {
       <section>
         <h1>Editar entrega {submission.id}</h1>
         <div id="evaluator-grade-section">
-            <p>La nota del evaluador no puede ser editada</p>
+            <p>La nota del evaluador no puede ser editada manualmente</p>
             <Modal id={`evaluatorModal${submission.id}`} btnText="Ejecutar evaluador">
               <main slot="mainModal">
                 <p>Está acción ejecutara el evaluador y si no hay ningun error generara una nota en Nota del evaluador</p>
@@ -85,7 +85,7 @@ if(submission.file_url) {
             min="0" 
             step="0.01"
           />
-          <label for="feedback">Comentarios</label>
+          <label for="feedback">Comentarios para el alumno</label>
           <textarea 
             id="feedback" 
             name="feedback" 

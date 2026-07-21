@@ -1,5 +1,6 @@
 ---
 import jwt from 'jsonwebtoken'
+import { setLocalDateLanguage } from '@/utils/dates';
 
 const secret = import.meta.env.JWT_SECRET;
 const { token , practice } = Astro.props;
@@ -15,7 +16,7 @@ if (token) {
 
 <section>
   <h1>Práctica {practice.name}</h1>
-  <p>Fecha de entrega: {new Date(practice.deadline).toLocaleDateString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit' })}</p>
+  <p>Fecha Límite Global: {setLocalDateLanguage(practice.deadline)}</p>
 </section>
 
 <style scoped>
