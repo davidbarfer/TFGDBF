@@ -156,10 +156,14 @@ export const createGroups = async (req, res, params) => {
               })
             );
           }
-          valuesPlaceholder.push('(?, ?, ?, ?, ?, ?)');
+          if (g.description === '') {
+            g.description = null;
+          }
+          valuesPlaceholder.push('(?, ?, ?, ?, ?, ?, ?)');
           flatValues.push(
             data.practice_id,
             g.group_name,
+            g.description,
             g.max_participants,
             g.group_date,
             g.start_time,
@@ -168,7 +172,7 @@ export const createGroups = async (req, res, params) => {
         }
         const rawQuery = `
           INSERT INTO practice_groups 
-          (practice_id, name, max_participants, practice_group_date, start_time, end_time) 
+          (practice_id, name, description, max_participants, practice_group_date, start_time, end_time) 
           VALUES ${valuesPlaceholder.join(', ')}
         `;
         const group = await query(rawQuery, flatValues);

@@ -135,6 +135,7 @@ export const professor = {
       groups: z.array(
         z.object({
           group_name: z.string(),
+          description: z.string().nullable(),
           max_participants: z.number(),
           group_date: z.string(),
           start_time: z.string(),
