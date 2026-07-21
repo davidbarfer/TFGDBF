@@ -22,10 +22,22 @@ const { data: subject, error } = await Astro.callAction(actions.user.getSubject,
 
 <Layout>
   {user?.role === roles.professor || user?.role === roles.admin ? (
-    <GroupCreate id={id} token={token} subject={subject} />
+    <section>
+      <h1>Crear grupo</h1>
+      <h2>Asignatura: {subject?.name}</h2>
+      <GroupCreate subjet_id={id} token={token} />
+    </section>
   ) : (
     <p>No tienes permiso para crear grupos</p>
     <a href="/">Volver al inicio</a>
   )}
 </Layout>
 
+<style>
+  section {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding-bottom: var(--space-8);
+  }
+</style>

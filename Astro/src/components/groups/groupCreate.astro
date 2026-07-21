@@ -1,29 +1,25 @@
 ---
 import { actions } from "astro:actions";
 import { setLocalDateLanguage } from "@/utils/dates";
-const { id, token, subject } = Astro.props;
-const { data: practices, error } = await Astro.callAction(actions.user.getPractices, { token: token as string, subject_id: id as string });
+const { subjet_id, token } = Astro.props;
+const { data: practices, error } = await Astro.callAction(actions.user.getPractices, { token: token as string, subject_id: subjet_id as string });
 ---
-<section>
-  <h1>Crear grupo</h1>
-  <h2>Asignatura: {subject?.name}</h2>
-  <form id="groupForm" data-id={id} data-token={token}>
-    <label for="practice">Selecciona la práctica</label>
-    <select name="practice_id" id="practice">
-      <option value="">Selecciona una práctica</option>
-      {practices?.map((practice: any) => (
-        <option value={practice.id}>{practice.name} | Fecha Limite Global: {setLocalDateLanguage(practice.deadline)}</option>
-      ))}
-    </select>
-    <section id="numberGroups">
-    <label for="groupsNumber">Número de grupos</label>
-      <input type="number" id="groupsNumber" name="groupsNumber" required>
-      <p>Cambiar el número de grupos borrara todos los datos introduccidos</p>
-    </section>
-    <section id="groups"></section>
-    <button type="submit">Crear</button>
-  </form>
-</section>
+<form id="groupForm" data-id={subjet_id} data-token={token}>
+  <label for="practice">Selecciona la práctica</label>
+  <select name="practice_id" id="practice">
+    <option value="">Selecciona una práctica</option>
+    {practices?.map((practice: any) => (
+      <option value={practice.id}>{practice.name} | Fecha Limite Global: {setLocalDateLanguage(practice.deadline)}</option>
+    ))}
+  </select>
+  <section id="numberGroups">
+  <label for="groupsNumber">Número de grupos</label>
+    <input type="number" id="groupsNumber" name="groupsNumber" required>
+    <p>Cambiar el número de grupos borrara todos los datos introduccidos</p>
+  </section>
+  <section id="groups"></section>
+  <button type="submit">Crear</button>
+</form>
 
 <script>
 import { actions } from "astro:actions";
