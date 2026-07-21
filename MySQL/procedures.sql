@@ -33,11 +33,22 @@ BEGIN
     -- Check the date condition
     ELSEIF p_group_date >= deadline_var THEN
       -- Construct the string into the variable first
-      SET error_msg = CONCAT('Group date (', p_group_date, ') must be before practice deadline (', deadline_var, ')');
+      SET error_msg = CONCAT('Fecha del grupo (', p_group_date, ') debe ser antes de la Fecha Límite Global (', deadline_var, ')');
       SIGNAL SQLSTATE '45000'
       SET MESSAGE_TEXT = error_msg;
     END IF;
   END IF;
+END//
+
+CREATE PROCEDURE validate_group_time_compatibility(
+    IN g_start_time TIME,
+    IN g_end_time TIME
+)
+BEGIN
+    IF g_end_time < g_start_time THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Rango de horas invalido: Hora Fin no puede ser antes que Hora Inicio.';
+    END IF;
 END//
 
 DELIMITER ;

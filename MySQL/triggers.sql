@@ -107,6 +107,20 @@ BEGIN
   CALL validate_group_date(NEW.practice_id, NEW.practice_group_date);
 END//
 
+CREATE TRIGGER practice_groups_before_insert_time_compability
+BEFORE INSERT ON practice_groups
+FOR EACH ROW
+BEGIN
+    CALL validate_group_time_compatibility(NEW.start_time, NEW.end_time);
+END//
+
+CREATE TRIGGER practice_groups_before_update_time_compability
+BEFORE UPDATE ON practice_groups
+FOR EACH ROW
+BEGIN
+    CALL validate_group_time_compatibility(NEW.start_time, NEW.end_time);
+END//
+
 CREATE TRIGGER submission_insert
 BEFORE INSERT ON submissions  -- Remove quotes around table name
 FOR EACH ROW

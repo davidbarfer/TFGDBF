@@ -2,6 +2,7 @@
 DROP VIEW IF EXISTS v_subject;
 -- Drop Procedures if exist
 DROP PROCEDURE IF EXISTS validate_group_date;
+DROP PROCEDURE IF EXISTS validate_group_time_compatibility;
 -- Drop Triggers if exist
 DROP TRIGGER IF EXISTS create_group;
 DROP TRIGGER IF EXISTS delete_group;
@@ -9,6 +10,8 @@ DROP TRIGGER IF EXISTS delete_user_group;
 DROP TRIGGER IF EXISTS update_user_group_count;
 DROP TRIGGER IF EXISTS check_user_already_in_group;
 DROP TRIGGER IF EXISTS check_user_already_in_group_of_practice;
+DROP TRIGGER IF EXISTS practice_groups_before_insert_time_compability;
+DROP TRIGGER IF EXISTS practice_groups_before_update_time_compability;
 DROP TRIGGER IF EXISTS practice_groups_before_insert_deadline;
 DROP TRIGGER IF EXISTS practice_groups_before_update_deadline;
 DROP TRIGGER IF EXISTS submission_insert;
