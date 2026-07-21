@@ -368,6 +368,9 @@ export const updateGroup = async (req, res, params) => {
             })
           );
         }
+        if (data.description === '') {
+          data.description = null;
+        }
         const pathCheck = await query(
           'SELECT p.subject_id FROM practice_groups pg JOIN practice p ON pg.practice_id = p.id WHERE pg.id = ?',
           [group_id]
@@ -376,9 +379,10 @@ export const updateGroup = async (req, res, params) => {
           await checkSubjectStatus(pathCheck.results[0].subject_id);
         }
         const result = await query(
-          'UPDATE practice_groups SET name = ?, max_participants = ?, practice_group_date = ?, start_time = ?, end_time = ? WHERE id = ?',
+          'UPDATE practice_groups SET name = ?, description = ?, max_participants = ?, practice_group_date = ?, start_time = ?, end_time = ? WHERE id = ?',
           [
             data.name,
+            data.description,
             data.max_participants,
             data.group_date,
             data.start_time,
