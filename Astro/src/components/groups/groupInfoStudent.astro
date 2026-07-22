@@ -8,7 +8,7 @@ if (token) {
   try {
     user = jwt.verify(token, secret); // same secret as backend
   } catch (err) {
-    console.warn("Invalid or expired token", err);
+    console.warn("Token no válido o vencido", err);
   }
 }
 const { data: students, error: studentsError } = await Astro.callAction(actions.user.getGroupStudents, { token: token as string, group_id: String(group?.id) });

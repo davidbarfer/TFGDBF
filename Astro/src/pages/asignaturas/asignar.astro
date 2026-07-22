@@ -13,7 +13,7 @@ if (token) {
   try {
     user = jwt.verify(token, secret); // same secret as backend
   } catch (err) {
-    console.warn("Invalid or expired token", err);
+    console.warn("Token no válido o vencido", err);
   }
 }
 let { data: professors, error: professorsError} = await Astro.callAction(actions.professor.getUsersProfessors,{token: token as string});
