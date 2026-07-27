@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import formidable from 'formidable';
-import { unhandledUserDefinedException } from '../utils/errors.mjs';
+import { unhandledUserDefinedException } from '../utils/messages.mjs';
 import { authenticate, query, checkSubjectStatus } from '../database.mjs';
 import {
   clearTempDirectory,

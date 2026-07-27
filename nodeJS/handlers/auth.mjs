@@ -1,6 +1,11 @@
 import jwt from 'jsonwebtoken';
 import { FRONTEND_URL, BACKEND_URL, corsHeaders } from '../api.mjs';
 import {
+  SERVER_ERRORS,
+  AUTH_ERRORS,
+  AUTH_SUCCESS,
+} from '../utils/messages.mjs';
+import {
   query,
   verifyPassword,
   hashPassword,
@@ -29,9 +34,7 @@ export const login = async (req, res, params) => {
         data = JSON.parse(body);
       } catch {
         res.statusCode = 400;
-        return res.end(
-          JSON.stringify({ error: 'Invalid JSON in request body' })
-        );
+        return res.end(JSON.stringify({ error: AUTH_ERRORS.jsonInvalid }));
       }
 
       // Simple validation
@@ -39,7 +42,7 @@ export const login = async (req, res, params) => {
         res.statusCode = 400;
         return res.end(
           JSON.stringify({
-            error: 'Username and password are required',
+            error: AUTH_ERRORS.credentialsRequired,
           })
         );
       }
@@ -52,12 +55,14 @@ export const login = async (req, res, params) => {
       const user = users.results[0];
 
       if (!user) {
-        logger.warn('Invalid credentials', {
+        logger.warn(AUTH_ERRORS.credentialsInvalid, {
           user,
-          error: 'User not found in database',
+          error: 'Usuario no encontrado en la base de datos',
         });
         res.statusCode = 401;
-        return res.end(JSON.stringify({ error: 'Invalid credentials' }));
+        return res.end(
+          JSON.stringify({ error: AUTH_ERRORS.credentialsInvalid })
+        );
       }
 
       // Verify password
@@ -66,21 +71,23 @@ export const login = async (req, res, params) => {
         user.password
       );
       if (!isPasswordValid) {
-        logger.warn('Invalid credentials', {
+        logger.warn(AUTH_ERRORS.credentialsInvalid, {
           user,
-          error: 'Password is invalid',
+          error: 'Contraseña no válida',
         });
         res.statusCode = 401;
-        return res.end(JSON.stringify({ error: 'Invalid credentials' }));
+        return res.end(
+          JSON.stringify({ error: AUTH_ERRORS.credentialsInvalid })
+        );
       }
 
       // Account active
       if (!user.is_active) {
-        logger.warn('Account pending approval by an administrator.', { user });
+        logger.warn(AUTH_ERRORS.accountPendingApproval, { user });
         res.statusCode = 403; // Forbidden
         return res.end(
           JSON.stringify({
-            error: 'Your account is pending approval by an administrator.',
+            error: AUTH_ERRORS.accountPendingApproval,
           })
         );
       }
@@ -112,7 +119,7 @@ export const login = async (req, res, params) => {
       res.writeHead(200, headers);
       return res.end(
         JSON.stringify({
-          message: 'Login successful',
+          message: AUTH_SUCCESS.loginSuccessful,
           user: {
             id: user.id,
             username: user.username,
@@ -126,7 +133,7 @@ export const login = async (req, res, params) => {
       });
       if (!res.headersSent) {
         res.statusCode = 500;
-        res.end(JSON.stringify({ error: 'Internal server error' }));
+        res.end(JSON.stringify({ error: SERVER_ERRORS.internalServerError }));
       }
     }
   });
@@ -141,7 +148,7 @@ export const login = async (req, res, params) => {
     });
     if (!res.headersSent) {
       res.statusCode = 500;
-      res.end(JSON.stringify({ error: 'Error processing request' }));
+      res.end(JSON.stringify({ error: SERVER_ERRORS.internalServerError }));
     }
   });
 
@@ -154,8 +161,8 @@ export const logout = async (req, res, params) => {
     'Content-Type': 'application/json',
     'Set-Cookie': `token=; HttpOnly; Max-Age=0; Path=/`,
   });
-  logger.info('Logout successful');
-  return res.end(JSON.stringify({ message: 'Logout successful' }));
+  logger.info(AUTH_SUCCESS.logoutSuccessful);
+  return res.end(JSON.stringify({ message: AUTH_SUCCESS.logoutSuccessful }));
 };
 export const signup = async (req, res, params) => {
   let body = '';
@@ -166,7 +173,7 @@ export const signup = async (req, res, params) => {
   });
 
   req.on('end', async () => {
-    logger.info('Auth signup process start');
+    logger.info('Comienzo proceso de registro');
     try {
       // Parse and validate request body
       const data = JSON.parse(body);
@@ -178,14 +185,16 @@ export const signup = async (req, res, params) => {
         res.statusCode = 400;
         return res.end(
           JSON.stringify({
-            error: 'Username, password, and role are required',
+            error: AUTH_ERRORS.credentialsRequired,
           })
         );
       }
       // Admin Creation not allow
       if (data.role === 'admin') {
         res.statusCode = 400;
-        return res.end(JSON.stringify({ error: 'Admin creation not allowed' }));
+        return res.end(
+          JSON.stringify({ error: AUTH_ERRORS.adminCreationNotAllowed })
+        );
       }
 
       // Check if user already exists
@@ -194,9 +203,11 @@ export const signup = async (req, res, params) => {
         [data.username]
       );
       if (existingUsers.results && existingUsers.results.length > 0) {
-        logger.warn('User already exists', existingUsers.results);
+        logger.warn(AUTH_ERRORS.userAlreadyExists, existingUsers.results);
         res.statusCode = 409;
-        return res.end(JSON.stringify({ error: 'User already exists' }));
+        return res.end(
+          JSON.stringify({ error: AUTH_ERRORS.userAlreadyExists })
+        );
       }
 
       const isActive = data.role === 'student' ? true : false;
@@ -219,14 +230,14 @@ export const signup = async (req, res, params) => {
       );
 
       // Registration successful
-      logger.info('Registration successful', data);
+      logger.info(AUTH_SUCCESS.signupSuccessful, data);
       res.statusCode = 201;
       return res.end(
         JSON.stringify({
           message:
             data.role === 'professor'
-              ? 'Registration successful. Waiting for administrator approval.'
-              : 'User registered successfully',
+              ? AUTH_SUCCESS.signupSucessfulWaitingForAdminApproval
+              : AUTH_SUCCESS.signupSuccessful,
           user: {
             username: data.username,
             role: data.role,
@@ -234,12 +245,14 @@ export const signup = async (req, res, params) => {
         })
       );
     } catch (error) {
-      logger.error('Registration error:', {
+      logger.error('Error en registro:', {
         error: error.message,
         stack: error.stack,
       });
       res.statusCode = 500;
-      return res.end(JSON.stringify({ error: 'Internal server error' }));
+      return res.end(
+        JSON.stringify({ error: SERVER_ERRORS.internalServerError })
+      );
     }
   });
 };

@@ -1,4 +1,4 @@
-import { unhandledUserDefinedException } from '../utils/errors.mjs';
+import { unhandledUserDefinedException } from '../utils/messages.mjs';
 import { authenticate, query, checkSubjectStatus } from '../database.mjs';
 import { generateFolder } from '../fileSystem.mjs';
 import { logger } from '../logger.mjs';
