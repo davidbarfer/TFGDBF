@@ -17,7 +17,7 @@ import {
 } from '../fileSystem.mjs';
 import { logger } from '../logger.mjs';
 import { executeMatlabFiles, extractGrade } from '../matlabFunctions.mjs';
-import { add7days, parseDateMatlab } from '../utils.mjs';
+import { add7days, parseDateMatlab } from '../utils/utils.mjs';
 const FILESYSTEM_PATH = getFileSystemBasePath();
 /**
  * Return a submission

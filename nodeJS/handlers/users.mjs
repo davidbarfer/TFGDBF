@@ -5,7 +5,7 @@ import {
   unhandledUserDefinedException,
 } from '../database.mjs';
 import { logger } from '../logger.mjs';
-import { roles } from '../utils.mjs';
+import { roles } from '../utils/utils.mjs';
 /**
  * Returns all users
  */
