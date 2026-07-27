@@ -50,7 +50,7 @@ BEGIN
   -- Check if group is full
   IF current_count >= max_count THEN
     SIGNAL SQLSTATE '45000' 
-    SET MESSAGE_TEXT = 'Cannot add user to group: group is already full';
+    SET MESSAGE_TEXT = 'Usuario no puede ser agregado. Grupo lleno';
   ELSE
     -- Increment the participant count
     UPDATE practice_groups 
@@ -65,7 +65,7 @@ FOR EACH ROW
 BEGIN
   IF EXISTS (SELECT 1 FROM practice_groups_users WHERE group_id = NEW.group_id AND user_id = NEW.user_id) THEN
     SIGNAL SQLSTATE '45000' 
-    SET MESSAGE_TEXT = 'User is already in this group';
+    SET MESSAGE_TEXT = 'Usuario ya pertenece a este grupo';
   END IF;
 END//
 
@@ -89,7 +89,7 @@ BEGIN
     AND pg.practice_id = practice_id_var
   ) THEN
     SIGNAL SQLSTATE '45000' 
-    SET MESSAGE_TEXT = 'User is already in a group of this practice';
+    SET MESSAGE_TEXT = 'Usuario ya pertenece a un grupo de esta práctica';
   END IF;
 END//
 
@@ -125,7 +125,8 @@ CREATE TRIGGER submission_insert
 BEFORE INSERT ON submissions  -- Remove quotes around table name
 FOR EACH ROW
 BEGIN
-  DECLARE practice_deadline DATETIME;
+  DECLARE practice_deadline DATE;
+  DECLARE error_msg VARCHAR(255); -- Added variable for error message
   SELECT deadline INTO practice_deadline FROM practice WHERE id = NEW.practice_id;
   
   IF EXISTS (
@@ -135,10 +136,11 @@ BEGIN
       AND practice_id = NEW.practice_id
   ) THEN
     SIGNAL SQLSTATE '45000'
-    SET MESSAGE_TEXT = 'User already has a submission for this practice';
+    SET MESSAGE_TEXT = 'Usuario ya tiene una entrega generada para esta práctica';
   ELSEIF (NEW.delivery_date > practice_deadline) THEN
+    SET error_msg = CONCAT('Fecha de la entrega (', New.delivery_date, ') debe ser antes de la Fecha Límite Global (', practice_deadline, ')');
     SIGNAL SQLSTATE '45000'
-    SET MESSAGE_TEXT = 'Submission after practice deadline not allowed';
+    SET MESSAGE_TEXT = error_msg;
   END IF;
 END//
 
@@ -146,12 +148,14 @@ CREATE TRIGGER submission_update
 BEFORE UPDATE ON submissions  -- Remove quotes around table name
 FOR EACH ROW
 BEGIN
-  DECLARE practice_deadline DATETIME;
+  DECLARE practice_deadline DATE;
+  DECLARE error_msg VARCHAR(255); -- Added variable for error message
   SELECT deadline INTO practice_deadline FROM practice WHERE id = NEW.practice_id;
   
   IF (NEW.delivery_date > practice_deadline) THEN
+    SET error_msg = CONCAT('Fecha de la entrega (', New.delivery_date, ') debe ser antes de la Fecha Límite Global (', practice_deadline, ')');
     SIGNAL SQLSTATE '45000'
-    SET MESSAGE_TEXT = 'Submission after practice deadline not allowed';
+    SET MESSAGE_TEXT = error_msg;
   END IF;
 END//
 
