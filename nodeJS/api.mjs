@@ -1,5 +1,6 @@
 import { router } from './router/router.mjs';
 import { logger } from './logger.mjs';
+import { SERVER_ERRORS } from './utils/messages.mjs';
 export const FRONTEND_URL = `http://${process.env.BASE_IP}:${process.env.FRONTEND_PORT}`;
 export const BACKEND_URL = `http://${process.env.BASE_IP}:${process.env.BACKEND_PORT}`;
 // CORS headers configuration
@@ -51,6 +52,8 @@ export const processRequest = async (req, res) => {
       stack: err.stack,
     });
     res.statusCode = 500;
-    return res.end(JSON.stringify({ error: 'Internal Server Error' }));
+    return res.end(
+      JSON.stringify({ error: SERVER_ERRORS.internalServerError })
+    );
   }
 };

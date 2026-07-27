@@ -25,3 +25,7 @@ export const AUTH_SUCCESS = {
 export const EXPORT_ERRORS = {
   dataNotFound: 'No se encontraron datos para la exportación',
 };
+export const GROUPS_ERRORS = {
+  groupNotFound: 'Grupo no encontrado',
+};
+export const GROUPS_SUCCESS = {};

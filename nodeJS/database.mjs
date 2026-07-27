@@ -2,6 +2,7 @@ import mysql from 'mysql2/promise';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { logger } from './logger.mjs';
+import { SERVER_ERRORS } from './utils/messages.mjs';
 // Create the connection to database
 export const connection = await mysql.createConnection({
   host: process.env.DB_HOST,
@@ -68,7 +69,9 @@ export async function authenticate(req, res, student = false) {
       stack: error.stack,
     });
     res.statusCode = 500;
-    return res.end(JSON.stringify({ error: 'Internal server error' }));
+    return res.end(
+      JSON.stringify({ error: SERVER_ERRORS.internalServerError })
+    );
   }
 }
 export const checkSubjectStatus = async subject_id => {
