@@ -562,9 +562,17 @@ export const postPracticeSubmissionEdit = async (req, res, params) => {
           error: error.message,
           stack: error.stack,
         });
-        res.statusCode = 500;
+        if (error.sqlState === unhandledUserDefinedException) {
+          res.statusCode = 400;
+          return res.end(JSON.stringify({ error: error.sqlMessage }));
+        }
+        res.statusCode = error.statusCode || 500;
         return res.end(
-          JSON.stringify({ error: SERVER_ERRORS.internalServerError })
+          JSON.stringify({
+            error: error.statusCode
+              ? error.message
+              : SERVER_ERRORS.internalServerError,
+          })
         );
       }
     });
