@@ -1,12 +1,8 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import formidable from 'formidable';
-import {
-  authenticate,
-  query,
-  checkSubjectStatus,
-  unhandledUserDefinedException,
-} from '../database.mjs';
+import { unhandledUserDefinedException } from '../utils/errors.mjs';
+import { authenticate, query, checkSubjectStatus } from '../database.mjs';
 import {
   clearTempDirectory,
   extractZip,

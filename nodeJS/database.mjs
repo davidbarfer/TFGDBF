@@ -71,7 +71,6 @@ export async function authenticate(req, res, student = false) {
     return res.end(JSON.stringify({ error: 'Internal server error' }));
   }
 }
-export const unhandledUserDefinedException = '45000';
 export const checkSubjectStatus = async subject_id => {
   const check = await query('SELECT is_deleted FROM subject WHERE id = ?', [
     subject_id,
