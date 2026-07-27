@@ -71,5 +71,11 @@ export const SUBMISSIONS_SUCCESS = {
   submissionSaved: 'Entrega guardada con éxito',
   submissionUpdated: 'Entrega actualizada con éxito',
 };
-export const USERS_ERRORS = {};
-export const USERS_SUCCESS = {};
+export const USERS_ERRORS = {
+  userNotFound: 'Usuario no encontrado',
+  userDataRequired: 'Se requiere datos de usuario válidos',
+  userNotAffected: 'No se ha afectado al usuario',
+};
+export const USERS_SUCCESS = {
+  userStatusUpdated: 'Estado del usuario actualizado con éxito',
+};
