@@ -1,7 +1,14 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import formidable from 'formidable';
-import { unhandledUserDefinedException } from '../utils/messages.mjs';
+import {
+  unhandledUserDefinedException,
+  SERVER_ERRORS,
+  SUBMISSIONS_ERRORS,
+  SUBMISSIONS_SUCCESS,
+  GROUPS_ERRORS,
+  PRACTICES_ERRORS,
+} from '../utils/messages.mjs';
 import { authenticate, query, checkSubjectStatus } from '../database.mjs';
 import {
   clearTempDirectory,
@@ -27,7 +34,9 @@ export const getSubmission = async (req, res, params) => {
     ]);
     if (submission.results.length === 0) {
       res.statusCode = 404;
-      return res.end(JSON.stringify({ error: 'Submission not found' }));
+      return res.end(
+        JSON.stringify({ error: SUBMISSIONS_ERRORS.submissionNotFound })
+      );
     }
     return res.end(JSON.stringify(submission.results[0]));
   } catch (error) {
@@ -36,7 +45,9 @@ export const getSubmission = async (req, res, params) => {
       stack: error.stack,
     });
     res.statusCode = 500;
-    return res.end(JSON.stringify({ error: 'Internal server error' }));
+    return res.end(
+      JSON.stringify({ error: SERVER_ERRORS.internalServerError })
+    );
   }
 };
 /**
@@ -53,7 +64,7 @@ export const getPracticeSubmissions = async (req, res, params) => {
     if (submissions.results.length === 0) {
       res.statusCode = 404;
       return res.end(
-        JSON.stringify({ error: 'There are no submissions for that practice' })
+        JSON.stringify({ error: SUBMISSIONS_ERRORS.submissionsNotFound })
       );
     }
     await Promise.all(
@@ -74,7 +85,9 @@ export const getPracticeSubmissions = async (req, res, params) => {
       stack: error.stack,
     });
     res.statusCode = 500;
-    return res.end(JSON.stringify({ error: 'Internal Server Error' }));
+    return res.end(
+      JSON.stringify({ error: SERVER_ERRORS.internalServerError })
+    );
   }
 };
 /**
@@ -94,9 +107,7 @@ export const getGroupSubmissions = async (req, res, params) => {
     );
     if (usersGroup.results.length === 0) {
       res.statusCode = 404;
-      return res.end(
-        JSON.stringify({ error: 'There are no student on this group' })
-      );
+      return res.end(JSON.stringify({ error: GROUPS_ERRORS.usersNotFound }));
     }
     const usersId = usersGroup.results.map(user => user.user_id).flat();
     const usersIdQuery = usersId.map(() => '?').join(',');
@@ -108,7 +119,7 @@ export const getGroupSubmissions = async (req, res, params) => {
     if (submissions.results.length === 0) {
       res.statusCode = 404;
       return res.end(
-        JSON.stringify({ error: 'There are no submissions for that practice' })
+        JSON.stringify({ error: SUBMISSIONS_ERRORS.submissionsNotFound })
       );
     }
     await Promise.all(
@@ -129,7 +140,9 @@ export const getGroupSubmissions = async (req, res, params) => {
       stack: error.stack,
     });
     res.statusCode = 500;
-    return res.end(JSON.stringify({ error: 'Internal Server Error' }));
+    return res.end(
+      JSON.stringify({ error: SERVER_ERRORS.internalServerError })
+    );
   }
 };
 /**
@@ -145,7 +158,9 @@ export const getStudentSubmissions = async (req, res, params) => {
     );
     if (submissions.results.length === 0) {
       res.statusCode = 404;
-      return res.end(JSON.stringify({ error: 'User submissions not found' }));
+      return res.end(
+        JSON.stringify({ error: SUBMISSIONS_ERRORS.userSubmissionNotFound })
+      );
     }
     await Promise.all(
       submissions.results.map(async (submission, idx) => {
@@ -165,7 +180,9 @@ export const getStudentSubmissions = async (req, res, params) => {
       stack: error.stack,
     });
     res.statusCode = 500;
-    return res.end(JSON.stringify({ error: 'Internal server error' }));
+    return res.end(
+      JSON.stringify({ error: SERVER_ERRORS.internalServerError })
+    );
   }
 };
 /**
@@ -187,7 +204,9 @@ export const getStudentSubmission = async (req, res, params) => {
     );
     if (submission.results.length === 0) {
       res.statusCode = 404;
-      return res.end(JSON.stringify({ error: 'Submission not found' }));
+      return res.end(
+        JSON.stringify({ error: SUBMISSIONS_ERRORS.submissionNotFound })
+      );
     }
     const practice = await query(
       'SELECT name, subject_id FROM practice WHERE id = ?',
@@ -202,7 +221,9 @@ export const getStudentSubmission = async (req, res, params) => {
       stack: error.stack,
     });
     res.statusCode = 500;
-    return res.end(JSON.stringify({ error: 'Internal server error' }));
+    return res.end(
+      JSON.stringify({ error: SERVER_ERRORS.internalServerError })
+    );
   }
 };
 /**
@@ -224,7 +245,9 @@ export const getStudentSubmissionFile = async (req, res, params) => {
     );
     if (practice_id.results[0].length === 0) {
       res.statusCode = 404;
-      return res.end(JSON.stringify({ error: 'Practice not found' }));
+      return res.end(
+        JSON.stringify({ error: PRACTICES_ERRORS.practiceNotFound })
+      );
     }
     const practice = await query(
       'SELECT subject_id, submissions_template_url FROM practice WHERE id = ?',
@@ -232,7 +255,9 @@ export const getStudentSubmissionFile = async (req, res, params) => {
     );
     if (practice.results.length === 0) {
       res.statusCode = 404;
-      return res.end(JSON.stringify({ error: 'Subject not found' }));
+      return res.end(
+        JSON.stringify({ error: SUBMISSIONS_ERRORS.submissionNotFound })
+      );
     }
     const url = practice.results[0].submissions_template_url;
     const submissionFile = await getFileSubmission(
@@ -241,7 +266,9 @@ export const getStudentSubmissionFile = async (req, res, params) => {
     );
     if (!submissionFile) {
       res.statusCode = 404;
-      return res.end(JSON.stringify({ error: 'Submission file not found' }));
+      return res.end(
+        JSON.stringify({ error: SUBMISSIONS_ERRORS.submissionFileNotFound })
+      );
     }
     return res.end(JSON.stringify(submissionFile));
   } catch (error) {
@@ -250,7 +277,9 @@ export const getStudentSubmissionFile = async (req, res, params) => {
       stack: error.stack,
     });
     res.statusCode = 500;
-    return res.end(JSON.stringify({ error: 'Internal server error' }));
+    return res.end(
+      JSON.stringify({ error: SERVER_ERRORS.internalServerError })
+    );
   }
 };
 export const postStudentSubmissionFile = async (req, res, params) => {
@@ -267,7 +296,7 @@ export const postStudentSubmissionFile = async (req, res, params) => {
           res.statusCode = 400;
           return res.end(
             JSON.stringify({
-              error: 'File content is required',
+              error: SUBMISSIONS_ERRORS.submissionFileRequired,
             })
           );
         }
@@ -275,7 +304,7 @@ export const postStudentSubmissionFile = async (req, res, params) => {
           res.statusCode = 400;
           return res.end(
             JSON.stringify({
-              error: 'File size exceeds the limit of 1MB',
+              error: SUBMISSIONS_ERRORS.submissionFileMaxSizeExceeded,
             })
           );
         }
@@ -283,7 +312,7 @@ export const postStudentSubmissionFile = async (req, res, params) => {
           res.statusCode = 500;
           return res.end(
             JSON.stringify({
-              error: 'File URL constructor error',
+              error: SUBMISSIONS_ERRORS.submissionDataRequired,
             })
           );
         }
@@ -303,7 +332,7 @@ export const postStudentSubmissionFile = async (req, res, params) => {
             res.statusCode = 500;
             return res.end(
               JSON.stringify({
-                error: 'Internal Server Error on saving submission',
+                error: SERVER_ERRORS.internalServerError,
               })
             );
           }
@@ -311,14 +340,14 @@ export const postStudentSubmissionFile = async (req, res, params) => {
             res.statusCode = 400;
             return res.end(
               JSON.stringify({
-                error: 'Error executing submission file. Syntax Error',
+                error: SUBMISSIONS_ERRORS.submissionSintaxError,
               })
             );
           }
           case 201: {
             res.statusCode = 201;
             return res.end(
-              JSON.stringify({ message: 'Submission saved successfully' })
+              JSON.stringify({ message: SUBMISSIONS_SUCCESS.submissionSaved })
             );
           }
         }
@@ -330,14 +359,18 @@ export const postStudentSubmissionFile = async (req, res, params) => {
         res.statusCode = error.statusCode || 500;
         return res.end(
           JSON.stringify({
-            error: error.statusCode ? error.message : 'Internal server error',
+            error: error.statusCode
+              ? error.message
+              : SERVER_ERRORS.internalServerError,
           })
         );
       }
     });
   } catch {
     res.statusCode = 500;
-    return res.end(JSON.stringify({ error: 'Internal server error' }));
+    return res.end(
+      JSON.stringify({ error: SERVER_ERRORS.internalServerError })
+    );
   }
 };
 /**
@@ -357,7 +390,7 @@ export const postPracticeGroupSubmissions = async (req, res, params) => {
           res.statusCode = 400;
           return res.end(
             JSON.stringify({
-              error: 'Practice ID and group ID are required',
+              error: SUBMISSIONS_ERRORS.submissionDataRequired,
             })
           );
         }
@@ -369,7 +402,7 @@ export const postPracticeGroupSubmissions = async (req, res, params) => {
           res.statusCode = 400;
           return res.end(
             JSON.stringify({
-              error: 'Group not found',
+              error: GROUPS_ERRORS.groupNotFound,
             })
           );
         }
@@ -384,7 +417,7 @@ export const postPracticeGroupSubmissions = async (req, res, params) => {
           res.statusCode = 400;
           return res.end(
             JSON.stringify({
-              error: 'Group does not belong to the practice',
+              error: GROUPS_ERRORS.groupNotFoundInPractice,
             })
           );
         }
@@ -396,7 +429,7 @@ export const postPracticeGroupSubmissions = async (req, res, params) => {
           res.statusCode = 400;
           return res.end(
             JSON.stringify({
-              error: 'No students have been assigned to the group',
+              error: GROUPS_ERRORS.usersNotFound,
             })
           );
         }
@@ -426,7 +459,7 @@ export const postPracticeGroupSubmissions = async (req, res, params) => {
               res.statusCode = 400;
               return res.end(
                 JSON.stringify({
-                  error: `No submissions were created for user ${submissionsData[idx].user_id}`,
+                  error: `${SUBMISSIONS_ERRORS.submissionNotCreatedForUser} ${submissionsData[idx].user_id}`,
                 })
               );
             }
@@ -447,7 +480,9 @@ export const postPracticeGroupSubmissions = async (req, res, params) => {
         res.statusCode = error.statusCode || 500;
         return res.end(
           JSON.stringify({
-            error: error.statusCode ? error.message : 'Internal server error',
+            error: error.statusCode
+              ? error.message
+              : SERVER_ERRORS.internalServerError,
           })
         );
       }
@@ -458,7 +493,9 @@ export const postPracticeGroupSubmissions = async (req, res, params) => {
       stack: error.stack,
     });
     res.statusCode = 500;
-    return res.end(JSON.stringify({ error: 'Internal server error' }));
+    return res.end(
+      JSON.stringify({ error: SERVER_ERRORS.internalServerError })
+    );
   }
 };
 /**
@@ -480,7 +517,9 @@ export const postPracticeSubmissionEdit = async (req, res, params) => {
         const data = JSON.parse(body);
         if (!data) {
           res.statusCode = 400;
-          return res.end(JSON.stringify({ error: 'Data required missing' }));
+          return res.end(
+            JSON.stringify({ error: SUBMISSIONS_ERRORS.submissionDataRequired })
+          );
         }
         const isSubmission = await query(
           'SELECT id FROM submissions WHERE id = ? AND practice_id = ?',
@@ -492,7 +531,9 @@ export const postPracticeSubmissionEdit = async (req, res, params) => {
 
         if (isSubmission.results.length === 0) {
           res.statusCode = 400;
-          return res.end(JSON.stringify({ error: 'Submission NOT FOUND' }));
+          return res.end(
+            JSON.stringify({ error: SUBMISSIONS_ERRORS.submissionNotFound })
+          );
         }
 
         const result = await query(
@@ -508,11 +549,13 @@ export const postPracticeSubmissionEdit = async (req, res, params) => {
         );
         if (result.results.affectedRows === 0) {
           res.statusCode = 404;
-          return res.end(JSON.stringify({ error: 'No submissions affected' }));
+          return res.end(
+            JSON.stringify({ error: SUBMISSIONS_ERRORS.submissionNotAffected })
+          );
         }
         res.statusCode = 204;
         return res.end(
-          JSON.stringify({ message: 'Submission updated successfully' })
+          JSON.stringify({ message: SUBMISSIONS_SUCCESS.submissionUpdated })
         );
       } catch (error) {
         logger.error('Database query error on postPracticeSubmissionEdit:', {
@@ -520,7 +563,9 @@ export const postPracticeSubmissionEdit = async (req, res, params) => {
           stack: error.stack,
         });
         res.statusCode = 500;
-        return res.end(JSON.stringify({ error: 'Internal server error' }));
+        return res.end(
+          JSON.stringify({ error: SERVER_ERRORS.internalServerError })
+        );
       }
     });
   } catch (error) {
@@ -529,7 +574,9 @@ export const postPracticeSubmissionEdit = async (req, res, params) => {
       stack: error.stack,
     });
     res.statusCode = 500;
-    return res.end(JSON.stringify({ error: 'Internal server error' }));
+    return res.end(
+      JSON.stringify({ error: SERVER_ERRORS.internalServerError })
+    );
   }
 };
 /**
@@ -558,7 +605,9 @@ export const postPracticeEvaluatorCreate = async (req, res, params) => {
         );
         if (result.results.length === 0) {
           res.statusCode = 500;
-          return res.end(JSON.stringify({ error: 'Internal server error' }));
+          return res.end(
+            JSON.stringify({ error: SERVER_ERRORS.internalServerError })
+          );
         }
         const subject_id = result.results[0].subject_id;
         await checkSubjectStatus(subject_id);
@@ -592,7 +641,7 @@ export const postPracticeEvaluatorCreate = async (req, res, params) => {
             res.statusCode = 500;
             return res.end(
               JSON.stringify({
-                error: 'Internal Server Error on saving submission template',
+                error: SERVER_ERRORS.internalServerError,
               })
             );
           }
@@ -604,7 +653,7 @@ export const postPracticeEvaluatorCreate = async (req, res, params) => {
           res.statusCode = 500;
           return res.end(
             JSON.stringify({
-              error: 'Internal Server Error on saving submission template',
+              error: SERVER_ERRORS.internalServerError,
             })
           );
         }
@@ -619,7 +668,7 @@ export const postPracticeEvaluatorCreate = async (req, res, params) => {
             res.statusCode = 500;
             return res.end(
               JSON.stringify({
-                error: 'Internal Server Error on saving submission template',
+                error: SERVER_ERRORS.internalServerError,
               })
             );
           }
@@ -627,7 +676,7 @@ export const postPracticeEvaluatorCreate = async (req, res, params) => {
             res.statusCode = 400;
             return res.end(
               JSON.stringify({
-                error: 'Error executing submission template file. Syntax Error',
+                error: SUBMISSIONS_ERRORS.submissionSintaxError,
               })
             );
           }
@@ -652,7 +701,9 @@ export const postPracticeEvaluatorCreate = async (req, res, params) => {
       res.statusCode = error.statusCode || 500;
       return res.end(
         JSON.stringify({
-          error: error.statusCode ? error.message : 'Internal server error',
+          error: error.statusCode
+            ? error.message
+            : SERVER_ERRORS.internalServerError,
         })
       );
     }
@@ -662,7 +713,9 @@ export const postPracticeEvaluatorCreate = async (req, res, params) => {
       stack: error.stack,
     });
     res.statusCode = 500;
-    return res.end(JSON.stringify({ error: 'Internal server error' }));
+    return res.end(
+      JSON.stringify({ error: SERVER_ERRORS.internalServerError })
+    );
   }
 };
 /**
@@ -686,7 +739,7 @@ export const postStudentSubmissionEvaluate = async (req, res, params) => {
         if (submision.results[0].file_url === null) {
           res.statusCode = 404;
           return res.end(
-            JSON.stringify({ error: 'Submission file was not found' })
+            JSON.stringify({ error: SUBMISSIONS_ERRORS.submissionFileNotFound })
           );
         }
         const evaluator_template_url = await query(
@@ -721,7 +774,9 @@ export const postStudentSubmissionEvaluate = async (req, res, params) => {
         );
         if (updateDbResult.results.affectedRows === 0) {
           res.statusCode = 404;
-          return res.end(JSON.stringify({ error: 'No submissions affected' }));
+          return res.end(
+            JSON.stringify({ error: SUBMISSIONS_ERRORS.submissionNotAffected })
+          );
         }
         // Eliminar los archivos descomprimidos
         const DeleteTempFiles = await clearTempDirectory(outputPath);
@@ -735,7 +790,7 @@ export const postStudentSubmissionEvaluate = async (req, res, params) => {
         return res.end(
           JSON.stringify({
             success: true,
-            message: 'Submission updated successfully',
+            message: SUBMISSIONS_SUCCESS.submissionUpdated,
           })
         );
       } catch (error) {
@@ -744,12 +799,16 @@ export const postStudentSubmissionEvaluate = async (req, res, params) => {
           stack: error.stack,
         });
         res.statusCode = 500;
-        return res.end(JSON.stringify({ error: 'Internal server error' }));
+        return res.end(
+          JSON.stringify({ error: SERVER_ERRORS.internalServerError })
+        );
       }
     });
   } catch {
     res.statusCode = 500;
-    return res.end(JSON.stringify({ error: 'Internal server error' }));
+    return res.end(
+      JSON.stringify({ error: SERVER_ERRORS.internalServerError })
+    );
   }
 };
 /**
@@ -769,7 +828,7 @@ export const postPracticeSubmissions = async (req, res, params) => {
           res.statusCode = 400;
           return res.end(
             JSON.stringify({
-              error: 'Practice ID is required',
+              error: SUBMISSIONS_ERRORS.submissionDataRequired,
             })
           );
         }
@@ -781,7 +840,7 @@ export const postPracticeSubmissions = async (req, res, params) => {
           res.statusCode = 400;
           return res.end(
             JSON.stringify({
-              error: 'Practice does not have any groups',
+              error: GROUPS_ERRORS.groupNotFoundInPractice,
             })
           );
         }
@@ -793,7 +852,7 @@ export const postPracticeSubmissions = async (req, res, params) => {
           res.statusCode = 400;
           return res.end(
             JSON.stringify({
-              error: 'No students have been assigned to the practice',
+              error: GROUPS_ERRORS.usersNotFound,
             })
           );
         }
@@ -825,7 +884,7 @@ export const postPracticeSubmissions = async (req, res, params) => {
               res.statusCode = 400;
               return res.end(
                 JSON.stringify({
-                  error: `No submissions were created for user ${submissionsData[idx].user_id}`,
+                  error: `${SUBMISSIONS_ERRORS.submissionNotCreatedForUser} ${submissionsData[idx].user_id}`,
                 })
               );
             }
@@ -844,12 +903,16 @@ export const postPracticeSubmissions = async (req, res, params) => {
           return res.end(JSON.stringify({ error: error.sqlMessage }));
         }
         res.statusCode = 500;
-        return res.end(JSON.stringify({ error: 'Internal server error' }));
+        return res.end(
+          JSON.stringify({ error: SERVER_ERRORS.internalServerError })
+        );
       }
     });
   } catch {
     res.statusCode = 500;
-    return res.end(JSON.stringify({ error: 'Internal server error' }));
+    return res.end(
+      JSON.stringify({ error: SERVER_ERRORS.internalServerError })
+    );
   }
 };
 /**
@@ -873,7 +936,7 @@ export const putStudentSubmissionGrade = async (req, res, params) => {
           res.statusCode = 400;
           return res.end(
             JSON.stringify({
-              error: 'Submission ID or evaluator grade or user ID is missing',
+              error: SUBMISSIONS_ERRORS.submissionDataRequired,
             })
           );
         }
@@ -882,7 +945,9 @@ export const putStudentSubmissionGrade = async (req, res, params) => {
           Number(student_id_submission_id_grade.submission_id)
         ) {
           res.statusCode = 500;
-          return res.end(JSON.stringify({ error: 'Internal server error' }));
+          return res.end(
+            JSON.stringify({ error: SERVER_ERRORS.internalServerError })
+          );
         }
         const subCheck = await query(
           'SELECT p.subject_id FROM submissions s JOIN practice p ON s.practice_id = p.id WHERE s.id = ?',
@@ -897,11 +962,13 @@ export const putStudentSubmissionGrade = async (req, res, params) => {
         );
         if (result.results.affectedRows === 0) {
           res.statusCode = 404;
-          return res.end(JSON.stringify({ error: 'No submissions affected' }));
+          return res.end(
+            JSON.stringify({ error: SUBMISSIONS_ERRORS.submissionNotAffected })
+          );
         }
         res.statusCode = 204;
         return res.end(
-          JSON.stringify({ message: 'Submission updated successfully' })
+          JSON.stringify({ message: SUBMISSIONS_SUCCESS.submissionUpdated })
         );
       } catch (error) {
         logger.error('Database query error on putStudentSubmissionGrade:', {
@@ -911,7 +978,9 @@ export const putStudentSubmissionGrade = async (req, res, params) => {
         res.statusCode = error.statusCode || 500;
         return res.end(
           JSON.stringify({
-            error: error.statusCode ? error.message : 'Internal server error',
+            error: error.statusCode
+              ? error.message
+              : SERVER_ERRORS.internalServerError,
           })
         );
       }
@@ -922,6 +991,8 @@ export const putStudentSubmissionGrade = async (req, res, params) => {
       stack: error.stack,
     });
     res.statusCode = 500;
-    return res.end(JSON.stringify({ error: 'Internal server error' }));
+    return res.end(
+      JSON.stringify({ error: SERVER_ERRORS.internalServerError })
+    );
   }
 };

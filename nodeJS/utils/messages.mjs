@@ -30,7 +30,9 @@ export const GROUPS_ERRORS = {
   groupArrayRequired: 'Se requiere un array de grupos válido',
   groupDataRequired: 'Se requiere datos de grupo válidos',
   userNotFound: 'Usuario no encontrado en el grupo',
+  usersNotFound: 'No se encontraron usuarios en el grupo',
   groupNotAffected: 'No se ha afectado al grupo',
+  groupNotFoundInPractice: 'Grupo no encontrado en la práctica',
 };
 export const GROUPS_SUCCESS = {
   groupDeleted: 'Grupo eliminado con éxito',
@@ -46,9 +48,28 @@ export const SUBJECTS_ERRORS = {
   userNotFound: 'Usuario no encontrado en la asignatura',
   subjectNotFoundInUser: 'Asignatura no encontrada para el usuario',
   subjectDataRequired: 'Se requiere datos de asignatura válidos',
+  subjectNotAffected: 'No se ha afectado a la asignatura',
 };
-export const SUBJECTS_SUCCESS = {};
-export const SUBMISSIONS_ERRORS = {};
-export const SUBMISSIONS_SUCCESS = {};
+export const SUBJECTS_SUCCESS = {
+  subjectDeleted: 'Asignatura eliminada con éxito',
+  subjectAssigned: 'Asignatura asignada con éxito',
+  subjectUnassigned: 'Asignatura desasignada con éxito',
+};
+export const SUBMISSIONS_ERRORS = {
+  submissionNotFound: 'Entrega no encontrado',
+  userSubmissionNotFound: 'Entrega no encontrada para el usuario',
+  submissionFileNotFound: 'Archivo de entrega no encontrado',
+  submissionDataRequired: 'Se requiere datos de entrega válidos',
+  submissionFileRequired: 'Se requiere archivo de entrega válido',
+  submissionFileMaxSizeExceeded:
+    'El tamaño del archivo de entrega excede el máximo permitido de 1MB',
+  submissionSintaxError: 'Error de sintaxis en la entrega',
+  submissionNotCreatedForUser: 'Entrega no creada para el usuario',
+  submissionNotAffected: 'No se ha afectado a la entrega',
+};
+export const SUBMISSIONS_SUCCESS = {
+  submissionSaved: 'Entrega guardada con éxito',
+  submissionUpdated: 'Entrega actualizada con éxito',
+};
 export const USERS_ERRORS = {};
 export const USERS_SUCCESS = {};
