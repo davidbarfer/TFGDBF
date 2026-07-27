@@ -1,7 +1,7 @@
 import {
   unhandledUserDefinedException,
   SERVER_ERRORS,
-  GROUPS_ERROS,
+  GROUPS_ERRORS,
   GROUPS_SUCCESS,
 } from '../utils/messages.mjs';
 import { authenticate, query, checkSubjectStatus } from '../database.mjs';
@@ -18,7 +18,7 @@ export const getGroup = async (req, res, params) => {
     ]);
     if (group.results.length === 0) {
       res.statusCode = 404;
-      return res.end(JSON.stringify({ error: GROUPS_ERROS.groupNotFound }));
+      return res.end(JSON.stringify({ error: GROUPS_ERRORS.groupNotFound }));
     }
     const practice = await query(
       'SELECT subject_id FROM practice WHERE id = ?',
@@ -63,7 +63,7 @@ export const getSubjectPracticesGroups = async (req, res, params) => {
     );
     if (groups.results.length === 0) {
       res.statusCode = 404;
-      return res.end(JSON.stringify({ error: GROUPS_ERROS.groupsNotFound }));
+      return res.end(JSON.stringify({ error: GROUPS_ERRORS.groupsNotFound }));
     }
     return res.end(JSON.stringify(groups.results));
   } catch (error) {
@@ -136,7 +136,7 @@ export const createGroups = async (req, res, params) => {
         ) {
           res.statusCode = 400;
           return res.end(
-            JSON.stringify({ error: GROUPS_ERROS.groupArrayRequired })
+            JSON.stringify({ error: GROUPS_ERRORS.groupArrayRequired })
           );
         }
         const practiceCheck = await query(
@@ -159,7 +159,7 @@ export const createGroups = async (req, res, params) => {
             res.statusCode = 400;
             return res.end(
               JSON.stringify({
-                error: GROUPS_ERROS.groupDataRequired,
+                error: GROUPS_ERRORS.groupDataRequired,
               })
             );
           }
@@ -230,7 +230,7 @@ export const postGroupStudent = async (req, res, params) => {
           res.statusCode = 400;
           return res.end(
             JSON.stringify({
-              error: GROUPS_ERROS.groupDataRequired,
+              error: GROUPS_ERRORS.groupDataRequired,
             })
           );
         }
@@ -296,7 +296,7 @@ export const deleteGroup = async (req, res, params) => {
         group_id,
       });
       res.statusCode = 404;
-      return res.end(JSON.stringify({ error: GROUPS_ERROS.groupNotFound }));
+      return res.end(JSON.stringify({ error: GROUPS_ERRORS.groupNotFound }));
     }
   } catch (error) {
     logger.error('Database query error on deleteGroup', {
@@ -350,7 +350,7 @@ export const deleteStudentGroup = async (req, res, params) => {
     } else {
       logger.warn('Error al eliminar alumno del grupo', group_id_student_id);
       res.statusCode = 404;
-      return res.end(JSON.stringify({ error: GROUPS_ERROS.userNotFound }));
+      return res.end(JSON.stringify({ error: GROUPS_ERRORS.userNotFound }));
     }
   } catch (error) {
     logger.error('Database query error on deleteStudentGroup:', {
@@ -386,7 +386,7 @@ export const updateGroup = async (req, res, params) => {
           res.statusCode = 400;
           return res.end(
             JSON.stringify({
-              error: GROUPS_ERROS.groupDataRequired,
+              error: GROUPS_ERRORS.groupDataRequired,
             })
           );
         }
@@ -415,7 +415,7 @@ export const updateGroup = async (req, res, params) => {
         if (result.results.affectedRows === 0) {
           res.statusCode = 404;
           return res.end(
-            JSON.stringify({ error: GROUPS_ERROS.groupNotAffected })
+            JSON.stringify({ error: GROUPS_ERRORS.groupNotAffected })
           );
         }
         res.statusCode = 200;
