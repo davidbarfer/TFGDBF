@@ -27,5 +27,23 @@ export const EXPORT_ERRORS = {
 };
 export const GROUPS_ERRORS = {
   groupNotFound: 'Grupo no encontrado',
+  groupArrayRequired: 'Se requiere un array de grupos válido',
+  groupDataRequired: 'Se requiere datos de grupo válidos',
+  userNotFound: 'Usuario no encontrado en el grupo',
+  groupNotAffected: 'No se ha afectado al grupo',
 };
-export const GROUPS_SUCCESS = {};
+export const GROUPS_SUCCESS = {
+  groupDeleted: 'Grupo eliminado con éxito',
+  userDeletedFromGroup: 'Usuario eliminado con éxito del grupo',
+  groupUpdated: 'Grupo actualizado con éxito',
+};
+export const PRACTICES_ERRORS = {
+  practiceNotFound: 'Práctica no encontrada',
+  practiceDataRequired: 'Se requiere datos de práctica válidos',
+};
+export const SUBJECTS_ERRORS = {};
+export const SUBJECTS_SUCCESS = {};
+export const SUBMISSIONS_ERRORS = {};
+export const SUBMISSIONS_SUCCESS = {};
+export const USERS_ERRORS = {};
+export const USERS_SUCCESS = {};
