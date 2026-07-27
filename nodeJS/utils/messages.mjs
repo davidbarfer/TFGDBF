@@ -22,3 +22,6 @@ export const AUTH_SUCCESS = {
   signupSucessfulWaitingForAdminApproval:
     'Usuario registrado con éxito. Esperando aprobación del administrador',
 };
+export const EXPORT_ERRORS = {
+  dataNotFound: 'No se encontraron datos para la exportación',
+};
