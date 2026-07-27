@@ -41,7 +41,12 @@ export const PRACTICES_ERRORS = {
   practiceNotFound: 'Práctica no encontrada',
   practiceDataRequired: 'Se requiere datos de práctica válidos',
 };
-export const SUBJECTS_ERRORS = {};
+export const SUBJECTS_ERRORS = {
+  subjectNotFound: 'Asignatura no encontrada',
+  userNotFound: 'Usuario no encontrado en la asignatura',
+  subjectNotFoundInUser: 'Asignatura no encontrada para el usuario',
+  subjectDataRequired: 'Se requiere datos de asignatura válidos',
+};
 export const SUBJECTS_SUCCESS = {};
 export const SUBMISSIONS_ERRORS = {};
 export const SUBMISSIONS_SUCCESS = {};

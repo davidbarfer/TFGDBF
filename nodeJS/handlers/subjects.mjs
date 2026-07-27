@@ -1,4 +1,9 @@
-import { unhandledUserDefinedException } from '../utils/messages.mjs';
+import {
+  unhandledUserDefinedException,
+  SERVER_ERRORS,
+  SUBJECTS_ERRORS,
+  SUBJECTS_SUCCESS,
+} from '../utils/messages.mjs';
 import { authenticate, query, checkSubjectStatus } from '../database.mjs';
 import { generateFolder } from '../fileSystem.mjs';
 import { logger } from '../logger.mjs';
@@ -11,7 +16,7 @@ export const getSubjects = async (req, res, params) => {
     const subjects = await query('SELECT * FROM v_subject');
     if (subjects.results.length === 0) {
       res.statusCode = 404;
-      res.end({ error: 'Subjects not found' });
+      res.end({ error: SUBJECTS_ERRORS.subjectsNotFound });
     }
     return res.end(JSON.stringify(subjects.results));
   } catch (error) {
@@ -20,7 +25,9 @@ export const getSubjects = async (req, res, params) => {
       stack: error.stack,
     });
     res.statusCode = 500;
-    return res.end(JSON.stringify({ error: 'Internal server error' }));
+    return res.end(
+      JSON.stringify({ error: SERVER_ERRORS.internalServerError })
+    );
   }
 };
 /**
@@ -36,7 +43,7 @@ export const getSubjectsUser = async (req, res, params) => {
     if (subjects_id.results.length === 0) {
       res.statusCode = 404;
       return res.end(
-        JSON.stringify({ error: 'No subject found for this user' })
+        JSON.stringify({ error: SUBJECTS_ERRORS.subjectNotFoundInUser })
       );
     }
     const subjects = await query('SELECT * FROM v_subject WHERE id IN (?)', [
@@ -49,7 +56,9 @@ export const getSubjectsUser = async (req, res, params) => {
       stack: error.stack,
     });
     res.statusCode = 500;
-    return res.end(JSON.stringify({ error: 'Internal server error' }));
+    return res.end(
+      JSON.stringify({ error: SERVER_ERRORS.internalServerError })
+    );
   }
 };
 /**
@@ -65,7 +74,9 @@ export const getSubject = async (req, res, params) => {
     ]);
     if (subject.results.length === 0) {
       res.statusCode = 404;
-      return res.end(JSON.stringify({ error: 'Subject not found' }));
+      return res.end(
+        JSON.stringify({ error: SUBJECTS_ERRORS.subjectNotFound })
+      );
     }
     return res.end(JSON.stringify(subject.results[0]));
   } catch (error) {
@@ -76,7 +87,9 @@ export const getSubject = async (req, res, params) => {
     res.statusCode = error.statusCode || 500;
     return res.end(
       JSON.stringify({
-        error: error.statusCode ? error.message : 'Internal server error',
+        error: error.statusCode
+          ? error.message
+          : SERVER_ERRORS.internalServerError,
       })
     );
   }
@@ -96,7 +109,7 @@ export const postSubjectCreate = async (req, res, params) => {
       if (!data.name || !data.course || !data.degree) {
         res.statusCode = 400;
         return res.end(
-          JSON.stringify({ error: 'Name, course and degree are required.' })
+          JSON.stringify({ error: SUBJECTS_ERRORS.subjectDataRequired })
         );
       }
       try {
@@ -106,14 +119,18 @@ export const postSubjectCreate = async (req, res, params) => {
         );
         if (subject.results.affectedRows === 0) {
           res.statusCode = 500;
-          return res.end(JSON.stringify({ error: 'Internal server error' }));
+          return res.end(
+            JSON.stringify({ error: SERVER_ERRORS.internalServerError })
+          );
         }
         const createSubjectFolder = await generateFolder(
           `${subject.results.insertId}`
         );
         if (createSubjectFolder === 500) {
           res.statusCode = 500;
-          return res.end(JSON.stringify({ error: 'Internal server error' }));
+          return res.end(
+            JSON.stringify({ error: SERVER_ERRORS.internalServerError })
+          );
         }
         res.statusCode = 201;
         return res.end(JSON.stringify(subject.results));
@@ -127,11 +144,15 @@ export const postSubjectCreate = async (req, res, params) => {
           return res.end(JSON.stringify({ error: error.sqlMessage }));
         }
         res.statusCode = 500;
-        return res.end(JSON.stringify({ error: 'Internal server error' }));
+        return res.end(
+          JSON.stringify({ error: SERVER_ERRORS.internalServerError })
+        );
       }
     } catch {
       res.statusCode = 500;
-      return res.end(JSON.stringify({ error: 'Internal server error' }));
+      return res.end(
+        JSON.stringify({ error: SERVER_ERRORS.internalServerError })
+      );
     }
   });
 };
@@ -142,23 +163,25 @@ export const deleteSubject = async (req, res, params) => {
   const subject_id = params[1];
   try {
     await authenticate(req, res);
-    logger.info('Attempting to delete subject', { subject_id });
+    logger.info('Intetntando eliminar asignatura', { subject_id });
     const result = await query(
       'UPDATE subject SET is_deleted = TRUE WHERE id = ?',
       [subject_id]
     );
     if (result.results.affectedRows > 0) {
-      logger.info('Subject deleted successfully', { subject_id });
+      logger.info(SUBJECTS_SUCCESS.subjectDeleted, { subject_id });
       res.statusCode = 200;
       return res.end(
-        JSON.stringify({ message: 'Subject deleted successfully' })
+        JSON.stringify({ message: SUBJECTS_SUCCESS.subjectDeleted })
       );
     } else {
       logger.warn('Subject deletion failed: Resource not found', {
         subject_id,
       });
       res.statusCode = 404;
-      return res.end(JSON.stringify({ error: 'Group not found' }));
+      return res.end(
+        JSON.stringify({ error: SUBJECTS_ERRORS.subjectNotFound })
+      );
     }
   } catch (error) {
     logger.error('Database query error on deleteSubject', {
@@ -167,7 +190,9 @@ export const deleteSubject = async (req, res, params) => {
       stack: error.stack,
     });
     res.statusCode = 500;
-    return res.end(JSON.stringify({ error: 'Internal server error' }));
+    return res.end(
+      JSON.stringify({ error: SERVER_ERRORS.internalServerError })
+    );
   }
 };
 /**
@@ -189,11 +214,11 @@ export const postUserSubject = async (req, res, params) => {
       );
       if (result.results.affectedRows === 0) {
         res.statusCode = 404;
-        return res.end({ error: 'Error al asignar asignatura' });
+        return res.end({ error: SUBJECTS_ERRORS.subjectNotAffected });
       }
       res.statusCode = 201;
       return res.end(
-        JSON.stringify({ message: 'Asignatura asignada con éxito ' })
+        JSON.stringify({ message: SUBJECTS_SUCCESS.subjectAssigned })
       );
     } catch (error) {
       logger.error('Database query error on postUserSubject:', {
@@ -203,7 +228,9 @@ export const postUserSubject = async (req, res, params) => {
       res.statusCode = error.statusCode || 500;
       return res.end(
         JSON.stringify({
-          error: error.statusCode ? error.message : 'Internal server error',
+          error: error.statusCode
+            ? error.message
+            : SERVER_ERRORS.internalServerError,
         })
       );
     }
@@ -228,11 +255,11 @@ export const deleteUserSubject = async (req, res, params) => {
       );
       if (result.results.affectedRows === 0) {
         res.statusCode = 404;
-        return res.end({ error: 'Error al desasignar asignatura' });
+        return res.end({ error: SUBJECTS_ERRORS.subjectNotAffected });
       }
       res.statusCode = 201;
       return res.end(
-        JSON.stringify({ message: 'Asignatura desasignada con éxito' })
+        JSON.stringify({ message: SUBJECTS_SUCCESS.subjectUnassigned })
       );
     } catch (error) {
       logger.error('Database query error on postUserSubject:', {
@@ -242,7 +269,9 @@ export const deleteUserSubject = async (req, res, params) => {
       res.statusCode = error.statusCode || 500;
       return res.end(
         JSON.stringify({
-          error: error.statusCode ? error.message : 'Internal server error',
+          error: error.statusCode
+            ? error.message
+            : SERVER_ERRORS.internalServerError,
         })
       );
     }
