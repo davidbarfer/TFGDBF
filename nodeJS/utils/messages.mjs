@@ -5,6 +5,8 @@ export const SERVER_ERRORS = {
   notFound: 'No encontrado',
   badRequest: 'Petición incorrecta',
   forbidden: 'Prohibido',
+  routeNotFound: 'Ruta no encontrada',
+  headersRequired: 'Cabeceras requeridas',
 };
 export const AUTH_ERRORS = {
   jsonInvalid: 'JSON inválido',
@@ -49,6 +51,7 @@ export const SUBJECTS_ERRORS = {
   subjectNotFoundInUser: 'Asignatura no encontrada para el usuario',
   subjectDataRequired: 'Se requiere datos de asignatura válidos',
   subjectNotAffected: 'No se ha afectado a la asignatura',
+  subjectDeletedNotFound: 'Asignatura eliminada o no encontrada',
 };
 export const SUBJECTS_SUCCESS = {
   subjectDeleted: 'Asignatura eliminada con éxito',

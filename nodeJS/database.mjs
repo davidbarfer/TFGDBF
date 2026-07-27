@@ -2,7 +2,7 @@ import mysql from 'mysql2/promise';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { logger } from './logger.mjs';
-import { SERVER_ERRORS } from './utils/messages.mjs';
+import { SERVER_ERRORS, SUBJECTS_ERRORS } from './utils/messages.mjs';
 // Create the connection to database
 export const connection = await mysql.createConnection({
   host: process.env.DB_HOST,
@@ -41,7 +41,7 @@ export async function authenticate(req, res, student = false) {
       return res.end(
         JSON.stringify({
           error: 'Unauthorized',
-          message: 'No authorization header',
+          message: SERVER_ERRORS.headersRequired,
         })
       );
     }
@@ -50,7 +50,7 @@ export async function authenticate(req, res, student = false) {
     if (!student) {
       if (decoded.role !== 'professor' && decoded.role !== 'admin') {
         res.statusCode = 401;
-        return res.end(JSON.stringify({ error: 'Unauthorized' }));
+        return res.end(JSON.stringify({ error: SERVER_ERRORS.unauthorized }));
       }
     } else {
       if (
@@ -59,12 +59,12 @@ export async function authenticate(req, res, student = false) {
         decoded.role !== 'admin'
       ) {
         res.statusCode = 401;
-        return res.end(JSON.stringify({ error: 'Unauthorized' }));
+        return res.end(JSON.stringify({ error: SERVER_ERRORS.unauthorized }));
       }
     }
     return decoded;
   } catch (error) {
-    logger.error('Authentication error on authenticate:', {
+    logger.error('Erro de autenticación en authenticate:', {
       error: error.message,
       stack: error.stack,
     });
@@ -79,7 +79,7 @@ export const checkSubjectStatus = async subject_id => {
     subject_id,
   ]);
   if (check.results.length === 0 || check.results[0].is_deleted) {
-    const error = new Error('Subject is deleted or non-existent');
+    const error = new Error(SUBJECTS_ERRORS.subjectDeletedNotFound);
     error.statusCode = 404;
     throw error;
   }

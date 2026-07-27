@@ -36,8 +36,8 @@ export const processRequest = async (req, res) => {
   const route = router.find(r => r.method === method && r.regex.test(url));
   if (!route) {
     res.statusCode = 404;
-    logger.warn(`Route not found for target matching`, { method, url });
-    return res.end(JSON.stringify({ error: 'Route not found' }));
+    logger.warn(SERVER_ERRORS.routeNotFound, { method, url });
+    return res.end(JSON.stringify({ error: SERVER_ERRORS.routeNotFound }));
   }
   try {
     const params = url.match(route.regex);
