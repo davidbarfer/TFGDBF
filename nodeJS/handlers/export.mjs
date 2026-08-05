@@ -136,7 +136,7 @@ export const exportSubjectGrades = async (req, res, params) => {
         u.surname AS student_surname,
         ${dynamicColumns}
       FROM users u
-      JOIN users_subjects us ON us.user_id = u.id AND us.subject_id = ?
+      JOIN users_subjects us ON us.user_id = u.id AND us.subject_id = ? AND u.role = 'student'
       LEFT JOIN submissions s ON s.user_id = u.id
       GROUP BY u.id, u.username, u.name, u.surname
     `;
