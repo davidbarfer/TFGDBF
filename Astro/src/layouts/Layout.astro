@@ -12,7 +12,7 @@ if (token) {
   try {
     user = jwt.verify(token, secret); // same secret as backend
   } catch (err) {
-    console.warn("Invalid or expired token", err);
+    console.warn("Token no válido o vencido", err);
   }
 }
 ---
@@ -24,8 +24,9 @@ if (token) {
 		<meta name="viewport" content="width=device-width" />
 		<!-- <link rel="icon" type="image/svg+xml" href="/favicon.svg" /> -->
 		<link rel="icon" type="image/svg+xml" href="https://etsi.us.es/sites/default/files/favicon_0.ico" />
-		<meta name="DoctusLite" />
-		<title>DoctusLite</title>
+		<meta name="EvaluaLab" />
+    <meta name="description" content="Sistema de gestión de prácticas informáticas en Matlab" />
+		<title>EvaluaLab</title>
 	</head>
 	<body>
 		<Header user={user}/>

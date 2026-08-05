@@ -1,11 +1,12 @@
 import {
-  authenticate,
-  query,
-  checkSubjectStatus,
   unhandledUserDefinedException,
-} from '../database.mjs';
+  SERVER_ERRORS,
+  USERS_ERRORS,
+  USERS_SUCCESS,
+} from '../utils/messages.mjs';
+import { authenticate, query, checkSubjectStatus } from '../database.mjs';
 import { logger } from '../logger.mjs';
-import { roles } from '../utils.mjs';
+import { roles } from '../utils/utils.mjs';
 /**
  * Returns all users
  */
@@ -15,12 +16,14 @@ export const getUsers = async (req, res, params) => {
     const users = await query('SELECT * FROM users');
     return res.end(JSON.stringify(users.results));
   } catch (error) {
-    logger.error('Database query error on getUsers:', {
+    logger.error('Error en la consulta a la base de datos en getUsers:', {
       error: error.message,
       stack: error.stack,
     });
     res.statusCode = 500;
-    return res.end(JSON.stringify({ error: 'Internal server error' }));
+    return res.end(
+      JSON.stringify({ error: SERVER_ERRORS.internalServerError })
+    );
   }
 };
 /**
@@ -36,7 +39,7 @@ export const getUsersByRole = async (req, res, params) => {
     );
     if (UsersByRole.results.length === 0) {
       res.statusCode = 404;
-      return res.end(JSON.stringify({ error: 'No professor found' }));
+      return res.end(JSON.stringify({ error: USERS_ERRORS.userNotFound }));
     }
     const UsersByRole_ids_arrays = UsersByRole.results
       .map(professor => professor.id)
@@ -59,12 +62,14 @@ export const getUsersByRole = async (req, res, params) => {
     res.statusCode = 200;
     res.end(JSON.stringify(UsersByRole.results));
   } catch (error) {
-    logger.error('Database query error on getUsersByRole:', {
+    logger.error('Error en la consulta a la base de datos en getUsersByRole:', {
       error: error.message,
       stack: error.stack,
     });
     res.statusCode = 500;
-    return res.end(JSON.stringify({ error: 'Internal server error' }));
+    return res.end(
+      JSON.stringify({ error: SERVER_ERRORS.internalServerError })
+    );
   }
 };
 /**
@@ -79,16 +84,18 @@ export const getUserCurrent = async (req, res, params) => {
     );
     if (currentUser.results.length === 0) {
       res.statusCode = 404;
-      res.end(JSON.stringify({ error: 'User not found' }));
+      res.end(JSON.stringify({ error: USERS_ERRORS.userNotFound }));
     }
     return res.end(JSON.stringify(currentUser.results[0]));
   } catch (error) {
-    logger.error('Database query error on getUserCurrent:', {
+    logger.error('Error en la consulta a la base de datos en getUserCurrent:', {
       error: error.message,
       stack: error.stack,
     });
     res.statusCode = 500;
-    return res.end(JSON.stringify({ error: 'Internal server error' }));
+    return res.end(
+      JSON.stringify({ error: SERVER_ERRORS.internalServerError })
+    );
   }
 };
 /**
@@ -105,7 +112,7 @@ export const getSubjectStudents = async (req, res, params) => {
     );
     if (users_ids.results.length === 0) {
       res.statusCode = 404;
-      return res.end(JSON.stringify({ error: 'Students not found' }));
+      return res.end(JSON.stringify({ error: USERS_ERRORS.userNotFound }));
     }
     const users_ids_array = users_ids.results.map(user => user.user_id).flat();
     const students = await query(
@@ -114,7 +121,7 @@ export const getSubjectStudents = async (req, res, params) => {
     );
     if (students.results.length === 0) {
       res.statusCode = 404;
-      return res.end(JSON.stringify({ error: 'Students not found' }));
+      return res.end(JSON.stringify({ error: USERS_ERRORS.userNotFound }));
     }
     const groups = await query(
       `SELECT * FROM practice_groups_users WHERE user_id IN (${students.results
@@ -131,14 +138,19 @@ export const getSubjectStudents = async (req, res, params) => {
     });
     return res.end(JSON.stringify(students.results));
   } catch (error) {
-    logger.error('Database query error on getSubjectStudents:', {
-      error: error.message,
-      stack: error.stack,
-    });
+    logger.error(
+      'Error en la consulta a la base de datos en getSubjectStudents:',
+      {
+        error: error.message,
+        stack: error.stack,
+      }
+    );
     res.statusCode = error.statusCode || 500;
     return res.end(
       JSON.stringify({
-        error: error.statusCode ? error.message : 'Internal server error',
+        error: error.statusCode
+          ? error.message
+          : SERVER_ERRORS.internalServerError,
       })
     );
   }
@@ -156,7 +168,7 @@ export const getGroupStudents = async (req, res, params) => {
     );
     if (users_ids.results.length === 0) {
       res.statusCode = 404;
-      return res.end(JSON.stringify({ error: 'Students not found' }));
+      return res.end(JSON.stringify({ error: USERS_ERRORS.userNotFound }));
     }
     const users_ids_array = users_ids.results.map(user => user.user_id).flat();
     const students = await query(
@@ -165,16 +177,21 @@ export const getGroupStudents = async (req, res, params) => {
     );
     if (students.results.length === 0) {
       res.statusCode = 404;
-      return res.end(JSON.stringify({ error: 'Students not found' }));
+      return res.end(JSON.stringify({ error: USERS_ERRORS.userNotFound }));
     }
     return res.end(JSON.stringify(students.results));
   } catch (error) {
-    logger.error('Database query error on getGroupStudents:', {
-      error: error.message,
-      stack: error.stack,
-    });
+    logger.error(
+      'Error en la consulta a la base de datos en getGroupStudents:',
+      {
+        error: error.message,
+        stack: error.stack,
+      }
+    );
     res.statusCode = 500;
-    return res.end(JSON.stringify({ error: 'Internal server error' }));
+    return res.end(
+      JSON.stringify({ error: SERVER_ERRORS.internalServerError })
+    );
   }
 };
 /**
@@ -195,7 +212,7 @@ export const updateUserStatus = async (req, res, params) => {
           res.statusCode = 400;
           return res.end(
             JSON.stringify({
-              error: 'Data required',
+              error: USERS_ERRORS.userDataRequired,
             })
           );
         }
@@ -203,7 +220,7 @@ export const updateUserStatus = async (req, res, params) => {
           res.statusCode = 404;
           return res.end(
             JSON.stringify({
-              error: 'User on URL and User on body does not match',
+              error: USERS_ERRORS.userDataRequired,
             })
           );
         }
@@ -214,30 +231,40 @@ export const updateUserStatus = async (req, res, params) => {
         if (result.results.affectedRows === 0) {
           res.statusCode = 404;
           return res.end(
-            JSON.stringify({ error: 'User have not been updated' })
+            JSON.stringify({ error: USERS_ERRORS.userNotAffected })
           );
         }
         res.statusCode = 200;
-        res.end(JSON.stringify({ message: 'User status have been updated' }));
+        res.end(JSON.stringify({ message: USERS_SUCCESS.userStatusUpdated }));
       } catch (error) {
-        logger.error('Database query error on updateUserStatus:', {
-          error: error.message,
-          stack: error.stack,
-        });
+        logger.error(
+          'Error en la consulta a la base de datos en updateUserStatus:',
+          {
+            error: error.message,
+            stack: error.stack,
+          }
+        );
         if (error.sqlState === unhandledUserDefinedException) {
           res.statusCode = 400;
           return res.end(JSON.stringify({ error: error.sqlMessage }));
         }
         res.statusCode = 500;
-        return res.end(JSON.stringify({ error: 'Internal server error' }));
+        return res.end(
+          JSON.stringify({ error: SERVER_ERRORS.internalServerError })
+        );
       }
     });
   } catch (error) {
-    logger.error('Database query error on updateUserStatus:', {
-      error: error.message,
-      stack: error.stack,
-    });
+    logger.error(
+      'Error en la consulta a la base de datos en updateUserStatus:',
+      {
+        error: error.message,
+        stack: error.stack,
+      }
+    );
     res.statusCode = 500;
-    return res.end(JSON.stringify({ error: 'Internal server error' }));
+    return res.end(
+      JSON.stringify({ error: SERVER_ERRORS.internalServerError })
+    );
   }
 };

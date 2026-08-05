@@ -1,5 +1,6 @@
 import { router } from './router/router.mjs';
 import { logger } from './logger.mjs';
+import { SERVER_ERRORS } from './utils/messages.mjs';
 export const FRONTEND_URL = `http://${process.env.BASE_IP}:${process.env.FRONTEND_PORT}`;
 export const BACKEND_URL = `http://${process.env.BASE_IP}:${process.env.BACKEND_PORT}`;
 // CORS headers configuration
@@ -30,20 +31,20 @@ export const processRequest = async (req, res) => {
   // Set respose
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
 
-  logger.info(`HTTP Request Received`, { method, url });
+  logger.info(`Se ha recibido una solicitud HTTP`, { method, url });
   // Find matching route
   const route = router.find(r => r.method === method && r.regex.test(url));
   if (!route) {
     res.statusCode = 404;
-    logger.warn(`Route not found for target matching`, { method, url });
-    return res.end(JSON.stringify({ error: 'Route not found' }));
+    logger.warn(SERVER_ERRORS.routeNotFound, { method, url });
+    return res.end(JSON.stringify({ error: SERVER_ERRORS.routeNotFound }));
   }
   try {
     const params = url.match(route.regex);
     await route.handler(req, res, params);
   } catch (err) {
     // Write full execution context to error logs
-    logger.error(`Router processing execution error`, {
+    logger.error(`Error en la ejecución del procesamiento del enrutador`, {
       route: route.regex.toString(),
       method,
       url,
@@ -51,6 +52,8 @@ export const processRequest = async (req, res) => {
       stack: err.stack,
     });
     res.statusCode = 500;
-    return res.end(JSON.stringify({ error: 'Internal Server Error' }));
+    return res.end(
+      JSON.stringify({ error: SERVER_ERRORS.internalServerError })
+    );
   }
 };

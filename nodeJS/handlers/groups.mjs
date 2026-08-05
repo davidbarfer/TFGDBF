@@ -1,9 +1,10 @@
 import {
-  authenticate,
-  query,
-  checkSubjectStatus,
   unhandledUserDefinedException,
-} from '../database.mjs';
+  SERVER_ERRORS,
+  GROUPS_ERRORS,
+  GROUPS_SUCCESS,
+} from '../utils/messages.mjs';
+import { authenticate, query, checkSubjectStatus } from '../database.mjs';
 import { logger } from '../logger.mjs';
 /**
  * Return a group
@@ -17,7 +18,7 @@ export const getGroup = async (req, res, params) => {
     ]);
     if (group.results.length === 0) {
       res.statusCode = 404;
-      return res.end(JSON.stringify({ error: 'Group not found' }));
+      return res.end(JSON.stringify({ error: GROUPS_ERRORS.groupNotFound }));
     }
     const practice = await query(
       'SELECT subject_id FROM practice WHERE id = ?',
@@ -28,14 +29,16 @@ export const getGroup = async (req, res, params) => {
     }
     return res.end(JSON.stringify(group.results[0]));
   } catch (error) {
-    logger.error('Database query error on getGroup:', {
+    logger.error('Error en la consulta a la base de datos on getGroup:', {
       error: error.message,
       stack: error.stack,
     });
     res.statusCode = error.statusCode || 500;
     return res.end(
       JSON.stringify({
-        error: error.statusCode ? error.message : 'Internal server error',
+        error: error.statusCode
+          ? error.message
+          : SERVER_ERRORS.internalServerError,
       })
     );
   }
@@ -60,18 +63,23 @@ export const getSubjectPracticesGroups = async (req, res, params) => {
     );
     if (groups.results.length === 0) {
       res.statusCode = 404;
-      return res.end(JSON.stringify({ error: 'Groups not found' }));
+      return res.end(JSON.stringify({ error: GROUPS_ERRORS.groupsNotFound }));
     }
     return res.end(JSON.stringify(groups.results));
   } catch (error) {
-    logger.error('Database query error on getSubjectPracticesGroups:', {
-      error: error.message,
-      stack: error.stack,
-    });
+    logger.error(
+      'Error en la consulta a la base de datos on getSubjectPracticesGroups:',
+      {
+        error: error.message,
+        stack: error.stack,
+      }
+    );
     res.statusCode = error.statusCode || 500;
     return res.end(
       JSON.stringify({
-        error: error.statusCode ? error.message : 'Internal server error',
+        error: error.statusCode
+          ? error.message
+          : SERVER_ERRORS.internalServerError,
       })
     );
   }
@@ -101,12 +109,17 @@ export const getStudentGroups = async (req, res, params) => {
     }
     return res.end(JSON.stringify(groups.results));
   } catch (error) {
-    logger.error('Database query error on getStudentGroups:', {
-      error: error.message,
-      stack: error.stack,
-    });
+    logger.error(
+      'Error en la consulta a la base de datos on getStudentGroups:',
+      {
+        error: error.message,
+        stack: error.stack,
+      }
+    );
     res.statusCode = 500;
-    return res.end(JSON.stringify({ error: 'Internal server error' }));
+    return res.end(
+      JSON.stringify({ error: SERVER_ERRORS.internalServerError })
+    );
   }
 };
 /**
@@ -129,7 +142,7 @@ export const createGroups = async (req, res, params) => {
         ) {
           res.statusCode = 400;
           return res.end(
-            JSON.stringify({ error: 'Se requiere un array de grupos válido.' })
+            JSON.stringify({ error: GROUPS_ERRORS.groupArrayRequired })
           );
         }
         const practiceCheck = await query(
@@ -152,7 +165,7 @@ export const createGroups = async (req, res, params) => {
             res.statusCode = 400;
             return res.end(
               JSON.stringify({
-                error: 'Todos los campos son obligatorios en cada grupo.',
+                error: GROUPS_ERRORS.groupDataRequired,
               })
             );
           }
@@ -181,10 +194,13 @@ export const createGroups = async (req, res, params) => {
           JSON.stringify({ success: true, results: group.results })
         );
       } catch (error) {
-        logger.error('Database query error on bulk postPracticeGroupsCreate:', {
-          error: error.message,
-          stack: error.stack,
-        });
+        logger.error(
+          'Error en la consulta a la base de datos on bulk postPracticeGroupsCreate:',
+          {
+            error: error.message,
+            stack: error.stack,
+          }
+        );
         if (error.sqlState === unhandledUserDefinedException) {
           res.statusCode = 400;
           return res.end(JSON.stringify({ error: error.sqlMessage }));
@@ -192,14 +208,18 @@ export const createGroups = async (req, res, params) => {
         res.statusCode = error.statusCode || 500;
         return res.end(
           JSON.stringify({
-            error: error.statusCode ? error.message : 'Internal server error',
+            error: error.statusCode
+              ? error.message
+              : SERVER_ERRORS.internalServerError,
           })
         );
       }
     });
   } catch {
     res.statusCode = 500;
-    return res.end(JSON.stringify({ error: 'Internal server error' }));
+    return res.end(
+      JSON.stringify({ error: SERVER_ERRORS.internalServerError })
+    );
   }
 };
 /**
@@ -219,7 +239,7 @@ export const postGroupStudent = async (req, res, params) => {
           res.statusCode = 400;
           return res.end(
             JSON.stringify({
-              error: 'Group ID and student ID are required',
+              error: GROUPS_ERRORS.groupDataRequired,
             })
           );
         }
@@ -237,21 +257,28 @@ export const postGroupStudent = async (req, res, params) => {
         res.statusCode = 201;
         return res.end(JSON.stringify(result.results));
       } catch (error) {
-        logger.error('Database query error on postGroupStudent:', {
-          error: error.message,
-          stack: error.stack,
-        });
+        logger.error(
+          'Error en la consulta a la base de datos on postGroupStudent:',
+          {
+            error: error.message,
+            stack: error.stack,
+          }
+        );
         res.statusCode = error.statusCode || 500;
         return res.end(
           JSON.stringify({
-            error: error.statusCode ? error.message : 'Internal server error',
+            error: error.statusCode
+              ? error.message
+              : SERVER_ERRORS.internalServerError,
           })
         );
       }
     });
   } catch {
     res.statusCode = 500;
-    return res.end(JSON.stringify({ error: 'Internal server error' }));
+    return res.end(
+      JSON.stringify({ error: SERVER_ERRORS.internalServerError })
+    );
   }
 };
 /**
@@ -261,7 +288,7 @@ export const deleteGroup = async (req, res, params) => {
   const group_id = params[1];
   try {
     await authenticate(req, res);
-    logger.info('Attempting to delete group', { group_id });
+    logger.info('Intentando eliminar grupo', { group_id });
     const pathCheck = await query(
       'SELECT p.subject_id FROM practice_groups pg JOIN practice p ON pg.practice_id = p.id WHERE pg.id = ?',
       [group_id]
@@ -273,16 +300,18 @@ export const deleteGroup = async (req, res, params) => {
       group_id,
     ]);
     if (result.results.affectedRows > 0) {
-      logger.info('Group deleted successfully', { group_id });
+      logger.info(GROUPS_SUCCESS.groupDeleted, { group_id });
       res.statusCode = 200;
-      return res.end(JSON.stringify({ message: 'Group deleted successfully' }));
+      return res.end(JSON.stringify({ message: GROUPS_SUCCESS.groupDeleted }));
     } else {
-      logger.warn('Group deletion failed: Resource not found', { group_id });
+      logger.warn('Fallo al eliminar grupo: Recurso no encontrado', {
+        group_id,
+      });
       res.statusCode = 404;
-      return res.end(JSON.stringify({ error: 'Group not found' }));
+      return res.end(JSON.stringify({ error: GROUPS_ERRORS.groupNotFound }));
     }
   } catch (error) {
-    logger.error('Database query error on deleteGroup', {
+    logger.error('Error en la consulta a la base de datos on deleteGroup', {
       group_id,
       error: error.message,
       stack: error.stack,
@@ -290,7 +319,9 @@ export const deleteGroup = async (req, res, params) => {
     res.statusCode = error.statusCode || 500;
     return res.end(
       JSON.stringify({
-        error: error.statusCode ? error.message : 'Internal server error',
+        error: error.statusCode
+          ? error.message
+          : SERVER_ERRORS.internalServerError,
       })
     );
   }
@@ -306,7 +337,7 @@ export const deleteStudentGroup = async (req, res, params) => {
   try {
     await authenticate(req, res);
     logger.info(
-      'Attempting to delete a student from a group',
+      'Intentando eliminar un alumno de un grupo',
       group_id_student_id
     );
     const pathCheck = await query(
@@ -321,31 +352,33 @@ export const deleteStudentGroup = async (req, res, params) => {
       [group_id_student_id.group_id, group_id_student_id.student_id]
     );
     if (result.results.affectedRows > 0) {
-      logger.info(
-        'Student deleted from group successfully',
-        group_id_student_id
-      );
+      logger.info(GROUPS_SUCCESS.userDeletedFromGroup, group_id_student_id);
       res.statusCode = 200;
       return res.end(
         JSON.stringify({
-          message: 'Student deleted from group successfully',
+          message: GROUPS_SUCCESS.userDeletedFromGroup,
         })
       );
     } else {
-      logger.warn('Student deletion from a group failed', group_id_student_id);
+      logger.warn('Error al eliminar alumno del grupo', group_id_student_id);
       res.statusCode = 404;
-      return res.end(JSON.stringify({ error: 'Student not found in group' }));
+      return res.end(JSON.stringify({ error: GROUPS_ERRORS.userNotFound }));
     }
   } catch (error) {
-    logger.error('Database query error on deleteStudentGroup:', {
-      group_id_student_id,
-      error: error.message,
-      stack: error.stack,
-    });
+    logger.error(
+      'Error en la consulta a la base de datos on deleteStudentGroup:',
+      {
+        group_id_student_id,
+        error: error.message,
+        stack: error.stack,
+      }
+    );
     res.statusCode = error.statusCode || 500;
     return res.end(
       JSON.stringify({
-        error: error.statusCode ? error.message : 'Internal server error',
+        error: error.statusCode
+          ? error.message
+          : SERVER_ERRORS.internalServerError,
       })
     );
   }
@@ -368,7 +401,7 @@ export const updateGroup = async (req, res, params) => {
           res.statusCode = 400;
           return res.end(
             JSON.stringify({
-              error: 'Group is not found',
+              error: GROUPS_ERRORS.groupDataRequired,
             })
           );
         }
@@ -396,15 +429,20 @@ export const updateGroup = async (req, res, params) => {
         );
         if (result.results.affectedRows === 0) {
           res.statusCode = 404;
-          return res.end(JSON.stringify({ error: 'No submissions affected' }));
+          return res.end(
+            JSON.stringify({ error: GROUPS_ERRORS.groupNotAffected })
+          );
         }
         res.statusCode = 200;
-        res.end(JSON.stringify({ message: 'Group have been updated' }));
+        res.end(JSON.stringify({ message: GROUPS_SUCCESS.groupUpdated }));
       } catch (error) {
-        logger.error('Database query error on updateGroup:', {
-          error: error.message,
-          stack: error.stack,
-        });
+        logger.error(
+          'Error en la consulta a la base de datos on updateGroup:',
+          {
+            error: error.message,
+            stack: error.stack,
+          }
+        );
         if (error.sqlState === unhandledUserDefinedException) {
           res.statusCode = 400;
           return res.end(JSON.stringify({ error: error.sqlMessage }));
@@ -412,17 +450,21 @@ export const updateGroup = async (req, res, params) => {
         res.statusCode = error.statusCode || 500;
         return res.end(
           JSON.stringify({
-            error: error.statusCode ? error.message : 'Internal server error',
+            error: error.statusCode
+              ? error.message
+              : SERVER_ERRORS.internalServerError,
           })
         );
       }
     });
   } catch (error) {
-    logger.error('Database query error on updateGroup:', {
+    logger.error('Error en la consulta a la base de datos on updateGroup:', {
       error: error.message,
       stack: error.stack,
     });
     res.statusCode = 500;
-    return res.end(JSON.stringify({ error: 'Internal server error' }));
+    return res.end(
+      JSON.stringify({ error: SERVER_ERRORS.internalServerError })
+    );
   }
 };

@@ -24,7 +24,7 @@ export function logout() {
     credentials: 'include',
   })
     .then(() => {
-      showToastOnLoad('Logout successful')
+      showToastOnLoad('Sesión cerrada con éxito')
       window.location.href = '/login';
     })
     .catch((error) => {

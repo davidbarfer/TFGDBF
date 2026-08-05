@@ -1,5 +1,3 @@
-import { link } from "node:fs";
-
 const PROJECT_NAME = 'Doctus Lite';
 const PROJECT_AUTHOR = 'David Barrero Fernandez';
 const PROJECT_FRAMEWORKS = {

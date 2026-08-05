@@ -1,3 +1,4 @@
+import { SERVER_ERRORS, EXPORT_ERRORS } from '../utils/messages.mjs';
 import { authenticate, query, checkSubjectStatus } from '../database.mjs';
 import { logger } from '../logger.mjs';
 import * as fastcsv from 'fast-csv';
@@ -40,9 +41,7 @@ export const exportPracticeGrades = async (req, res, params) => {
         practice_id,
       });
       res.statusCode = 404;
-      return res.end(
-        JSON.stringify({ error: 'No data found for this practice' })
-      );
+      return res.end(JSON.stringify({ error: EXPORT_ERRORS.dataNotFound }));
     }
 
     // 3. Configurar cabeceras de respuesta HTTP para forzar la descarga de un archivo binario
@@ -96,7 +95,7 @@ export const exportPracticeGrades = async (req, res, params) => {
         JSON.stringify({
           error: error.statusCode
             ? error.message
-            : 'Internal server error during export',
+            : SERVER_ERRORS.internalServerError,
         })
       );
     }
@@ -117,9 +116,7 @@ export const exportSubjectGrades = async (req, res, params) => {
 
     if (practices.length === 0) {
       res.statusCode = 404;
-      return res.end(
-        JSON.stringify({ error: 'No practices found for this subject' })
-      );
+      return res.end(JSON.stringify({ error: EXPORT_ERRORS.dataNotFound }));
     }
 
     // 2. Construir los fragmentos condicionales dinámicos para cada práctica
@@ -150,9 +147,7 @@ export const exportSubjectGrades = async (req, res, params) => {
         subject_id,
       });
       res.statusCode = 404;
-      return res.end(
-        JSON.stringify({ error: 'No data found for this subkect' })
-      );
+      return res.end(JSON.stringify({ error: EXPORT_ERRORS.dataNotFound }));
     }
 
     // 3. Configurar cabeceras de respuesta HTTP para forzar la descarga de un archivo binario
@@ -213,7 +208,7 @@ export const exportSubjectGrades = async (req, res, params) => {
         JSON.stringify({
           error: error.statusCode
             ? error.message
-            : 'Internal server error during export',
+            : SERVER_ERRORS.internalServerError,
         })
       );
     }
@@ -257,7 +252,7 @@ export const exportGroupStudents = async (req, res, params) => {
         group_id,
       });
       res.statusCode = 404;
-      return res.end(JSON.stringify({ error: 'No data found for this group' }));
+      return res.end(JSON.stringify({ error: EXPORT_ERRORS.dataNotFound }));
     }
 
     // 3. Configurar cabeceras de respuesta HTTP para forzar la descarga de un archivo binario
@@ -314,9 +309,7 @@ export const exportGroupStudents = async (req, res, params) => {
       res.statusCode = error.statusCode || 500;
       return res.end(
         JSON.stringify({
-          error: error.statusCode
-            ? error.message
-            : 'Internal server error during export',
+          error: error.statusCode ? error.message : EXPORT_ERRORS.dataNotFound,
         })
       );
     }

@@ -16,7 +16,7 @@ BEGIN
   
   IF practice_count = 0 THEN
     SIGNAL SQLSTATE '45000'
-    SET MESSAGE_TEXT = 'Invalid practice_id: Practice does not exist';
+    SET MESSAGE_TEXT = 'Practica no existe';
   ELSE
     -- Get the deadline
     SELECT deadline INTO deadline_var 
@@ -26,10 +26,10 @@ BEGIN
     -- Check for NULL dates
     IF p_group_date IS NULL THEN
       SIGNAL SQLSTATE '45000'
-      SET MESSAGE_TEXT = 'practice_group_date cannot be NULL';
+      SET MESSAGE_TEXT = 'La fecha del grupo no puede ser nula';
     ELSEIF deadline_var IS NULL THEN
       SIGNAL SQLSTATE '45000'
-      SET MESSAGE_TEXT = 'Practice deadline is not set';
+      SET MESSAGE_TEXT = 'Fecha límite global no puede ser nula';
     -- Check the date condition
     ELSEIF p_group_date >= deadline_var THEN
       -- Construct the string into the variable first
