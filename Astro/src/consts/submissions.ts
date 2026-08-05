@@ -2,7 +2,7 @@ export const submissionStatuses = {
   pending: 'pendiente de entrega',
   pass: 'aprobado',
   fail: 'suspendido',
-  late: 'entrega tardía',
+  late: 'fecha de entrega vencida',
   submitted: 'entregado',
 }
 export function submissionStatus(grade: number | null, due_date: string | null, file_url: string): string {
