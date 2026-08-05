@@ -5,7 +5,7 @@ import { generateFileSystem } from './fileSystem.mjs';
 
 const isProduction = process.argv.includes('--prod');
 logger.info(
-  `Server starting mode: ${isProduction ? 'PRODUCTION' : 'DEVELOPMENT'}`
+  `Modo de inicio del servidor: ${isProduction ? 'PRODUCCIÓN' : 'DESARROLLO'}`
 );
 
 const server = http.createServer(processRequest);
