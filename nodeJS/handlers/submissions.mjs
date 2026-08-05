@@ -40,7 +40,7 @@ export const getSubmission = async (req, res, params) => {
     }
     return res.end(JSON.stringify(submission.results[0]));
   } catch (error) {
-    logger.error('Database query error on getSubmission:', {
+    logger.error('Error en la consulta a la base de datos en getSubmission:', {
       error: error.message,
       stack: error.stack,
     });
@@ -80,10 +80,13 @@ export const getPracticeSubmissions = async (req, res, params) => {
     res.statusCode = 200;
     return res.end(JSON.stringify(submissions.results));
   } catch (error) {
-    logger.error('Database query error on getPracticeSubmissions:', {
-      error: error.message,
-      stack: error.stack,
-    });
+    logger.error(
+      'Error en la consulta a la base de datos en getPracticeSubmissions:',
+      {
+        error: error.message,
+        stack: error.stack,
+      }
+    );
     res.statusCode = 500;
     return res.end(
       JSON.stringify({ error: SERVER_ERRORS.internalServerError })
@@ -135,10 +138,13 @@ export const getGroupSubmissions = async (req, res, params) => {
     res.statusCode = 200;
     return res.end(JSON.stringify(submissions.results));
   } catch (error) {
-    logger.error('Database query error on getGroupSubmissions:', {
-      error: error.message,
-      stack: error.stack,
-    });
+    logger.error(
+      'Error en la consulta a la base de datos en getGroupSubmissions:',
+      {
+        error: error.message,
+        stack: error.stack,
+      }
+    );
     res.statusCode = 500;
     return res.end(
       JSON.stringify({ error: SERVER_ERRORS.internalServerError })
@@ -175,10 +181,13 @@ export const getStudentSubmissions = async (req, res, params) => {
     );
     return res.end(JSON.stringify(submissions.results));
   } catch (error) {
-    logger.error('Database query error on getStudentSubmissions:', {
-      error: error.message,
-      stack: error.stack,
-    });
+    logger.error(
+      'Error en la consulta a la base de datos en getStudentSubmissions:',
+      {
+        error: error.message,
+        stack: error.stack,
+      }
+    );
     res.statusCode = 500;
     return res.end(
       JSON.stringify({ error: SERVER_ERRORS.internalServerError })
@@ -216,10 +225,13 @@ export const getStudentSubmission = async (req, res, params) => {
     submission.results[0].subject_id = practice.results[0].subject_id;
     return res.end(JSON.stringify(submission.results[0]));
   } catch (error) {
-    logger.error('Database query error on getStudentSubmission:', {
-      error: error.message,
-      stack: error.stack,
-    });
+    logger.error(
+      'Error en la consulta a la base de datos en getStudentSubmission:',
+      {
+        error: error.message,
+        stack: error.stack,
+      }
+    );
     res.statusCode = 500;
     return res.end(
       JSON.stringify({ error: SERVER_ERRORS.internalServerError })
@@ -272,10 +284,13 @@ export const getStudentSubmissionFile = async (req, res, params) => {
     }
     return res.end(JSON.stringify(submissionFile));
   } catch (error) {
-    logger.error('Database query error on getStudentSubmissionFile:', {
-      error: error.message,
-      stack: error.stack,
-    });
+    logger.error(
+      'Error en la consulta a la base de datos en getStudentSubmissionFile:',
+      {
+        error: error.message,
+        stack: error.stack,
+      }
+    );
     res.statusCode = 500;
     return res.end(
       JSON.stringify({ error: SERVER_ERRORS.internalServerError })
@@ -352,10 +367,13 @@ export const postStudentSubmissionFile = async (req, res, params) => {
           }
         }
       } catch (error) {
-        logger.error('Database query error on postStudentSubmissionFile:', {
-          error: error.message,
-          stack: error.stack,
-        });
+        logger.error(
+          'Error en la consulta a la base de datos en postStudentSubmissionFile:',
+          {
+            error: error.message,
+            stack: error.stack,
+          }
+        );
         res.statusCode = error.statusCode || 500;
         return res.end(
           JSON.stringify({
@@ -469,10 +487,13 @@ export const postPracticeGroupSubmissions = async (req, res, params) => {
         res.statusCode = 201;
         return res.end(JSON.stringify(result));
       } catch (error) {
-        logger.error('Database query error on postPracticeGroupSubmissions:', {
-          error: error.message,
-          stack: error.stack,
-        });
+        logger.error(
+          'Error en la consulta a la base de datos en postPracticeGroupSubmissions:',
+          {
+            error: error.message,
+            stack: error.stack,
+          }
+        );
         if (error.sqlState === unhandledUserDefinedException) {
           res.statusCode = 400;
           return res.end(JSON.stringify({ error: error.sqlMessage }));
@@ -488,10 +509,13 @@ export const postPracticeGroupSubmissions = async (req, res, params) => {
       }
     });
   } catch (error) {
-    logger.error('Database query error on postPracticeGroupSubmissions:', {
-      error: error.message,
-      stack: error.stack,
-    });
+    logger.error(
+      'Error en la consulta a la base de datos en postPracticeGroupSubmissions:',
+      {
+        error: error.message,
+        stack: error.stack,
+      }
+    );
     res.statusCode = 500;
     return res.end(
       JSON.stringify({ error: SERVER_ERRORS.internalServerError })
@@ -558,10 +582,13 @@ export const postPracticeSubmissionEdit = async (req, res, params) => {
           JSON.stringify({ message: SUBMISSIONS_SUCCESS.submissionUpdated })
         );
       } catch (error) {
-        logger.error('Database query error on postPracticeSubmissionEdit:', {
-          error: error.message,
-          stack: error.stack,
-        });
+        logger.error(
+          'Error en la consulta a la base de datos en postPracticeSubmissionEdit:',
+          {
+            error: error.message,
+            stack: error.stack,
+          }
+        );
         if (error.sqlState === unhandledUserDefinedException) {
           res.statusCode = 400;
           return res.end(JSON.stringify({ error: error.sqlMessage }));
@@ -577,10 +604,13 @@ export const postPracticeSubmissionEdit = async (req, res, params) => {
       }
     });
   } catch (error) {
-    logger.error('Database query error on postPracticeSubmissionEdit:', {
-      error: error.message,
-      stack: error.stack,
-    });
+    logger.error(
+      'Error en la consulta a la base de datos en postPracticeSubmissionEdit:',
+      {
+        error: error.message,
+        stack: error.stack,
+      }
+    );
     res.statusCode = 500;
     return res.end(
       JSON.stringify({ error: SERVER_ERRORS.internalServerError })
@@ -631,10 +661,13 @@ export const postPracticeEvaluatorCreate = async (req, res, params) => {
             `${FILESYSTEM_PATH}/${newPath}`
           );
         } catch (error) {
-          logger.error('Error renaming file on postPracticeEvaluatorCreate:', {
-            error: error.message,
-            stack: error.stack,
-          });
+          logger.error(
+            'Error al renombrar el archivo en postPracticeEvaluatorCreate:',
+            {
+              error: error.message,
+              stack: error.stack,
+            }
+          );
           // Fallback: if rename fails, we still have the temp file
         }
         try {
@@ -644,7 +677,7 @@ export const postPracticeEvaluatorCreate = async (req, res, params) => {
           );
           if (fileUrlResponse.results.affectedRows === 0) {
             logger.error(
-              'No rows were updated in the database on postPracticeEvaluatorCreate.'
+              'No se ha actualizado ninguna fila en la base de datos al ejecutar «postPracticeEvaluatorCreate».'
             );
             res.statusCode = 500;
             return res.end(
@@ -654,10 +687,13 @@ export const postPracticeEvaluatorCreate = async (req, res, params) => {
             );
           }
         } catch (error) {
-          logger.error('Database query error on postPracticeEvaluatorCreate:', {
-            error: error.message,
-            stack: error.stack,
-          });
+          logger.error(
+            'Error en la consulta a la base de datos en postPracticeEvaluatorCreate:',
+            {
+              error: error.message,
+              stack: error.stack,
+            }
+          );
           res.statusCode = 500;
           return res.end(
             JSON.stringify({
@@ -689,7 +725,9 @@ export const postPracticeEvaluatorCreate = async (req, res, params) => {
             );
           }
           case 201: {
-            logger.info('Submission template file saved succesfully');
+            logger.info(
+              'El archivo de plantilla de envío se ha guardado correctamente'
+            );
           }
         }
       }
@@ -702,10 +740,13 @@ export const postPracticeEvaluatorCreate = async (req, res, params) => {
         })
       );
     } catch (error) {
-      logger.error('Database query error on postPracticeEvaluatorCreate:', {
-        error: error.message,
-        stack: error.stack,
-      });
+      logger.error(
+        'Error en la consulta a la base de datos en postPracticeEvaluatorCreate:',
+        {
+          error: error.message,
+          stack: error.stack,
+        }
+      );
       res.statusCode = error.statusCode || 500;
       return res.end(
         JSON.stringify({
@@ -716,10 +757,13 @@ export const postPracticeEvaluatorCreate = async (req, res, params) => {
       );
     }
   } catch (error) {
-    logger.error('Database query error on postPracticeEvaluatorCreate:', {
-      error: error.message,
-      stack: error.stack,
-    });
+    logger.error(
+      'Error en la consulta a la base de datos en postPracticeEvaluatorCreate:',
+      {
+        error: error.message,
+        stack: error.stack,
+      }
+    );
     res.statusCode = 500;
     return res.end(
       JSON.stringify({ error: SERVER_ERRORS.internalServerError })
@@ -790,7 +834,7 @@ export const postStudentSubmissionEvaluate = async (req, res, params) => {
         const DeleteTempFiles = await clearTempDirectory(outputPath);
         if (!DeleteTempFiles) {
           logger.error(
-            'Error deleteing temp files on postStudentSubmissionEvaluate'
+            'Error al eliminar los archivos temporales en postStudentSubmissionEvaluate'
           );
         }
         // Send response
@@ -802,10 +846,13 @@ export const postStudentSubmissionEvaluate = async (req, res, params) => {
           })
         );
       } catch (error) {
-        logger.error('Database query error on postStudentSubmissionEvaluate:', {
-          error: error.message,
-          stack: error.stack,
-        });
+        logger.error(
+          'Error en la consulta a la base de datos en postStudentSubmissionEvaluate:',
+          {
+            error: error.message,
+            stack: error.stack,
+          }
+        );
         res.statusCode = 500;
         return res.end(
           JSON.stringify({ error: SERVER_ERRORS.internalServerError })
@@ -902,10 +949,13 @@ export const postPracticeSubmissions = async (req, res, params) => {
         res.statusCode = 201;
         return res.end(JSON.stringify(result));
       } catch (error) {
-        logger.error('Database query error on postPracticeSubmissions:', {
-          error: error.message,
-          stack: error.stack,
-        });
+        logger.error(
+          'Error en la consulta a la base de datos en postPracticeSubmissions:',
+          {
+            error: error.message,
+            stack: error.stack,
+          }
+        );
         if (error.sqlState === unhandledUserDefinedException) {
           res.statusCode = 400;
           return res.end(JSON.stringify({ error: error.sqlMessage }));
@@ -979,10 +1029,13 @@ export const putStudentSubmissionGrade = async (req, res, params) => {
           JSON.stringify({ message: SUBMISSIONS_SUCCESS.submissionUpdated })
         );
       } catch (error) {
-        logger.error('Database query error on putStudentSubmissionGrade:', {
-          error: error.message,
-          stack: error.stack,
-        });
+        logger.error(
+          'Error en la consulta a la base de datos en putStudentSubmissionGrade:',
+          {
+            error: error.message,
+            stack: error.stack,
+          }
+        );
         res.statusCode = error.statusCode || 500;
         return res.end(
           JSON.stringify({
@@ -994,10 +1047,13 @@ export const putStudentSubmissionGrade = async (req, res, params) => {
       }
     });
   } catch (error) {
-    logger.error('Database query error on putStudentSubmissionGrade:', {
-      error: error.message,
-      stack: error.stack,
-    });
+    logger.error(
+      'Error en la consulta a la base de datos en putStudentSubmissionGrade:',
+      {
+        error: error.message,
+        stack: error.stack,
+      }
+    );
     res.statusCode = 500;
     return res.end(
       JSON.stringify({ error: SERVER_ERRORS.internalServerError })

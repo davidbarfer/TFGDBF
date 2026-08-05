@@ -20,7 +20,7 @@ export const getSubjects = async (req, res, params) => {
     }
     return res.end(JSON.stringify(subjects.results));
   } catch (error) {
-    logger.error('Database query error on getSubjects:', {
+    logger.error('Error en la consulta a la base de datos en getSubjects:', {
       error: error.message,
       stack: error.stack,
     });
@@ -51,10 +51,13 @@ export const getSubjectsUser = async (req, res, params) => {
     ]);
     return res.end(JSON.stringify(subjects.results));
   } catch (error) {
-    logger.error('Database query error on getSubjectsUser:', {
-      error: error.message,
-      stack: error.stack,
-    });
+    logger.error(
+      'Error en la consulta a la base de datos en getSubjectsUser:',
+      {
+        error: error.message,
+        stack: error.stack,
+      }
+    );
     res.statusCode = 500;
     return res.end(
       JSON.stringify({ error: SERVER_ERRORS.internalServerError })
@@ -80,7 +83,7 @@ export const getSubject = async (req, res, params) => {
     }
     return res.end(JSON.stringify(subject.results[0]));
   } catch (error) {
-    logger.error('Database query error on getSubject:', {
+    logger.error('Error en la consulta a la base de datos en getSubject:', {
       error: error.message,
       stack: error.stack,
     });
@@ -135,10 +138,13 @@ export const postSubjectCreate = async (req, res, params) => {
         res.statusCode = 201;
         return res.end(JSON.stringify(subject.results));
       } catch (error) {
-        logger.error('Database query error on postSubjectCreate:', {
-          error: error.message,
-          stack: error.stack,
-        });
+        logger.error(
+          'Error en la consulta a la base de datos en postSubjectCreate:',
+          {
+            error: error.message,
+            stack: error.stack,
+          }
+        );
         if (error.sqlState === unhandledUserDefinedException) {
           res.statusCode = 400;
           return res.end(JSON.stringify({ error: error.sqlMessage }));
@@ -163,7 +169,7 @@ export const deleteSubject = async (req, res, params) => {
   const subject_id = params[1];
   try {
     await authenticate(req, res);
-    logger.info('Intetntando eliminar asignatura', { subject_id });
+    logger.info('Intentando eliminar asignatura', { subject_id });
     const result = await query(
       'UPDATE subject SET is_deleted = TRUE WHERE id = ?',
       [subject_id]
@@ -175,16 +181,19 @@ export const deleteSubject = async (req, res, params) => {
         JSON.stringify({ message: SUBJECTS_SUCCESS.subjectDeleted })
       );
     } else {
-      logger.warn('Subject deletion failed: Resource not found', {
-        subject_id,
-      });
+      logger.warn(
+        'Error al eliminar la asignatura: No se ha encontrado el recurso',
+        {
+          subject_id,
+        }
+      );
       res.statusCode = 404;
       return res.end(
         JSON.stringify({ error: SUBJECTS_ERRORS.subjectNotFound })
       );
     }
   } catch (error) {
-    logger.error('Database query error on deleteSubject', {
+    logger.error('Error en la consulta a la base de datos en deleteSubject', {
       subject_id,
       error: error.message,
       stack: error.stack,
@@ -221,10 +230,13 @@ export const postUserSubject = async (req, res, params) => {
         JSON.stringify({ message: SUBJECTS_SUCCESS.subjectAssigned })
       );
     } catch (error) {
-      logger.error('Database query error on postUserSubject:', {
-        error: error.message,
-        stack: error.stack,
-      });
+      logger.error(
+        'Error en la consulta a la base de datos en postUserSubject:',
+        {
+          error: error.message,
+          stack: error.stack,
+        }
+      );
       res.statusCode = error.statusCode || 500;
       return res.end(
         JSON.stringify({
@@ -262,10 +274,13 @@ export const deleteUserSubject = async (req, res, params) => {
         JSON.stringify({ message: SUBJECTS_SUCCESS.subjectUnassigned })
       );
     } catch (error) {
-      logger.error('Database query error on postUserSubject:', {
-        error: error.message,
-        stack: error.stack,
-      });
+      logger.error(
+        'Error en la consulta a la base de datos en postUserSubject:',
+        {
+          error: error.message,
+          stack: error.stack,
+        }
+      );
       res.statusCode = error.statusCode || 500;
       return res.end(
         JSON.stringify({

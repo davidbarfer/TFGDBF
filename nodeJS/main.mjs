@@ -12,14 +12,16 @@ const server = http.createServer(processRequest);
 
 server.listen(Number(process.env.BACKEND_PORT), process.env.BASE_IP, () => {
   logger.info(
-    `API server listening on: http://${process.env.BASE_IP}:${process.env.BACKEND_PORT}`
+    `Servidor API escuchando en: http://${process.env.BASE_IP}:${process.env.BACKEND_PORT}`
   );
 });
 generateFileSystem({ isProduction })
-  .then(() => logger.info('File system generated sucessfully'))
+  .then(() =>
+    logger.info('El sistema de archivos se ha generado correctamente')
+  )
   .catch(error => {
     logger.error(
-      `${isProduction ? 'Production' : 'Development'} FS Initialization Error`,
+      `Error de inicialización del sistema de archivos en ${isProduction ? 'Producción' : 'Desarrollo'}`,
       { error: error.message }
     );
   });

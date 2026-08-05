@@ -16,7 +16,7 @@ export const getUsers = async (req, res, params) => {
     const users = await query('SELECT * FROM users');
     return res.end(JSON.stringify(users.results));
   } catch (error) {
-    logger.error('Database query error on getUsers:', {
+    logger.error('Error en la consulta a la base de datos en getUsers:', {
       error: error.message,
       stack: error.stack,
     });
@@ -62,7 +62,7 @@ export const getUsersByRole = async (req, res, params) => {
     res.statusCode = 200;
     res.end(JSON.stringify(UsersByRole.results));
   } catch (error) {
-    logger.error('Database query error on getUsersByRole:', {
+    logger.error('Error en la consulta a la base de datos en getUsersByRole:', {
       error: error.message,
       stack: error.stack,
     });
@@ -88,7 +88,7 @@ export const getUserCurrent = async (req, res, params) => {
     }
     return res.end(JSON.stringify(currentUser.results[0]));
   } catch (error) {
-    logger.error('Database query error on getUserCurrent:', {
+    logger.error('Error en la consulta a la base de datos en getUserCurrent:', {
       error: error.message,
       stack: error.stack,
     });
@@ -138,10 +138,13 @@ export const getSubjectStudents = async (req, res, params) => {
     });
     return res.end(JSON.stringify(students.results));
   } catch (error) {
-    logger.error('Database query error on getSubjectStudents:', {
-      error: error.message,
-      stack: error.stack,
-    });
+    logger.error(
+      'Error en la consulta a la base de datos en getSubjectStudents:',
+      {
+        error: error.message,
+        stack: error.stack,
+      }
+    );
     res.statusCode = error.statusCode || 500;
     return res.end(
       JSON.stringify({
@@ -178,10 +181,13 @@ export const getGroupStudents = async (req, res, params) => {
     }
     return res.end(JSON.stringify(students.results));
   } catch (error) {
-    logger.error('Database query error on getGroupStudents:', {
-      error: error.message,
-      stack: error.stack,
-    });
+    logger.error(
+      'Error en la consulta a la base de datos en getGroupStudents:',
+      {
+        error: error.message,
+        stack: error.stack,
+      }
+    );
     res.statusCode = 500;
     return res.end(
       JSON.stringify({ error: SERVER_ERRORS.internalServerError })
@@ -231,10 +237,13 @@ export const updateUserStatus = async (req, res, params) => {
         res.statusCode = 200;
         res.end(JSON.stringify({ message: USERS_SUCCESS.userStatusUpdated }));
       } catch (error) {
-        logger.error('Database query error on updateUserStatus:', {
-          error: error.message,
-          stack: error.stack,
-        });
+        logger.error(
+          'Error en la consulta a la base de datos en updateUserStatus:',
+          {
+            error: error.message,
+            stack: error.stack,
+          }
+        );
         if (error.sqlState === unhandledUserDefinedException) {
           res.statusCode = 400;
           return res.end(JSON.stringify({ error: error.sqlMessage }));
@@ -246,10 +255,13 @@ export const updateUserStatus = async (req, res, params) => {
       }
     });
   } catch (error) {
-    logger.error('Database query error on updateUserStatus:', {
-      error: error.message,
-      stack: error.stack,
-    });
+    logger.error(
+      'Error en la consulta a la base de datos en updateUserStatus:',
+      {
+        error: error.message,
+        stack: error.stack,
+      }
+    );
     res.statusCode = 500;
     return res.end(
       JSON.stringify({ error: SERVER_ERRORS.internalServerError })

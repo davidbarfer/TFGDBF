@@ -24,10 +24,13 @@ export const getSubjectPractices = async (req, res, params) => {
     }
     return res.end(JSON.stringify(practices.results));
   } catch (error) {
-    logger.error('Database query error on getSubjectPractices:', {
-      error: error.message,
-      stack: error.stack,
-    });
+    logger.error(
+      'Error en la consulta a la base de datos on getSubjectPractices:',
+      {
+        error: error.message,
+        stack: error.stack,
+      }
+    );
     res.statusCode = error.statusCode || 500;
     return res.end(
       JSON.stringify({
@@ -57,7 +60,7 @@ export const getPractice = async (req, res, params) => {
     await checkSubjectStatus(practice.results[0].subject_id);
     return res.end(JSON.stringify(practice.results[0]));
   } catch (error) {
-    logger.error('Database query error on getPractice:', {
+    logger.error('Error en la consulta a la base de datos on getPractice:', {
       error: error.message,
       stack: error.stack,
     });
@@ -128,10 +131,13 @@ export const postPracticeCreate = async (req, res, params) => {
         res.statusCode = 201;
         return res.end(JSON.stringify(practice.results));
       } catch (error) {
-        logger.error('Database query error on postPracticeCreate:', {
-          error: error.message,
-          stack: error.stack,
-        });
+        logger.error(
+          'Error en la consulta a la base de datos on postPracticeCreate:',
+          {
+            error: error.message,
+            stack: error.stack,
+          }
+        );
         res.statusCode = error.statusCode || 500;
         return res.end(
           JSON.stringify({
@@ -143,7 +149,7 @@ export const postPracticeCreate = async (req, res, params) => {
       }
     });
   } catch (error) {
-    logger.error('Error checking subject ID on postPracticeCreate:', {
+    logger.error('Error comprobando subject ID on postPracticeCreate:', {
       error: error.message,
       stack: error.stack,
     });

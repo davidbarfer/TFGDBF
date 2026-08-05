@@ -31,7 +31,7 @@ export const processRequest = async (req, res) => {
   // Set respose
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
 
-  logger.info(`HTTP Request Received`, { method, url });
+  logger.info(`Se ha recibido una solicitud HTTP`, { method, url });
   // Find matching route
   const route = router.find(r => r.method === method && r.regex.test(url));
   if (!route) {
@@ -44,7 +44,7 @@ export const processRequest = async (req, res) => {
     await route.handler(req, res, params);
   } catch (err) {
     // Write full execution context to error logs
-    logger.error(`Router processing execution error`, {
+    logger.error(`Error en la ejecución del procesamiento del enrutador`, {
       route: route.regex.toString(),
       method,
       url,

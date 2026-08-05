@@ -27,7 +27,7 @@ export const login = async (req, res, params) => {
     requestComplete = true;
 
     try {
-      logger.info('Authenticating process start');
+      logger.info('Inicio del proceso de autenticación');
       // Parse and validate request body
       let data;
       try {
@@ -115,7 +115,7 @@ export const login = async (req, res, params) => {
       };
 
       // Send successful response
-      logger.info('Login sucessful', user);
+      logger.info('Inicio de sesión realizado con éxito', user);
       res.writeHead(200, headers);
       return res.end(
         JSON.stringify({
@@ -127,7 +127,7 @@ export const login = async (req, res, params) => {
         })
       );
     } catch (error) {
-      logger.error('Login error:', {
+      logger.error('Error de inicio de sesión:', {
         error: error.message,
         stack: error.stack,
       });
@@ -142,7 +142,7 @@ export const login = async (req, res, params) => {
   req.on('error', error => {
     if (requestComplete) return;
     requestComplete = true;
-    logger.error('Request error:', {
+    logger.error('Error en la solicitud:', {
       error: error.message,
       stack: error.stack,
     });
