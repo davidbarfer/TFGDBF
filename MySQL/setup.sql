@@ -11,7 +11,7 @@ COLLATE utf8mb4_unicode_ci;
 USE doctus_lite;
 
 -- Drop Triggers and Tables if exist
-source /home/davidbarfer/Us/TFG/TFGDBF/MySQL/drop.sql;
+source drop.sql;
 
 -- Table: users
 CREATE TABLE IF NOT EXISTS users (
@@ -114,9 +114,9 @@ CREATE TABLE IF NOT EXISTS practice_groups_users (
   FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
-source /home/davidbarfer/Us/TFG/TFGDBF/MySQL/views.sql;
-source /home/davidbarfer/Us/TFG/TFGDBF/MySQL/procedures.sql;
-source /home/davidbarfer/Us/TFG/TFGDBF/MySQL/triggers.sql;
-source /home/davidbarfer/Us/TFG/TFGDBF/MySQL/developmentData.sql;
--- source /home/davidbarfer/Us/TFG/TFGDBF/MySQL/setupData.sql;
+source views.sql;
+source procedures.sql;
+source triggers.sql;
+source setupData.sql;
+-- source developmentData.sql;
 
