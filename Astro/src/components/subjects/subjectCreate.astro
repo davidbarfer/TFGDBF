@@ -6,9 +6,9 @@ const { token } = Astro.props;
   <h1>Crear Asignatura</h1>
   <form id="SubjectForm" data-token={token}>
     <label for="name">Nombre</label>
-    <input type="text" id="name" name="name" required>
+    <input type="text" id="name" name="name" placeholder="Nombre de la asignatura (Año)" required>
     <label for="course">Curso (Año)</label>
-    <input type="number" id="course" name="course" required>
+    <input type="number" id="course" name="course" min="1" max="4" required>
     <label for="degree">Titulación</label>
     <select id="degree" name="degree" required>
        {Object.entries(DEGREES).map((([degree_id,degree]) => (
